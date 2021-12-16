@@ -73,13 +73,41 @@ class Base(pygame.sprite.Sprite):
         self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
 
 
+class Missile(pygame.sprite.Sprite):
+    def __init__(self, state, player, ai, first_pos_check):
+        pygame.sprite.Sprite.__init__(self)
+        if state == 'friendly':
+            base_img = pygame.image.load('img/missile_friendly.png').convert()
+        elif state == 'hostile':
+            base_img = pygame.image.load('img/missile_hostile.png').convert()
+        self.image = base_img
+        self.image.set_colorkey(pygame.Color('black'))
+        self.rect = self.image.get_rect()
+        if first_pos_check:
+            if state == 'friendly':
+                self.rect.center = [player.rect.centerx, player.rect.centery]
+            else:
+                self.rect.center = [ai.rect.centerx, ai.rect.centery]
+            first_pos_check = False
+        self.speedx = 0
+        self.speedy = 0
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+
+
 class Run:
     def __init__(self):
         pass
 
-    def missile_launch(self, start, destination, screen, player):
+    def missile_launch(self, start, destination, screen, player, ai, bases):
         pygame.draw.line(screen, pygame.Color('blue'), (start[0], start[1]),
                          (destination[0], destination[1]))
+        self.missiles.append(Missile('friendly', player, AI, 'True'))
+        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites.add(player, ai, bases, self.missiles)
+
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -237,6 +265,7 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         player = Player()
         bases = []
+        self.missiles = []
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
