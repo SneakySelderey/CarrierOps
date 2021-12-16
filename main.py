@@ -73,21 +73,15 @@ class Base(pygame.sprite.Sprite):
         self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
 
 
-class Missile(pygame.sprite.Sprite):
-    def __init__(self, state, player, ai, first_pos_check):
+class MissileFriendly(pygame.sprite.Sprite):
+    def __init__(self, player, ai, first_pos_check, activation):
         pygame.sprite.Sprite.__init__(self)
-        if state == 'friendly':
-            base_img = pygame.image.load('img/missile_friendly.png').convert()
-        elif state == 'hostile':
-            base_img = pygame.image.load('img/missile_hostile.png').convert()
+        base_img = pygame.image.load('img/missile_friendly.png').convert()
         self.image = base_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
         if first_pos_check:
-            if state == 'friendly':
-                self.rect.center = [player.rect.centerx, player.rect.centery]
-            else:
-                self.rect.center = [ai.rect.centerx, ai.rect.centery]
+            self.rect.center = [player.rect.centerx, player.rect.centery]
             first_pos_check = False
         self.speedx = 0
         self.speedy = 0
@@ -104,10 +98,14 @@ class Run:
     def missile_launch(self, start, destination, screen, player, ai, bases):
         pygame.draw.line(screen, pygame.Color('blue'), (start[0], start[1]),
                          (destination[0], destination[1]))
-        self.missiles.append(Missile('friendly', player, AI, 'True'))
+        self.friendly_missiles.append(MissileFriendly(player, AI, 'True', destination))
         self.all_sprites = pygame.sprite.Group()
-        self.all_sprites.add(player, ai, bases, self.missiles)
+        self.all_sprites.add(player, ai, bases, self.friendly_missiles)
 
+    def friendly_missile_movement(self):
+        for missile in self.friendly_missiles:
+            pass
+        # TODO: сделать функцию движения ракеты до точки активации через расчет точек на прямой
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -184,7 +182,7 @@ class Run:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
                                     // 2, 'friendly')
                     self.all_sprites = pygame.sprite.Group()
-                    self.all_sprites.add(player, ai, bases)
+                    self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
                             self.hostile_bases:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
@@ -200,7 +198,7 @@ class Run:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
                                     self.cell_size // 2, 'hostile')
                     self.all_sprites = pygame.sprite.Group()
-                    self.all_sprites.add(player, ai, bases)
+                    self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
@@ -224,7 +222,7 @@ class Run:
         if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
                 <= 300:
             self.all_sprites = pygame.sprite.Group()
-            self.all_sprites.add(player, bases, ai)
+            self.all_sprites.add(player, bases, ai, self.friendly_missiles)
             pygame.draw.circle(screen, pygame.Color('red'), (ai.rect.centerx, ai.rect.centery), 300, 1)
             self.ai_detected = True
             self.play_contact_lost = True
@@ -236,7 +234,7 @@ class Run:
                 self.all_sprites.draw(screen)
         else:
             self.all_sprites = pygame.sprite.Group()
-            self.all_sprites.add(player, bases)
+            self.all_sprites.add(player, bases, self.friendly_missiles)
             self.ai_detected = False
             self.play_new_contact = True
             if self.play_contact_lost:
@@ -265,7 +263,8 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         player = Player()
         bases = []
-        self.missiles = []
+        self.friendly_missiles = []
+        self.hostile_missiles = []
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
@@ -294,7 +293,6 @@ class Run:
                     if event.button == 1:
                         destination_player = event.pos
                     if event.button == 3:
-                        start_missile = [player.rect.centerx, player.rect.centery]
                         destination_missile = event.pos
                         self.missile = True
 
@@ -303,7 +301,7 @@ class Run:
                         self.pause = not self.pause
 
             if self.missile:
-                self.missile_launch(start_missile, destination_missile, screen, player)
+                self.missile_launch('friendly', destination_missile, screen, player, AI, bases)
 
             dest = self.movement_player(destination_player, player, screen)
 
