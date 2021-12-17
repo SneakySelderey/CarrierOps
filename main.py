@@ -85,6 +85,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             first_pos_check = False
         self.speedx = 0
         self.speedy = 0
+        self.activation = activation
 
     def update(self):
         self.rect.x += self.speedx
@@ -95,17 +96,34 @@ class Run:
     def __init__(self):
         pass
 
-    def missile_launch(self, start, destination, screen, player, ai, bases):
-        pygame.draw.line(screen, pygame.Color('blue'), (start[0], start[1]),
-                         (destination[0], destination[1]))
+    def missile_launch(self, destination, player, bases):
         self.friendly_missiles.append(MissileFriendly(player, AI, 'True', destination))
         self.all_sprites = pygame.sprite.Group()
-        self.all_sprites.add(player, ai, bases, self.friendly_missiles)
+        self.all_sprites.add(player, bases, self.friendly_missiles)
 
-    def friendly_missile_movement(self):
+    def friendly_missile_movement(self, screen):
         for missile in self.friendly_missiles:
-            pass
-        # TODO: сделать функцию движения ракеты до точки активации через расчет точек на прямой
+            stop_x, stop_y = False, False
+
+            pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
+                             (missile.activation[0], missile.activation[1]))
+
+            if missile.activation[0] > missile.rect.centerx:
+                missile.speedx = 1
+            if missile.activation[1] > missile.rect.centery:
+                missile.speedy = 1
+
+            if missile.activation[0] < missile.rect.centerx:
+                missile.speedx = -1
+            if missile.activation[1] < missile.rect.centery:
+                missile.speedy = -1
+
+            if missile.activation[0] == missile.rect.centerx:
+                missile.speedx = 0
+                stop_x = True
+            if missile.activation[1] == missile.rect.centery:
+                missile.speedy = 0
+                stop_y = True
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -301,9 +319,12 @@ class Run:
                         self.pause = not self.pause
 
             if self.missile:
-                self.missile_launch('friendly', destination_missile, screen, player, AI, bases)
+                self.missile_launch(destination_missile, player, bases)
+                self.missile = False
 
             dest = self.movement_player(destination_player, player, screen)
+
+            self.friendly_missile_movement(screen)
 
             self.base_taken(dest, destination_player, bases, player, ai)
 
