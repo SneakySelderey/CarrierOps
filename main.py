@@ -101,6 +101,8 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(player, bases, self.friendly_missiles)
 
+        self.sound_fire_VLS.play()
+
     def friendly_missile_movement(self, screen):
         for missile in self.friendly_missiles:
             stop_x, stop_y = False, False
@@ -109,14 +111,14 @@ class Run:
                              (missile.activation[0], missile.activation[1]))
 
             if missile.activation[0] > missile.rect.centerx:
-                missile.speedx = 1
+                missile.speedx = 2
             if missile.activation[1] > missile.rect.centery:
-                missile.speedy = 1
+                missile.speedy = 2
 
             if missile.activation[0] < missile.rect.centerx:
-                missile.speedx = -1
+                missile.speedx = -2
             if missile.activation[1] < missile.rect.centery:
-                missile.speedy = -1
+                missile.speedy = -2
 
             if missile.activation[0] == missile.rect.centerx:
                 missile.speedx = 0
@@ -292,6 +294,7 @@ class Run:
 
         self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
         self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
+        self.sound_fire_VLS = pygame.mixer.Sound('sound/FireVLS.wav')
 
         destination_player = player.rect.center
         self.running = True
