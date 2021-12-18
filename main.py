@@ -74,7 +74,7 @@ class Base(pygame.sprite.Sprite):
 
 
 class MissileFriendly(pygame.sprite.Sprite):
-    def __init__(self, player, ai, first_pos_check, activation):
+    def __init__(self, player, first_pos_check, activation):
         pygame.sprite.Sprite.__init__(self)
         base_img = pygame.image.load('img/missile_friendly.png').convert()
         self.image = base_img
@@ -83,13 +83,48 @@ class MissileFriendly(pygame.sprite.Sprite):
         if first_pos_check:
             self.rect.center = [player.rect.centerx, player.rect.centery]
             first_pos_check = False
+            self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
+        self.dir = pygame.math.Vector2(activation[0], activation[1]).normalize()
+
+        self.activated = False
+        self.turn_one_side = True
+        self.turn_another_side = False
+
         self.speedx = 0
         self.speedy = 0
         self.activation = activation
 
+        self.ticks = 10
+        self.speed = 50
+
     def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+        clock = pygame.time.Clock()
+
+        if self.pos != self.activation:
+            self.pos += self.dir * 2
+            x = round(self.pos.x)
+            y = round(self.pos.y)
+            self.rect.center = x, y
+
+        if self.activation[0] - 10 < round(self.pos.x) < self.activation[0] + 10 \
+                and self.activation[1] - 10 < round(self.pos.y) < self.activation[1] + 10:
+            if not self.activated:
+                self.dir = self.dir.rotate(-20)
+            self.activated = True
+
+        if self.activated:
+            if self.ticks >= self.speed:
+                self.ticks = 0
+                if self.turn_one_side:
+                    self.dir = self.dir.rotate(40)
+                    self.turn_one_side = False
+                    self.turn_another_side = True
+                elif self.turn_another_side:
+                    self.dir = self.dir.rotate(-40)
+                    self.turn_one_side = True
+                    self.turn_another_side = False
+            clock.tick(300)
+            self.ticks += 1
 
 
 class Run:
@@ -97,35 +132,17 @@ class Run:
         pass
 
     def missile_launch(self, destination, player, bases):
-        self.friendly_missiles.append(MissileFriendly(player, AI, 'True', destination))
+        self.friendly_missiles.append(MissileFriendly(player, True, destination))
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(player, bases, self.friendly_missiles)
 
         self.sound_fire_VLS.play()
 
-    def friendly_missile_movement(self, screen):
+    def friendly_missile_movement(self, screen, missile):
         for missile in self.friendly_missiles:
-            stop_x, stop_y = False, False
-
             pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
                              (missile.activation[0], missile.activation[1]))
-
-            if missile.activation[0] > missile.rect.centerx:
-                missile.speedx = 2
-            if missile.activation[1] > missile.rect.centery:
-                missile.speedy = 2
-
-            if missile.activation[0] < missile.rect.centerx:
-                missile.speedx = -2
-            if missile.activation[1] < missile.rect.centery:
-                missile.speedy = -2
-
-            if missile.activation[0] == missile.rect.centerx:
-                missile.speedx = 0
-                stop_x = True
-            if missile.activation[1] == missile.rect.centery:
-                missile.speedy = 0
-                stop_y = True
+            pygame.draw.circle(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery), 100, 1)
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -305,6 +322,7 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
         self.missile = False
+
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -327,7 +345,7 @@ class Run:
 
             dest = self.movement_player(destination_player, player, screen)
 
-            self.friendly_missile_movement(screen)
+            self.friendly_missile_movement(screen, MissileFriendly)
 
             self.base_taken(dest, destination_player, bases, player, ai)
 
