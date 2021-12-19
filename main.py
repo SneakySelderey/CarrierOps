@@ -35,7 +35,6 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = [25, 25]
         self.speedx = 0
         self.speedy = 0
-        self.missiles = 5
 
     def update(self):
         self.rect.x += self.speedx
@@ -73,13 +72,124 @@ class Base(pygame.sprite.Sprite):
         self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
 
 
+class MissileFriendly(pygame.sprite.Sprite):
+    def __init__(self, player, first_pos_check, activation, ai):
+        pygame.sprite.Sprite.__init__(self)
+        base_img = pygame.image.load('img/missile_friendly.png').convert()
+        self.image = base_img
+        self.image.set_colorkey(pygame.Color('black'))
+        self.rect = self.image.get_rect()
+        if first_pos_check:
+            self.rect.center = [player.rect.centerx, player.rect.centery]
+            first_pos_check = False
+            self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
+            self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
+                                            activation[1] - player.rect.centery)).normalize()
+
+        self.activated = False
+        self.turn_one_side = True
+        self.turn_another_side = False
+        self.first_rotate = True
+
+        self.activation = activation
+
+        self.ticks = 10
+        self.speed = 50
+        self.total_ticks = 0
+
+        self.ticks1 = 0
+        self.speed1 = 50
+
+        self.ticks2 = 0
+        self.speed2 = 50
+
+        self.ai = ai
+
+    def update(self):
+        clock1 = pygame.time.Clock()
+
+        if not self.activated:
+            if self.ticks1 >= self.speed1:
+                self.total_ticks += 1
+                self.ticks1 = 0
+            clock1.tick(300)
+            self.ticks1 += 1
+
+        if self.pos != self.activation:
+            self.pos += self.dir * 2
+            x = int(self.pos.x)
+            y = int(self.pos.y)
+            self.rect.center = x, y
+
+        if self.activation[0] - 10 < round(self.pos.x) < self.activation[0] + 10 \
+                and self.activation[1] - 10 < round(self.pos.y) < self.activation[1] + 10:
+            self.activated = True
+
+        self.missile_activation()
+        if self.activated:
+            self.missile_tracking(self.ai)
+
+    def missile_activation(self):
+        clock = pygame.time.Clock()
+        if self.activated:
+            if self.ticks >= self.speed:
+                self.total_ticks += 1
+                self.ticks = 0
+                if self.first_rotate:
+                    self.dir = self.dir.rotate(-40)
+                    self.first_rotate = False
+                elif self.turn_one_side:
+                    self.dir = self.dir.rotate(80)
+                    self.first_rotate = False
+                    self.turn_one_side = False
+                    self.turn_another_side = True
+                elif self.turn_another_side:
+                    self.dir = self.dir.rotate(-80)
+                    self.turn_one_side = True
+                    self.turn_another_side = False
+            clock.tick(300)
+            self.ticks += 1
+
+    def missile_tracking(self, ai):
+        global sound_explosion
+        clock2 = pygame.time.Clock()
+        if self.ticks2 >= self.speed2:
+            self.total_ticks += 1
+            self.ticks2 = 0
+        clock2.tick(300)
+        self.ticks2 += 1
+        try:
+            if (sqrt((self.rect.centerx - ai.rect.centerx) ** 2 + (self.rect.centery - ai.rect.centery) ** 2)) <= 150:
+                self.dir = pygame.math.Vector2((ai.rect.centerx - self.rect.centerx,
+                                                ai.rect.centery - self.rect.centery)).normalize()
+
+            if ai.rect.centerx - 10 < self.rect.centerx < ai.rect.centerx + 10 \
+                    and ai.rect.centery - 10 < self.rect.centery < ai.rect.centery + 10:
+                self.total_ticks = 10
+                sound_explosion.play()
+        except ValueError:
+            self.total_ticks = 10
+
+
 class Run:
     def __init__(self):
         pass
+    def missile_launch(self, destination, player, bases, ai):
+        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai))
+        self.all_sprites = pygame.sprite.Group()
+        self.all_sprites.add(player, bases, self.friendly_missiles)
 
-    def missile_launch(self, start, destination, screen, player):
-        pygame.draw.line(screen, pygame.Color('blue'), (start[0], start[1]),
-                         (destination[0], destination[1]))
+        self.sound_fire_VLS.play()
+
+    def friendly_missile_movement(self, screen, missile):
+        for missile in self.friendly_missiles:
+            if not missile.activated:
+                pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
+                                 (missile.activation[0], missile.activation[1]))
+            pygame.draw.circle(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery), 150, 1)
+
+            if missile.total_ticks >= 10:
+                self.friendly_missiles.remove(missile)
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -156,7 +266,7 @@ class Run:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
                                     // 2, 'friendly')
                     self.all_sprites = pygame.sprite.Group()
-                    self.all_sprites.add(player, ai, bases)
+                    self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
                             self.hostile_bases:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
@@ -172,7 +282,7 @@ class Run:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
                                     self.cell_size // 2, 'hostile')
                     self.all_sprites = pygame.sprite.Group()
-                    self.all_sprites.add(player, ai, bases)
+                    self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
@@ -193,22 +303,33 @@ class Run:
             pygame.display.flip()
 
     def fog_of_war(self, ai, player, bases, screen):
+        missile_tracking = False
+        for missile in self.friendly_missiles:
+            if (sqrt((missile.rect.centerx - ai.rect.centerx) ** 2 + (missile.rect.centery - ai.rect.centery) ** 2)) \
+                    <= 150:
+                missile_tracking = True
+
         if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
-                <= 300:
+                <= 300 or missile_tracking:
             self.all_sprites = pygame.sprite.Group()
-            self.all_sprites.add(player, bases, ai)
+            self.all_sprites.add(player, bases, ai, self.friendly_missiles)
             pygame.draw.circle(screen, pygame.Color('red'), (ai.rect.centerx, ai.rect.centery), 300, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
-                self.sound_new_contact.play()
+                if missile_tracking:
+                    self.sound_weapon_acquire.play()
+                else:
+                    self.sound_new_contact.play()
                 self.play_new_contact = False
                 self.play_contact_lost = True
                 self.pause = True
                 self.all_sprites.draw(screen)
-        else:
+
+        elif (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
+                > 300 or missile_tracking:
             self.all_sprites = pygame.sprite.Group()
-            self.all_sprites.add(player, bases)
+            self.all_sprites.add(player, bases, self.friendly_missiles)
             self.ai_detected = False
             self.play_new_contact = True
             if self.play_contact_lost:
@@ -216,6 +337,7 @@ class Run:
                 self.play_contact_lost = False
 
         pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 300, 1)
+        pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 1050, 1)
 
     def main(self):
         pygame.init()
@@ -237,15 +359,14 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         player = Player()
         bases = []
+        self.friendly_missiles = []
+        self.hostile_missiles = []
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
             bases.append(Base(x, y, 'neutral'))
         ai = AI(board)
         self.all_sprites.add(player, bases)
-
-        self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
-        self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
 
         destination_player = player.rect.center
         self.running = True
@@ -256,6 +377,15 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
         self.missile = False
+
+        global sound_explosion
+        self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
+        self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
+        self.sound_fire_VLS = pygame.mixer.Sound('sound/FireVLS.wav')
+        self.sound_weapon_acquire = pygame.mixer.Sound('sound/weapon acquire.wav')
+        self.sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
+        sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
+
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -265,7 +395,6 @@ class Run:
                     if event.button == 1:
                         destination_player = event.pos
                     if event.button == 3:
-                        start_missile = [player.rect.centerx, player.rect.centery]
                         destination_missile = event.pos
                         self.missile = True
 
@@ -274,9 +403,12 @@ class Run:
                         self.pause = not self.pause
 
             if self.missile:
-                self.missile_launch(start_missile, destination_missile, screen, player)
+                self.missile_launch(destination_missile, player, bases, ai)
+                self.missile = False
 
             dest = self.movement_player(destination_player, player, screen)
+
+            self.friendly_missile_movement(screen, MissileFriendly)
 
             self.base_taken(dest, destination_player, bases, player, ai)
 
