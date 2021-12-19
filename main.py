@@ -155,8 +155,9 @@ class Run:
 
     def friendly_missile_movement(self, screen, missile):
         for missile in self.friendly_missiles:
-            pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
-                             (missile.activation[0], missile.activation[1]))
+            if not missile.activated:
+                pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
+                                 (missile.activation[0], missile.activation[1]))
             pygame.draw.circle(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery), 100, 1)
 
             if missile.total_ticks == 10:
