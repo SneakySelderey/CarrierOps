@@ -84,43 +84,58 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.rect.center = [player.rect.centerx, player.rect.centery]
             first_pos_check = False
             self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
-        self.dir = pygame.math.Vector2(activation[0], activation[1]).normalize()
+            self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
+                                            activation[1] - player.rect.centery)).normalize()
 
         self.activated = False
         self.turn_one_side = True
         self.turn_another_side = False
+        self.first_rotate = True
 
-        self.speedx = 0
-        self.speedy = 0
         self.activation = activation
 
         self.ticks = 10
         self.speed = 50
+        self.total_ticks = 0
+
+        self.ticks1 = 0
+        self.speed1 = 50
 
     def update(self):
         clock = pygame.time.Clock()
+        clock1 = pygame.time.Clock()
+
+        if not self.activated:
+            if self.ticks1 >= self.speed1:
+                self.total_ticks += 1
+                self.ticks1 = 0
+            clock1.tick(300)
+            self.ticks1 += 1
 
         if self.pos != self.activation:
             self.pos += self.dir * 2
-            x = round(self.pos.x)
-            y = round(self.pos.y)
+            x = int(self.pos.x)
+            y = int(self.pos.y)
             self.rect.center = x, y
 
         if self.activation[0] - 10 < round(self.pos.x) < self.activation[0] + 10 \
                 and self.activation[1] - 10 < round(self.pos.y) < self.activation[1] + 10:
-            if not self.activated:
-                self.dir = self.dir.rotate(-20)
             self.activated = True
 
         if self.activated:
             if self.ticks >= self.speed:
+                self.total_ticks += 1
                 self.ticks = 0
-                if self.turn_one_side:
-                    self.dir = self.dir.rotate(40)
+                if self.first_rotate:
+                    self.dir = self.dir.rotate(-40)
+                    self.first_rotate = False
+                elif self.turn_one_side:
+                    self.dir = self.dir.rotate(80)
+                    self.first_rotate = False
                     self.turn_one_side = False
                     self.turn_another_side = True
                 elif self.turn_another_side:
-                    self.dir = self.dir.rotate(-40)
+                    self.dir = self.dir.rotate(-80)
                     self.turn_one_side = True
                     self.turn_another_side = False
             clock.tick(300)
@@ -143,6 +158,9 @@ class Run:
             pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
                              (missile.activation[0], missile.activation[1]))
             pygame.draw.circle(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery), 100, 1)
+
+            if missile.total_ticks == 10:
+                self.friendly_missiles.remove(missile)
 
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
@@ -279,6 +297,7 @@ class Run:
                 self.play_contact_lost = False
 
         pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 300, 1)
+        pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 1050, 1)
 
     def main(self):
         pygame.init()
