@@ -102,7 +102,6 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.speed1 = 50
 
     def update(self):
-        clock = pygame.time.Clock()
         clock1 = pygame.time.Clock()
 
         if not self.activated:
@@ -122,6 +121,10 @@ class MissileFriendly(pygame.sprite.Sprite):
                 and self.activation[1] - 10 < round(self.pos.y) < self.activation[1] + 10:
             self.activated = True
 
+        self.missile_activation()
+
+    def missile_activation(self):
+        clock = pygame.time.Clock()
         if self.activated:
             if self.ticks >= self.speed:
                 self.total_ticks += 1
