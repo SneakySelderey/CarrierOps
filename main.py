@@ -3,6 +3,7 @@ import random
 from math import sqrt
 
 
+# TODO: сделать только два обращения к all_sprites и отрисовку класса в зависимости от параметра visibility
 # Класс, ответственный за отрисовку квадратов
 class Board:
     def __init__(self, width, height):
@@ -30,7 +31,7 @@ class Board:
 
 # класс, определяющий параметеры и спрайт игрока
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, visibility):
         pygame.sprite.Sprite.__init__(self)
         player_img = pygame.image.load('img/Player_cursor.png').convert()
         self.image = player_img
@@ -40,6 +41,8 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
+        self.visibility = visibility
+
     # обновление позиции спрайта
     def update(self):
         self.rect.x += self.speedx
@@ -48,7 +51,7 @@ class Player(pygame.sprite.Sprite):
 
 # класс, определяющий параметры и спрайт ИИ
 class AI(pygame.sprite.Sprite):
-    def __init__(self, board):
+    def __init__(self, board, visibility):
         pygame.sprite.Sprite.__init__(self)
         player_img = pygame.image.load('img/AI_cursor.png').convert()
         self.image = player_img
@@ -58,6 +61,8 @@ class AI(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
+        self.visibility = visibility
+
     # обновление позиции спрайта
     def update(self):
         self.rect.x += self.speedx
@@ -66,7 +71,7 @@ class AI(pygame.sprite.Sprite):
 
 # класс, определяющий спрайт и местоположение базы-острова
 class Base(pygame.sprite.Sprite):
-    def __init__(self, x, y, state):
+    def __init__(self, x, y, state, visibility):
         pygame.sprite.Sprite.__init__(self)
         if state == 'neutral':
             base_img = pygame.image.load('img/base_neutral.png').convert()
@@ -79,10 +84,12 @@ class Base(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
 
+        self.visibility = visibility
+
 
 # класс, определяющий параметры и спрайт дружественной противокорабельной ракеты
 class MissileFriendly(pygame.sprite.Sprite):
-    def __init__(self, player, first_pos_check, activation, ai):
+    def __init__(self, player, first_pos_check, activation, ai, visibility):
         pygame.sprite.Sprite.__init__(self)
         base_img = pygame.image.load('img/missile_friendly.png').convert()
         self.image = base_img
@@ -94,6 +101,8 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
             self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
                                             activation[1] - player.rect.centery)).normalize()
+
+        self.visibility = visibility
 
         # флаги, ответственные за паттерн поиска ракеты
         self.activated = False
@@ -192,7 +201,7 @@ class Run:
 
     # пуск противокорабельной ракеты
     def missile_launch(self, destination, player, bases, ai):
-        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai))
+        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai, True))
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(player, bases, self.friendly_missiles)
 
@@ -286,7 +295,7 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == player_grid_x and bases[i].rect.centery // \
                         self.cell_size == player_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
-                                    // 2, 'friendly')
+                                    // 2, 'friendly', True)
                     self.all_sprites = pygame.sprite.Group()
                     self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
@@ -303,7 +312,7 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == ai_grid_x and bases[i].rect.centery // self.cell_size == \
                         ai_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
-                                    self.cell_size // 2, 'hostile')
+                                    self.cell_size // 2, 'hostile', True)
                     self.all_sprites = pygame.sprite.Group()
                     self.all_sprites.add(player, ai, bases, self.friendly_missiles)
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
@@ -388,15 +397,15 @@ class Run:
 
         # добавление спрайтов в группы
         self.all_sprites = pygame.sprite.Group()
-        player = Player()
+        player = Player(True)
         bases = []
         self.friendly_missiles = []
         self.hostile_missiles = []
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
-            bases.append(Base(x, y, 'neutral'))
-        ai = AI(board)
+            bases.append(Base(x, y, 'neutral', True))
+        ai = AI(board, False)
         self.all_sprites.add(player, bases)
 
         # различные флаги
