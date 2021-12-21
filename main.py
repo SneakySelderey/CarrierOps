@@ -3,6 +3,7 @@ import random
 from math import sqrt
 
 
+# Класс, ответственный за отрисовку квадратов
 class Board:
     def __init__(self, width, height):
         self.width = width
@@ -12,11 +13,13 @@ class Board:
         self.top = 0
         self.cell_size = 30
 
+    # метод, задающий отступ сетки и размер одного квадрата
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
         Run.cell_size = cell_size
 
+    # метод, отрисовывающий сетку
     def render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
@@ -25,6 +28,7 @@ class Board:
                                   Run.cell_size, Run.cell_size), 1)
 
 
+# класс, определяющий параметеры и спрайт игрока
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -36,11 +40,13 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
+    # обновление позиции спрайта
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
 
 
+# класс, определяющий параметры и спрайт ИИ
 class AI(pygame.sprite.Sprite):
     def __init__(self, board):
         pygame.sprite.Sprite.__init__(self)
@@ -52,11 +58,13 @@ class AI(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
+    # обновление позиции спрайта
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
 
 
+# класс, определяющий спрайт и местоположение базы-острова
 class Base(pygame.sprite.Sprite):
     def __init__(self, x, y, state):
         pygame.sprite.Sprite.__init__(self)
@@ -72,6 +80,7 @@ class Base(pygame.sprite.Sprite):
         self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
 
 
+# класс, определяющий параметры и спрайт дружественной противокорабельной ракеты
 class MissileFriendly(pygame.sprite.Sprite):
     def __init__(self, player, first_pos_check, activation, ai):
         pygame.sprite.Sprite.__init__(self)
@@ -86,6 +95,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
                                             activation[1] - player.rect.centery)).normalize()
 
+        # флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn_one_side = True
         self.turn_another_side = False
@@ -93,6 +103,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
         self.activation = activation
 
+        # три таймера, отсчитывающие время полета ракеты
         self.ticks = 10
         self.speed = 50
         self.total_ticks = 0
@@ -105,6 +116,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
         self.ai = ai
 
+    # обновление координат ракеты при полете к точке активации ГСН
     def update(self):
         clock1 = pygame.time.Clock()
 
@@ -129,6 +141,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         if self.activated:
             self.missile_tracking(self.ai)
 
+    # обновление координат ракеты при активации ГСН
     def missile_activation(self):
         clock = pygame.time.Clock()
         if self.activated:
@@ -150,6 +163,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             clock.tick(300)
             self.ticks += 1
 
+    # обновление координат ракеты при захвате противника ГСН
     def missile_tracking(self, ai):
         global sound_explosion
         clock2 = pygame.time.Clock()
@@ -171,9 +185,12 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.total_ticks = 10
 
 
+# класс, в котором обрабатываются все основные игровые события
 class Run:
     def __init__(self):
         pass
+
+    # пуск противокорабельной ракеты
     def missile_launch(self, destination, player, bases, ai):
         self.friendly_missiles.append(MissileFriendly(player, True, destination, ai))
         self.all_sprites = pygame.sprite.Group()
@@ -181,6 +198,7 @@ class Run:
 
         self.sound_fire_VLS.play()
 
+    # отрисовка линии движения и радиуса захвата ГСН для ракеты
     def friendly_missile_movement(self, screen, missile):
         for missile in self.friendly_missiles:
             if not missile.activated:
@@ -191,6 +209,7 @@ class Run:
             if missile.total_ticks >= 10:
                 self.friendly_missiles.remove(missile)
 
+    # движение игрока
     def movement_player(self, destination, player, screen):
         stop_x, stop_y = False, False
         if destination[0] > player.rect.centerx:
@@ -213,6 +232,7 @@ class Run:
             stop_y = True
         return [stop_x, stop_y]
 
+    # расчет точки движения для ИИ
     def destination_ai(self, bases, ai, player, fps):
         # if (sqrt((player.rect.centerx - ai.rect.centerx) ** 2 + (player.rect.centery - ai.rect.centery) ** 2)) \
         #         <= 300:
@@ -238,6 +258,7 @@ class Run:
                 self.running = False
                 print('Вы проиграли!')
 
+    # движение ИИ
     def movement_ai(self, destination, ai, fps):
         stop_x, stop_y = False, False
         if destination[0] > ai.rect.centerx:
@@ -256,6 +277,7 @@ class Run:
             stop_y = True
         return [stop_x, stop_y]
 
+    # база захвачена союзником
     def base_taken(self, dest, destination, bases, player, ai):
         if dest[0] and dest[1]:
             player_grid_x = destination[0] // self.cell_size
@@ -272,6 +294,7 @@ class Run:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                    self.cell_size])
 
+    # база захвачена противником
     def base_lost(self, dest, destination, bases, player, ai):
         if dest[0] and dest[1]:
             ai_grid_x = destination[0] // self.cell_size
@@ -286,6 +309,7 @@ class Run:
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
+    # поставить игру на паузу
     def set_pause(self, screen, pause_screen, board, size, ai):
         if not self.pause:
             self.all_sprites.update()
@@ -302,13 +326,16 @@ class Run:
             pause_screen.blit(sc_text, pos)
             pygame.display.flip()
 
+    # отрисовка тумана войны
     def fog_of_war(self, ai, player, bases, screen):
+        # если противник обнаружен ракетой
         missile_tracking = False
         for missile in self.friendly_missiles:
             if (sqrt((missile.rect.centerx - ai.rect.centerx) ** 2 + (missile.rect.centery - ai.rect.centery) ** 2)) \
                     <= 150:
                 missile_tracking = True
 
+        # отрисовка спрайта противника
         if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
                 <= 300 or missile_tracking:
             self.all_sprites = pygame.sprite.Group()
@@ -326,6 +353,7 @@ class Run:
                 self.pause = True
                 self.all_sprites.draw(screen)
 
+        # противник прячется в тумане войны
         elif (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
                 > 300 or missile_tracking:
             self.all_sprites = pygame.sprite.Group()
@@ -336,16 +364,18 @@ class Run:
                 self.sound_contact_lost.play()
                 self.play_contact_lost = False
 
+        # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 300, 1)
         pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 1050, 1)
 
+    # функция с основным игровым циклом
     def main(self):
         pygame.init()
         pygame.mixer.init()
         size = 1400, 800
         screen = pygame.display.set_mode(size)
         pause_screen = pygame.display.set_mode(size)
-        pygame.display.set_caption("CW")
+        pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
 
         self.cell_size = 75
@@ -356,6 +386,7 @@ class Run:
 
         fps = 60
 
+        # добавление спрайтов в группы
         self.all_sprites = pygame.sprite.Group()
         player = Player()
         bases = []
@@ -368,6 +399,7 @@ class Run:
         ai = AI(board)
         self.all_sprites.add(player, bases)
 
+        # различные флаги
         destination_player = player.rect.center
         self.running = True
         self.pause = False
@@ -378,6 +410,7 @@ class Run:
         self.battle = False
         self.missile = False
 
+        # озвучка событий
         global sound_explosion
         self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
         self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
@@ -386,6 +419,7 @@ class Run:
         self.sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
         sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
 
+        # основной игровой цикл
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
