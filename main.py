@@ -1,31 +1,7 @@
 import pygame
 import random
 from math import sqrt
-
-
-# Класс, ответственный за отрисовку квадратов
-class Board:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.board = [[0] * width for _ in range(height)]
-        self.left = 0
-        self.top = 0
-        self.cell_size = 30
-
-    # метод, задающий отступ сетки и размер одного квадрата
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        Run.cell_size = cell_size
-
-    # метод, отрисовывающий сетку
-    def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                pygame.draw.rect(screen, pygame.Color('darkred'),
-                                 (x * Run.cell_size + self.left, y * Run.cell_size + self.top,
-                                  Run.cell_size, Run.cell_size), 1)
+from board import Board
 
 
 # класс, определяющий параметеры и спрайт игрока
@@ -50,13 +26,13 @@ class Player(pygame.sprite.Sprite):
 
 # класс, определяющий параметры и спрайт ИИ
 class AI(pygame.sprite.Sprite):
-    def __init__(self, board, visibility):
+    def __init__(self, board, visibility, cell_size):
         pygame.sprite.Sprite.__init__(self)
         player_img = pygame.image.load('data/img/AI_cursor.png').convert()
         self.image = player_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
-        self.rect.center = [Run.cell_size * board.width, Run.cell_size * board.height]
+        self.rect.center = [cell_size * board.width, cell_size * board.height]
         self.speedx = 0
         self.speedy = 0
 
@@ -70,7 +46,7 @@ class AI(pygame.sprite.Sprite):
 
 # класс, определяющий спрайт и местоположение базы-острова
 class Base(pygame.sprite.Sprite):
-    def __init__(self, x, y, state, visibility):
+    def __init__(self, x, y, state, visibility, cell_size):
         pygame.sprite.Sprite.__init__(self)
         if state == 'neutral':
             base_img = pygame.image.load('data/img/base_neutral.png').convert()
@@ -81,7 +57,7 @@ class Base(pygame.sprite.Sprite):
         self.image = base_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
-        self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
+        self.rect.center = [x + cell_size // 2, y + cell_size // 2]
 
         self.visibility = visibility
 
@@ -249,7 +225,7 @@ class Run:
                 destination_ai = min(distance)
                 a = distance.index(destination_ai)
                 dest = self.movement_ai(distance[a + 1], ai, fps)
-                self.base_lost(dest, distance[a + 1], bases, player, ai)
+                self.base_lost(dest, distance[a + 1], bases)
             except ValueError:
                 self.running = False
                 print('Вы проиграли!')
@@ -282,14 +258,14 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == player_grid_x and bases[i].rect.centery // \
                         self.cell_size == player_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
-                                    // 2, 'friendly', True)
+                                    // 2, 'friendly', True, self.cell_size)
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
                             self.hostile_bases:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                    self.cell_size])
 
     # база захвачена противником
-    def base_lost(self, dest, destination, bases, player, ai):
+    def base_lost(self, dest, destination, bases):
         if dest[0] and dest[1]:
             ai_grid_x = destination[0] // self.cell_size
             ai_grid_y = destination[1] // self.cell_size
@@ -297,7 +273,7 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == ai_grid_x and bases[i].rect.centery // self.cell_size == \
                         ai_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
-                                    self.cell_size // 2, 'hostile', True)
+                                    self.cell_size // 2, 'hostile', True, self.cell_size)
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
@@ -396,7 +372,7 @@ class Run:
         self.cell_size = 75
         self.cells_x = size[0] // self.cell_size
         self.cells_y = size[1] // self.cell_size
-        board = Board(self.cells_x, self.cells_y)
+        board = Board(self.cells_x, self.cells_y, Run())
         board.set_view(0, 0, self.cell_size)
 
         fps = 60
@@ -410,8 +386,8 @@ class Run:
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
-            bases.append(Base(x, y, 'neutral', True))
-        ai = AI(board, False)
+            bases.append(Base(x, y, 'neutral', True, self.cell_size))
+        ai = AI(board, False, self.cell_size)
 
         # различные флаги
         destination_player = player.rect.center
