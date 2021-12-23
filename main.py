@@ -1,197 +1,11 @@
 import pygame
 import random
 from math import sqrt
-
-
-# Класс, ответственный за отрисовку квадратов
-class Board:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.board = [[0] * width for _ in range(height)]
-        self.left = 0
-        self.top = 0
-        self.cell_size = 30
-
-    # метод, задающий отступ сетки и размер одного квадрата
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        Run.cell_size = cell_size
-
-    # метод, отрисовывающий сетку
-    def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                pygame.draw.rect(screen, pygame.Color('darkred'),
-                                 (x * Run.cell_size + self.left, y * Run.cell_size + self.top,
-                                  Run.cell_size, Run.cell_size), 1)
-
-
-# класс, определяющий параметеры и спрайт игрока
-class Player(pygame.sprite.Sprite):
-    def __init__(self, visibility):
-        pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('img/Player_cursor.png').convert()
-        self.image = player_img
-        self.image.set_colorkey(pygame.Color('black'))
-        self.rect = self.image.get_rect()
-        self.rect.center = [25, 25]
-        self.speedx = 0
-        self.speedy = 0
-
-        self.visibility = visibility
-
-    # обновление позиции спрайта
-    def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
-
-
-# класс, определяющий параметры и спрайт ИИ
-class AI(pygame.sprite.Sprite):
-    def __init__(self, board, visibility):
-        pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('img/AI_cursor.png').convert()
-        self.image = player_img
-        self.image.set_colorkey(pygame.Color('black'))
-        self.rect = self.image.get_rect()
-        self.rect.center = [Run.cell_size * board.width, Run.cell_size * board.height]
-        self.speedx = 0
-        self.speedy = 0
-
-        self.visibility = visibility
-
-    # обновление позиции спрайта
-    def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
-
-
-# класс, определяющий спрайт и местоположение базы-острова
-class Base(pygame.sprite.Sprite):
-    def __init__(self, x, y, state, visibility):
-        pygame.sprite.Sprite.__init__(self)
-        if state == 'neutral':
-            base_img = pygame.image.load('img/base_neutral.png').convert()
-        elif state == 'friendly':
-            base_img = pygame.image.load('img/base_friendly.png').convert()
-        elif state == 'hostile':
-            base_img = pygame.image.load('img/base_hostile.png').convert()
-        self.image = base_img
-        self.image.set_colorkey(pygame.Color('black'))
-        self.rect = self.image.get_rect()
-        self.rect.center = [x + Run.cell_size // 2, y + Run.cell_size // 2]
-
-        self.visibility = visibility
-
-
-# класс, определяющий параметры и спрайт дружественной противокорабельной ракеты
-class MissileFriendly(pygame.sprite.Sprite):
-    def __init__(self, player, first_pos_check, activation, ai, visibility):
-        pygame.sprite.Sprite.__init__(self)
-        base_img = pygame.image.load('img/missile_friendly.png').convert()
-        self.image = base_img
-        self.image.set_colorkey(pygame.Color('black'))
-        self.rect = self.image.get_rect()
-        if first_pos_check:
-            self.rect.center = [player.rect.centerx, player.rect.centery]
-            first_pos_check = False
-            self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
-            self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
-                                            activation[1] - player.rect.centery)).normalize()
-
-        self.visibility = visibility
-
-        # флаги, ответственные за паттерн поиска ракеты
-        self.activated = False
-        self.turn_one_side = True
-        self.turn_another_side = False
-        self.first_rotate = True
-
-        self.activation = activation
-
-        # три таймера, отсчитывающие время полета ракеты
-        self.ticks = 10
-        self.speed = 50
-        self.total_ticks = 0
-
-        self.ticks1 = 0
-        self.speed1 = 50
-
-        self.ticks2 = 0
-        self.speed2 = 50
-
-        self.ai = ai
-
-    # обновление координат ракеты при полете к точке активации ГСН
-    def update(self):
-        clock1 = pygame.time.Clock()
-
-        if not self.activated:
-            if self.ticks1 >= self.speed1:
-                self.total_ticks += 1
-                self.ticks1 = 0
-            clock1.tick(300)
-            self.ticks1 += 1
-
-        if self.pos != self.activation:
-            self.pos += self.dir * 2
-            x = int(self.pos.x)
-            y = int(self.pos.y)
-            self.rect.center = x, y
-
-        if self.activation[0] - 10 < round(self.pos.x) < self.activation[0] + 10 \
-                and self.activation[1] - 10 < round(self.pos.y) < self.activation[1] + 10:
-            self.activated = True
-
-        self.missile_activation()
-        if self.activated:
-            self.missile_tracking(self.ai)
-
-    # обновление координат ракеты при активации ГСН
-    def missile_activation(self):
-        clock = pygame.time.Clock()
-        if self.activated:
-            if self.ticks >= self.speed:
-                self.total_ticks += 1
-                self.ticks = 0
-                if self.first_rotate:
-                    self.dir = self.dir.rotate(-40)
-                    self.first_rotate = False
-                elif self.turn_one_side:
-                    self.dir = self.dir.rotate(80)
-                    self.first_rotate = False
-                    self.turn_one_side = False
-                    self.turn_another_side = True
-                elif self.turn_another_side:
-                    self.dir = self.dir.rotate(-80)
-                    self.turn_one_side = True
-                    self.turn_another_side = False
-            clock.tick(300)
-            self.ticks += 1
-
-    # обновление координат ракеты при захвате противника ГСН
-    def missile_tracking(self, ai):
-        global sound_explosion
-        global friendly_missiles
-        clock2 = pygame.time.Clock()
-        if self.ticks2 >= self.speed2:
-            self.total_ticks += 1
-            self.ticks2 = 0
-        clock2.tick(300)
-        self.ticks2 += 1
-        try:
-            if (sqrt((self.rect.centerx - ai.rect.centerx) ** 2 + (self.rect.centery - ai.rect.centery) ** 2)) <= 150:
-                self.dir = pygame.math.Vector2((ai.rect.centerx - self.rect.centerx,
-                                                ai.rect.centery - self.rect.centery)).normalize()
-
-            if ai.rect.centerx - 10 < self.rect.centerx < ai.rect.centerx + 10 \
-                    and ai.rect.centery - 10 < self.rect.centery < ai.rect.centery + 10:
-                self.total_ticks = 10
-                sound_explosion.play()
-        except ValueError:
-            self.total_ticks = 10
+from board import Board
+from player import Player
+from AI import AI
+from base import Base
+from friendly_missile import MissileFriendly
 
 
 # класс, в котором обрабатываются все основные игровые события
@@ -201,7 +15,7 @@ class Run:
 
     # пуск противокорабельной ракеты
     def missile_launch(self, destination, player, bases, ai):
-        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai, True))
+        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai, True, self.sound_explosion))
 
         self.sound_fire_VLS.play()
 
@@ -249,7 +63,7 @@ class Run:
                 destination_ai = min(distance)
                 a = distance.index(destination_ai)
                 dest = self.movement_ai(distance[a + 1], ai, fps)
-                self.base_lost(dest, distance[a + 1], bases, player, ai)
+                self.base_lost(dest, distance[a + 1], bases)
             except ValueError:
                 self.running = False
                 print('Вы проиграли!')
@@ -282,14 +96,14 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == player_grid_x and bases[i].rect.centery // \
                         self.cell_size == player_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
-                                    // 2, 'friendly', True)
+                                    // 2, 'friendly', True, self.cell_size)
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
                             self.hostile_bases:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                    self.cell_size])
 
     # база захвачена противником
-    def base_lost(self, dest, destination, bases, player, ai):
+    def base_lost(self, dest, destination, bases):
         if dest[0] and dest[1]:
             ai_grid_x = destination[0] // self.cell_size
             ai_grid_y = destination[1] // self.cell_size
@@ -297,7 +111,7 @@ class Run:
                 if bases[i].rect.centerx // self.cell_size == ai_grid_x and bases[i].rect.centery // self.cell_size == \
                         ai_grid_y:
                     bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
-                                    self.cell_size // 2, 'hostile', True)
+                                    self.cell_size // 2, 'hostile', True, self.cell_size)
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
@@ -313,7 +127,7 @@ class Run:
             board.render(screen)
         else:
             self.all_sprites.draw(screen)
-            f = pygame.font.Font('font/Teletactile.ttf', 24)
+            f = pygame.font.Font('data/font/Teletactile.ttf', 24)
             sc_text = f.render('PAUSE', True, pygame.Color('white'))
             pos = sc_text.get_rect(center=(size[0] // 2, size[1] // 2))
             pause_screen.blit(sc_text, pos)
@@ -396,7 +210,7 @@ class Run:
         self.cell_size = 75
         self.cells_x = size[0] // self.cell_size
         self.cells_y = size[1] // self.cell_size
-        board = Board(self.cells_x, self.cells_y)
+        board = Board(self.cells_x, self.cells_y, Run())
         board.set_view(0, 0, self.cell_size)
 
         fps = 60
@@ -410,8 +224,8 @@ class Run:
         for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
-            bases.append(Base(x, y, 'neutral', True))
-        ai = AI(board, False)
+            bases.append(Base(x, y, 'neutral', True, self.cell_size))
+        ai = AI(board, False, self.cell_size)
 
         # различные флаги
         destination_player = player.rect.center
@@ -425,16 +239,14 @@ class Run:
         self.missile = False
 
         # озвучка событий
-        global sound_explosion
-        self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
-        self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
-        self.sound_fire_VLS = pygame.mixer.Sound('sound/FireVLS.wav')
-        self.sound_weapon_acquire = pygame.mixer.Sound('sound/weapon acquire.wav')
-        self.sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
-        sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
+        self.sound_new_contact = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
+        self.sound_contact_lost = pygame.mixer.Sound('data/sound/contact_lost.wav')
+        self.sound_fire_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
+        self.sound_weapon_acquire = pygame.mixer.Sound('data/sound/weapon acquire.wav')
+        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
+        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
-        hiden_sprites = []
 
         # основной игровой цикл
         while self.running:
