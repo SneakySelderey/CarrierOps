@@ -244,10 +244,9 @@ class Run:
         self.sound_fire_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
         self.sound_weapon_acquire = pygame.mixer.Sound('data/sound/weapon acquire.wav')
         self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
-        sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
+        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
-        hiden_sprites = []
 
         # основной игровой цикл
         while self.running:
