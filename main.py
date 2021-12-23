@@ -32,7 +32,7 @@ class Board:
 class Player(pygame.sprite.Sprite):
     def __init__(self, visibility):
         pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('img/Player_cursor.png').convert()
+        player_img = pygame.image.load('data/img/Player_cursor.png').convert()
         self.image = player_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
@@ -52,7 +52,7 @@ class Player(pygame.sprite.Sprite):
 class AI(pygame.sprite.Sprite):
     def __init__(self, board, visibility):
         pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('img/AI_cursor.png').convert()
+        player_img = pygame.image.load('data/img/AI_cursor.png').convert()
         self.image = player_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
@@ -73,11 +73,11 @@ class Base(pygame.sprite.Sprite):
     def __init__(self, x, y, state, visibility):
         pygame.sprite.Sprite.__init__(self)
         if state == 'neutral':
-            base_img = pygame.image.load('img/base_neutral.png').convert()
+            base_img = pygame.image.load('data/img/base_neutral.png').convert()
         elif state == 'friendly':
-            base_img = pygame.image.load('img/base_friendly.png').convert()
+            base_img = pygame.image.load('data/img/base_friendly.png').convert()
         elif state == 'hostile':
-            base_img = pygame.image.load('img/base_hostile.png').convert()
+            base_img = pygame.image.load('data/img/base_hostile.png').convert()
         self.image = base_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
@@ -90,7 +90,7 @@ class Base(pygame.sprite.Sprite):
 class MissileFriendly(pygame.sprite.Sprite):
     def __init__(self, player, first_pos_check, activation, ai, visibility):
         pygame.sprite.Sprite.__init__(self)
-        base_img = pygame.image.load('img/missile_friendly.png').convert()
+        base_img = pygame.image.load('data/img/missile_friendly.png').convert()
         self.image = base_img
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
@@ -313,7 +313,7 @@ class Run:
             board.render(screen)
         else:
             self.all_sprites.draw(screen)
-            f = pygame.font.Font('font/Teletactile.ttf', 24)
+            f = pygame.font.Font('data/font/Teletactile.ttf', 24)
             sc_text = f.render('PAUSE', True, pygame.Color('white'))
             pos = sc_text.get_rect(center=(size[0] // 2, size[1] // 2))
             pause_screen.blit(sc_text, pos)
@@ -426,12 +426,12 @@ class Run:
 
         # озвучка событий
         global sound_explosion
-        self.sound_new_contact = pygame.mixer.Sound('sound/new_radar_contact.wav')
-        self.sound_contact_lost = pygame.mixer.Sound('sound/contact_lost.wav')
-        self.sound_fire_VLS = pygame.mixer.Sound('sound/FireVLS.wav')
-        self.sound_weapon_acquire = pygame.mixer.Sound('sound/weapon acquire.wav')
-        self.sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
-        sound_explosion = pygame.mixer.Sound('sound/explosion.wav')
+        self.sound_new_contact = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
+        self.sound_contact_lost = pygame.mixer.Sound('data/sound/contact_lost.wav')
+        self.sound_fire_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
+        self.sound_weapon_acquire = pygame.mixer.Sound('data/sound/weapon acquire.wav')
+        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
+        sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
         hiden_sprites = []
