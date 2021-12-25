@@ -204,6 +204,10 @@ class Run:
         size = 1400, 800
         screen = pygame.display.set_mode(size)
         pause_screen = pygame.display.set_mode(size)
+        title_screen = pygame.display.set_mode(size)
+        new_campaign_screen = pygame.display.set_mode(size)
+        settings_screen = pygame.display.set_mode(size)
+        exit_screen = pygame.display.set_mode(size)
         pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
 
@@ -238,6 +242,10 @@ class Run:
         self.battle = False
         self.missile = False
 
+        self.menu_screen = True
+        self.game_screen = False
+        self.gameover_screen = False
+
         # озвучка событий
         self.sound_new_contact = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
         self.sound_contact_lost = pygame.mixer.Sound('data/sound/contact_lost.wav')
@@ -248,42 +256,78 @@ class Run:
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
 
+        screen.fill(pygame.Color('gray5'))
+        new_campaign_screen.fill(pygame.Color('gray5'))
+        settings_screen.fill(pygame.Color('gray5'))
+        exit_screen.fill(pygame.Color('gray5'))
+
         # основной игровой цикл
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        destination_player = event.pos
-                    if event.button == 3:
-                        destination_missile = event.pos
-                        self.missile = True
+            while self.menu_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.menu_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            click_pos = event.pos
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_p:
-                        self.pause = not self.pause
+                f = pygame.font.Font('data/font/Teletactile.ttf', 42)
+                title_text = f.render('CARRIER OPERATIONS', True, pygame.Color('white'))
+                pos1 = title_text.get_rect(center=(size[0] // 2, size[1] // 5))
+                screen.blit(title_text, pos1)
 
-            if self.missile:
-                self.missile_launch(destination_missile, player, bases, ai)
-                self.missile = False
+                f = pygame.font.Font('data/font/Teletactile.ttf', 28)
+                new_game_text = f.render('NEW CAMPAIGN', True, pygame.Color('white'))
+                pos = new_game_text.get_rect(center=(size[0] // 2, 300))
+                new_campaign_screen.blit(new_game_text, pos)
 
-            dest = self.movement_player(destination_player, player, screen)
+                new_game_text = f.render('SETTINGS', True, pygame.Color('white'))
+                pos = new_game_text.get_rect(center=(size[0] // 2, 400))
+                new_campaign_screen.blit(new_game_text, pos)
 
-            self.base_taken(dest, destination_player, bases, player, ai)
+                new_game_text = f.render('QUIT TO DESKTOP', True, pygame.Color('white'))
+                pos = new_game_text.get_rect(center=(size[0] // 2, 500))
+                new_campaign_screen.blit(new_game_text, pos)
 
-            self.destination_ai(bases, ai, player, fps)
+                pygame.display.flip()
 
-            self.fog_of_war(ai, player, bases, screen)
+            while self.game_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
 
-            clock.tick(fps)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            destination_player = event.pos
+                        if event.button == 3:
+                            destination_missile = event.pos
+                            self.missile = True
 
-            self.set_pause(screen, pause_screen, board, size, ai)
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_p:
+                            self.pause = not self.pause
 
-            if start:
-                self.pause = True
-                start = False
+                if self.missile:
+                    self.missile_launch(destination_missile, player, bases, ai)
+                    self.missile = False
+
+                dest = self.movement_player(destination_player, player, screen)
+
+                self.base_taken(dest, destination_player, bases, player, ai)
+
+                self.destination_ai(bases, ai, player, fps)
+
+                self.fog_of_war(ai, player, bases, screen)
+
+                clock.tick(fps)
+
+                self.set_pause(screen, pause_screen, board, size, ai)
+
+                if start:
+                    self.pause = True
+                    start = False
 
 
 if __name__ == '__main__':
