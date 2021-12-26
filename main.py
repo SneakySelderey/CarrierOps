@@ -1,6 +1,6 @@
 import pygame
 import random
-from math import sqrt
+from math import hypot
 from board import Board
 from player import Player
 from AI import AI
@@ -16,7 +16,7 @@ class Run:
         self.cells_x = WIDTH // self.cell_size
         self.cells_y = HEIGHT // self.cell_size
 
-        self.board = Board(self.cells_x, self.cells_y, self)
+        self.board = Board(self.cells_x, self.cells_y, self.cell_size)
         self.board.set_view(0, 0, self.cell_size)
 
         # Озвучка событий
@@ -55,7 +55,7 @@ class Run:
             self.sound_explosion))
         self.sound_fire_VLS.play()
 
-    def movement(self, destination, game_obj, screen=None):
+    def move(self, destination, game_obj, screen=None):
         """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
@@ -83,7 +83,7 @@ class Run:
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            dest = self.movement(distance[idx][1], self.ai)
+            dest = self.move(distance[idx][1], self.ai)
             self.base_lost(dest, distance[idx][1])
         except ValueError:
             self.running = False
@@ -130,15 +130,16 @@ class Run:
             pause_screen.blit(SC_TEXT, POS)
             pygame.display.flip()
 
-    def fog_of_war(self, ai, player, bases, screen):
+    def fog_of_war(self, screen):
         # если противник обнаружен ракетой
         missile_tracking = False
+        ai_x, ai_y = self.ai.rect.center
+        player_x, player_y = self.player.rect.center
         for missile in self.friendly_missiles:
             # если цель в радиусе обнаружения ракеты, то
             # поднимается соответствующий флаг
-            if (sqrt((missile.rect.centerx - ai.rect.centerx) ** 2 + (
-                missile.rect.centery - ai.rect.centery) ** 2)) \
-                    <= 150:
+            missile_x, missile_y = missile.rect.center
+            if hypot(missile_x - ai_x, missile_y - ai_y) <= 150:
                 missile_tracking = True
             # если ракета исчерпала свой ресурс, она падает в море и
             # спрайт удаляется
@@ -148,19 +149,18 @@ class Run:
             # отрисовка радиуса обнаружения ракеты
             if not missile.activated:
                 pygame.draw.line(screen, BLUE,
-                                 (missile.rect.centerx, missile.rect.centery),
-                                 (missile.activation[0], missile.activation[1]))
+                                 (missile_x, missile_y),
+                                 (missile.activation[0],
+                                  missile.activation[1]))
             pygame.draw.circle(screen, BLUE,
-                               (missile.rect.centerx, missile.rect.centery),
+                               (missile_x, missile_y),
                                150, 1)
 
         # отрисовка спрайта противника
-        if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (
-            ai.rect.centery - player.rect.centery) ** 2)) \
-                <= 300 or missile_tracking:
-            ai.visibility = True
-            pygame.draw.circle(screen, RED,
-                               (ai.rect.centerx, ai.rect.centery), 300, 1)
+        dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+        if dist_between_ai_player <= 300 or missile_tracking:
+            self.ai.visibility = True
+            pygame.draw.circle(screen, RED, (ai_x, ai_y), 300, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
@@ -174,10 +174,8 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (
-            ai.rect.centery - player.rect.centery) ** 2)) \
-                > 300 or missile_tracking:
-            ai.visibility = False
+        elif dist_between_ai_player > 300 and not missile_tracking:
+            self.ai.visibility = False
             self.ai_detected = False
             self.play_new_contact = True
             if self.play_contact_lost:
@@ -199,10 +197,8 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, BLUE,
-                           (player.rect.centerx, player.rect.centery), 300, 1)
-        pygame.draw.circle(screen, BLUE,
-                           (player.rect.centerx, player.rect.centery), 1050, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y), 300, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y), 1050, 1)
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -235,10 +231,10 @@ class Run:
             if self.missile:
                 self.missile_launch(destination_missile)
                 self.missile = False
-            goal = self.movement(destination_player, self.player, screen)
+            goal = self.move(destination_player, self.player, screen)
             self.base_taken(goal, destination_player)
             self.destination_ai()
-            self.fog_of_war(self.ai, self.player, self.bases, screen)
+            self.fog_of_war(screen)
             self.set_pause(screen, pause_screen)
             clock.tick(fps)
 
