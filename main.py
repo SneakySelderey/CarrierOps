@@ -40,24 +40,24 @@ class Run:
         #     dest = self.movement_ai([player.rect.centerx, player.rect.centery], ai, fps)
         #     self.battle = True
         # else:
-            distance = []
-            for i in range(len(bases)):
-                ai_pos_x = ai.rect.centerx // self.cell_size
-                ai_pos_y = ai.rect.centery // self.cell_size
-                dist = [ai_pos_x - bases[i].rect.centerx // self.cell_size, ai_pos_y - bases[i].rect.centery //
-                        self.cell_size]
-                if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] not in \
-                        self.hostile_bases:
-                    distance.append(dist)
-                    distance.append([bases[i].rect.centerx, bases[i].rect.centery])
-            try:
-                destination_ai = min(distance)
-                a = distance.index(destination_ai)
-                dest = self.movement(distance[a + 1], ai)
-                self.base_lost(dest, distance[a + 1], bases)
-            except ValueError:
-                self.running = False
-                print('Вы проиграли!')
+        distance = []
+        ai_pos_x = ai.rect.centerx // self.cell_size
+        ai_pos_y = ai.rect.centery // self.cell_size
+        for i in range(len(bases)):
+            base_x = bases[i].rect.centerx // self.cell_size
+            base_y = bases[i].rect.centery // self.cell_size
+            dist = [ai_pos_x - base_x, ai_pos_y - base_y]
+            if [base_x, base_y] not in self.hostile_bases:
+                distance.append(
+                    (dist, [bases[i].rect.centerx, bases[i].rect.centery]))
+        try:
+            destination_ai = min(distance)
+            idx = distance.index(destination_ai)
+            dest = self.movement(distance[idx][1], ai)
+            self.base_lost(dest, distance[idx][1], bases)
+        except ValueError:
+            self.running = False
+            print('Вы проиграли!')
 
     # база захвачена союзником
     def base_taken(self, dest, destination, bases, player, ai):
@@ -99,8 +99,7 @@ class Run:
             board.render(screen)
         else:
             self.all_sprites.draw(screen)
-            f = pygame.font.Font('data/font/Teletactile.ttf', 24)
-            sc_text = f.render('PAUSE', True, WHITE)
+            sc_text = MAIN_FONT.render('PAUSE', True, WHITE)
             pos = sc_text.get_rect(center=(size[0] // 2, size[1] // 2))
             pause_screen.blit(sc_text, pos)
             pygame.display.flip()
@@ -173,7 +172,7 @@ class Run:
     def main(self):
         pygame.init()
         pygame.mixer.init()
-        size = 1400, 800
+        size = WIDTH, HEIGHT
         screen = pygame.display.set_mode(size)
         pause_screen = pygame.display.set_mode(size)
         pygame.display.set_caption("CarrierOps")
