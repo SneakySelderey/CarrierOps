@@ -9,19 +9,44 @@ from friendly_missile import MissileFriendly
 from Settings import *
 
 
-# класс, в котором обрабатываются все основные игровые события
 class Run:
+    """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
-        pass
+        self.cell_size = 75
+        self.cells_x = WIDTH // self.cell_size
+        self.cells_y = HEIGHT // self.cell_size
+
+        self.board = Board(self.cells_x, self.cells_y, self)
+        self.board.set_view(0, 0, self.cell_size)
+
+        # Озвучка событий
+        self.sound_new_contact = NEW_CONTACT
+        self.sound_contact_lost = CONTACT_LOST
+        self.sound_fire_VLS = FIRE_VLS
+        self.sound_weapon_acquire = WEAPON_ACQUIRE
+        self.sound_explosion = EXPLOSION
+
+        # Флаги
+        self.running = True
+        self.pause = False
+        self.hostile_bases = []
+        self.ai_detected = False
+        self.play_new_contact, self.play_contact_lost = True, False
+        self.battle = False
+        self.missile = False
+
+        self.all_sprites = pygame.sprite.Group()
+        self.player = Player(True)
+        self.ai = AI(self.board, False, self.cell_size)
 
     # пуск противокорабельной ракеты
-    def missile_launch(self, destination, player, bases, ai):
-        self.friendly_missiles.append(MissileFriendly(player, True, destination, ai, True, self.sound_explosion))
+    def missile_launch(self, destination):
+        self.friendly_missiles.append(MissileFriendly(self.player, True, destination, self.ai, True, self.sound_explosion))
 
         self.sound_fire_VLS.play()
 
-    # движение игрока или ИИ
     def movement(self, destination, game_obj, screen=None):
+        """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
         game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
@@ -33,16 +58,16 @@ class Run:
                 screen, BLUE, (destination[0], destination[1]), 10)
         return [stop_x, stop_y]
 
-    # расчет точки движения для ИИ
-    def destination_ai(self, bases, ai, player, fps):
+    def destination_ai(self, bases):
+        """Расчет точки движания дял ИИ"""
         # if (sqrt((player.rect.centerx - ai.rect.centerx) ** 2 + (player.rect.centery - ai.rect.centery) ** 2)) \
         #         <= 300:
         #     dest = self.movement_ai([player.rect.centerx, player.rect.centery], ai, fps)
         #     self.battle = True
         # else:
         distance = []
-        ai_pos_x = ai.rect.centerx // self.cell_size
-        ai_pos_y = ai.rect.centery // self.cell_size
+        ai_pos_x = self.ai.rect.centerx // self.cell_size
+        ai_pos_y = self.ai.rect.centery // self.cell_size
         for i in range(len(bases)):
             base_x = bases[i].rect.centerx // self.cell_size
             base_y = bases[i].rect.centery // self.cell_size
@@ -53,14 +78,14 @@ class Run:
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            dest = self.movement(distance[idx][1], ai)
+            dest = self.movement(distance[idx][1], self.ai)
             self.base_lost(dest, distance[idx][1], bases)
         except ValueError:
             self.running = False
             print('Вы проиграли!')
 
     # база захвачена союзником
-    def base_taken(self, dest, destination, bases, player, ai):
+    def base_taken(self, dest, destination, bases, ai):
         if dest[0] and dest[1]:
             player_grid_x = destination[0] // self.cell_size
             player_grid_y = destination[1] // self.cell_size
@@ -87,20 +112,20 @@ class Run:
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
-    # поставить игру на паузу
-    def set_pause(self, screen, pause_screen, board, size, ai):
+    def set_pause(self, screen, pause_screen):
+        """Функиця, ставящая игру на паузу"""
         if not self.pause:
             self.all_sprites.update()
             if not self.ai_detected:
-                ai.update()
+                self.ai.update()
             pygame.display.flip()
             screen.fill(GRAY5)
             self.all_sprites.draw(screen)
-            board.render(screen)
+            self.board.render(screen)
         else:
             self.all_sprites.draw(screen)
             sc_text = MAIN_FONT.render('PAUSE', True, WHITE)
-            pos = sc_text.get_rect(center=(size[0] // 2, size[1] // 2))
+            pos = sc_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
             pause_screen.blit(sc_text, pos)
             pygame.display.flip()
 
@@ -168,8 +193,8 @@ class Run:
         pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 300, 1)
         pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 1050, 1)
 
-    # функция с основным игровым циклом
     def main(self):
+        """Функция с основным игровым циклом"""
         pygame.init()
         pygame.mixer.init()
         size = WIDTH, HEIGHT
@@ -177,18 +202,9 @@ class Run:
         pause_screen = pygame.display.set_mode(size)
         pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
-
-        self.cell_size = 75
-        self.cells_x = size[0] // self.cell_size
-        self.cells_y = size[1] // self.cell_size
-        board = Board(self.cells_x, self.cells_y, Run())
-        board.set_view(0, 0, self.cell_size)
-
         fps = 60
 
         # добавление спрайтов в группы
-        self.all_sprites = pygame.sprite.Group()
-        player = Player(True)
         bases = []
         self.friendly_missiles = []
         self.hostile_missiles = []
@@ -196,65 +212,41 @@ class Run:
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
             bases.append(Base(x, y, 'neutral', True, self.cell_size))
-        ai = AI(board, False, self.cell_size)
 
-        # различные флаги
-        destination_player = player.rect.center
-        self.running = True
-        self.pause = False
+        destination_player = self.player.rect.center
+        destination_missile = self.player.rect.center
         start = True
-        self.hostile_bases = []
-        self.ai_detected = False
-        self.play_new_contact, self.play_contact_lost = True, False
-        self.battle = False
-        self.missile = False
 
-        # озвучка событий
-        self.sound_new_contact = NEW_CONTACT
-        self.sound_contact_lost = CONTACT_LOST
-        self.sound_fire_VLS = FIRE_VLS
-        self.sound_weapon_acquire = WEAPON_ACQUIRE
-        self.sound_explosion = EXPLOSION
-
-        self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
+        self.list_all_sprites = [self.player, self.ai, bases, self.friendly_missiles, self.hostile_missiles]
 
         # основной игровой цикл
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and not self.pause:
                     if event.button == 1:
                         destination_player = event.pos
                     if event.button == 3:
                         destination_missile = event.pos
                         self.missile = True
-
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
-
             if self.missile:
-                self.missile_launch(destination_missile, player, bases, ai)
+                self.missile_launch(destination_missile)
                 self.missile = False
-
-            dest = self.movement(destination_player, player, screen)
-
-            self.base_taken(dest, destination_player, bases, player, ai)
-
-            self.destination_ai(bases, ai, player, fps)
-
-            self.fog_of_war(ai, player, bases, screen)
-
+            dest = self.movement(destination_player, self.player, screen)
+            self.base_taken(dest, destination_player, bases, self.ai)
+            self.destination_ai(bases)
+            self.fog_of_war(self.ai, self.player, bases, screen)
+            self.set_pause(screen, pause_screen)
             clock.tick(fps)
-
-            self.set_pause(screen, pause_screen, board, size, ai)
-
             if start:
                 self.pause = True
                 start = False
 
 
 if __name__ == '__main__':
-    Run().main()
+    game = Run()
+    game.main()
