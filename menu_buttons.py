@@ -40,8 +40,7 @@ class Load(pygame.sprite.Sprite):
 
     def update(self, pos):
         if self.rect.collidepoint(pos[0], pos[1]):
-            self.run.menu_screen = False
-            self.run.game_screen = True
+            pass
 
 
 class Settings(pygame.sprite.Sprite):
