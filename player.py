@@ -1,5 +1,6 @@
 import pygame
-from Settings import BLACK, PLAYER_IMAGE
+from random import randint
+from Settings import BLACK, PLAYER_IMAGE, HEIGHT
 
 
 class Player(pygame.sprite.Sprite):
@@ -9,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         self.image = PLAYER_IMAGE.convert()
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.center = [25, 25]
+        self.rect.center = [40, randint(40, HEIGHT - 40)]
         self.speedx = 0
         self.speedy = 0
 
