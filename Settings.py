@@ -6,6 +6,10 @@ pygame.mixer.init()
 # Цвета
 BLACK = pygame.Color('black')
 DARK_RED = pygame.Color('darkred')
+WHITE = pygame.Color('white')
+GRAY5 = pygame.Color('gray5')
+BLUE = pygame.Color('blue')
+RED = pygame.Color('red')
 
 # Изображения
 PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png')

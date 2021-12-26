@@ -25,19 +25,19 @@ class Run:
         stop_x, stop_y = False, False
         if destination[0] > player.rect.centerx:
             player.speedx = 1
-            pygame.draw.circle(screen, pygame.Color('blue'), (destination[0], destination[1]), 10)
+            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
         if destination[0] < player.rect.centerx:
             player.speedx = -1
-            pygame.draw.circle(screen, pygame.Color('blue'), (destination[0], destination[1]), 10)
+            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
         elif destination[0] == player.rect.centerx:
             player.speedx = 0
             stop_x = True
         if destination[1] > player.rect.centery:
             player.speedy = 1
-            pygame.draw.circle(screen, pygame.Color('blue'), (destination[0], destination[1]), 10)
+            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
         if destination[1] < player.rect.centery:
             player.speedy = -1
-            pygame.draw.circle(screen, pygame.Color('blue'), (destination[0], destination[1]), 10)
+            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
         elif destination[1] == player.rect.centery:
             player.speedy = 0
             stop_y = True
@@ -123,13 +123,13 @@ class Run:
             if not self.ai_detected:
                 ai.update()
             pygame.display.flip()
-            screen.fill(pygame.Color('gray5'))
+            screen.fill(GRAY5)
             self.all_sprites.draw(screen)
             board.render(screen)
         else:
             self.all_sprites.draw(screen)
             f = pygame.font.Font('data/font/Teletactile.ttf', 24)
-            sc_text = f.render('PAUSE', True, pygame.Color('white'))
+            sc_text = f.render('PAUSE', True, WHITE)
             pos = sc_text.get_rect(center=(size[0] // 2, size[1] // 2))
             pause_screen.blit(sc_text, pos)
             pygame.display.flip()
@@ -149,15 +149,15 @@ class Run:
                 self.all_sprites.remove(missile)
             # отрисовка радиуса обнаружения ракеты
             if not missile.activated:
-                pygame.draw.line(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery),
+                pygame.draw.line(screen, BLUE, (missile.rect.centerx, missile.rect.centery),
                                  (missile.activation[0], missile.activation[1]))
-            pygame.draw.circle(screen, pygame.Color('blue'), (missile.rect.centerx, missile.rect.centery), 150, 1)
+            pygame.draw.circle(screen, BLUE, (missile.rect.centerx, missile.rect.centery), 150, 1)
 
         # отрисовка спрайта противника
         if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
                 <= 300 or missile_tracking:
             ai.visibility = True
-            pygame.draw.circle(screen, pygame.Color('red'), (ai.rect.centerx, ai.rect.centery), 300, 1)
+            pygame.draw.circle(screen, RED, (ai.rect.centerx, ai.rect.centery), 300, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
@@ -195,8 +195,8 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 300, 1)
-        pygame.draw.circle(screen, pygame.Color('blue'), (player.rect.centerx, player.rect.centery), 1050, 1)
+        pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 300, 1)
+        pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 1050, 1)
 
     # функция с основным игровым циклом
     def main(self):
