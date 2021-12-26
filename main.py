@@ -205,10 +205,7 @@ class Run:
         size = 1400, 800
         screen = pygame.display.set_mode(size)
         pause_screen = pygame.display.set_mode(size)
-        title_screen = pygame.display.set_mode(size)
-        new_campaign_screen = pygame.display.set_mode(size)
-        settings_screen = pygame.display.set_mode(size)
-        exit_screen = pygame.display.set_mode(size)
+        background_screen = pygame.display.set_mode(size)
         pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
 
@@ -260,9 +257,6 @@ class Run:
         self.menu_sprites = pygame.sprite.Group()
 
         screen.fill(pygame.Color('gray5'))
-        new_campaign_screen.fill(pygame.Color('gray5'))
-        settings_screen.fill(pygame.Color('gray5'))
-        exit_screen.fill(pygame.Color('gray5'))
 
         # основной игровой цикл
         while self.running:
@@ -276,16 +270,18 @@ class Run:
                         if event.button == 1:
                             self.menu_sprites.update(event.pos)
 
+                screen.blit(pygame.image.load('data/img/menu_background.png'), (0, 0))
+
                 if self.first_add:
                     self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
                                           menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
                                           menu_buttons.Quit(size, self))
                     self.first_add = False
 
+                self.menu_sprites.draw(screen)
+
                 clock.tick(fps)
                 pygame.display.flip()
-                screen.fill(pygame.Color('black'))
-                self.menu_sprites.draw(screen)
 
             while self.game_screen:
                 for event in pygame.event.get():

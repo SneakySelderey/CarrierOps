@@ -69,4 +69,3 @@ class Quit(pygame.sprite.Sprite):
         if self.rect.collidepoint(pos[0], pos[1]):
             self.run.menu_screen = False
             self.run.running = False
-
