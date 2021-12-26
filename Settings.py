@@ -32,7 +32,7 @@ FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
 
-# Шрифты
+# Для меню паузы
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
 SC_TEXT = MAIN_FONT.render('PAUSE', True, WHITE)
 POS = SC_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))

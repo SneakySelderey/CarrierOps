@@ -17,5 +17,4 @@ class Base(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = [x + cell_size // 2, y + cell_size // 2]
-
         self.visibility = visibility

@@ -37,12 +37,11 @@ class Run:
 
         self.all_sprites = pygame.sprite.Group()
         self.player = Player(True)
-        self.ai = AI(self.board, False, self.cell_size)
+        self.ai = AI(False)
 
     # пуск противокорабельной ракеты
     def missile_launch(self, destination):
         self.friendly_missiles.append(MissileFriendly(self.player, True, destination, self.ai, True, self.sound_explosion))
-
         self.sound_fire_VLS.play()
 
     def movement(self, destination, game_obj, screen=None):
@@ -59,7 +58,7 @@ class Run:
         return [stop_x, stop_y]
 
     def destination_ai(self, bases):
-        """Расчет точки движания дял ИИ"""
+        """Расчет точки движания для ИИ"""
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
