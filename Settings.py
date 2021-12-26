@@ -6,6 +6,7 @@ pygame.mixer.init()
 
 WIDTH = 1400
 HEIGHT = 800
+CELL_SIZE = 75
 
 # Цвета
 BLACK = pygame.Color('black')
