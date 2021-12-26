@@ -7,6 +7,7 @@ from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
 import menu_buttons
+import gameover_buttons
 
 
 # класс, в котором обрабатываются все основные игровые события
@@ -66,8 +67,8 @@ class Run:
                 dest = self.movement_ai(distance[a + 1], ai, fps)
                 self.base_lost(dest, distance[a + 1], bases)
             except ValueError:
-                self.running = False
-                print('Вы проиграли!')
+                self.game_screen = False
+                self.gameover_screen = True
 
     # движение ИИ
     def movement_ai(self, destination, ai, fps):
@@ -219,6 +220,15 @@ class Run:
 
         # добавление спрайтов в группы
         self.all_sprites = pygame.sprite.Group()
+        self.menu_sprites = pygame.sprite.Group()
+        self.gameover_sprites = pygame.sprite.Group()
+
+        self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
+                              menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
+                              menu_buttons.Quit(size, self))
+        self.gameover_sprites.add(gameover_buttons.MainMenu(size, self), gameover_buttons.Quit(size, self),
+                                  gameover_buttons.BasesLost(size, self))
+
         player = Player(True)
         bases = []
         self.friendly_missiles = []
@@ -254,7 +264,6 @@ class Run:
         self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
-        self.menu_sprites = pygame.sprite.Group()
 
         screen.fill(pygame.Color('gray5'))
 
@@ -271,12 +280,6 @@ class Run:
                             self.menu_sprites.update(event.pos)
 
                 screen.blit(pygame.image.load('data/img/menu_background.png'), (0, 0))
-
-                if self.first_add:
-                    self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
-                                          menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
-                                          menu_buttons.Quit(size, self))
-                    self.first_add = False
 
                 self.menu_sprites.draw(screen)
 
@@ -320,6 +323,21 @@ class Run:
                     self.pause = True
                     start = False
 
+            while self.gameover_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.gameover_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.gameover_sprites.update(event.pos)
+
+                screen.blit(pygame.image.load('data/img/gameover_background.png'), (0, 0))
+
+                self.gameover_sprites.draw(screen)
+
+                clock.tick(fps)
+                pygame.display.flip()
 
 
 if __name__ == '__main__':
