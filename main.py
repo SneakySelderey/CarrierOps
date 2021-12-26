@@ -60,11 +60,6 @@ class Run:
 
     def destination_ai(self, bases):
         """Расчет точки движания дял ИИ"""
-        # if (sqrt((player.rect.centerx - ai.rect.centerx) ** 2 + (player.rect.centery - ai.rect.centery) ** 2)) \
-        #         <= 300:
-        #     dest = self.movement_ai([player.rect.centerx, player.rect.centery], ai, fps)
-        #     self.battle = True
-        # else:
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
@@ -85,7 +80,7 @@ class Run:
             print('Вы проиграли!')
 
     # база захвачена союзником
-    def base_taken(self, dest, destination, bases, ai):
+    def base_taken(self, dest, destination, bases):
         if dest[0] and dest[1]:
             player_grid_x = destination[0] // self.cell_size
             player_grid_y = destination[1] // self.cell_size
@@ -124,9 +119,7 @@ class Run:
             self.board.render(screen)
         else:
             self.all_sprites.draw(screen)
-            sc_text = MAIN_FONT.render('PAUSE', True, WHITE)
-            pos = sc_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            pause_screen.blit(sc_text, pos)
+            pause_screen.blit(SC_TEXT, POS)
             pygame.display.flip()
 
     # отрисовка тумана войны
@@ -135,7 +128,7 @@ class Run:
         missile_tracking = False
         for missile in self.friendly_missiles:
             # если цель в радиусе обнаружения ракеты, то поднимается соответствующий флаг
-            if (sqrt((missile.rect.centerx - ai.rect.centerx) ** 2 + (missile.rect.centery - ai.rect.centery) ** 2)) \
+            if (sqrt((missile.rect.centerx - self.ai.rect.centerx) ** 2 + (missile.rect.centery - self.ai.rect.centery) ** 2)) \
                     <= 150:
                 missile_tracking = True
             # если ракета исчерпала свой ресурс, она падает в море и спрайт удаляется
@@ -190,8 +183,8 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 300, 1)
-        pygame.draw.circle(screen, BLUE, (player.rect.centerx, player.rect.centery), 1050, 1)
+        pygame.draw.circle(screen, BLUE, (self.player.rect.centerx, self.player.rect.centery), 300, 1)
+        pygame.draw.circle(screen, BLUE, (self.player.rect.centerx, self.player.rect.centery), 1050, 1)
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -237,7 +230,7 @@ class Run:
                 self.missile_launch(destination_missile)
                 self.missile = False
             dest = self.movement(destination_player, self.player, screen)
-            self.base_taken(dest, destination_player, bases, self.ai)
+            self.base_taken(dest, destination_player, bases)
             self.destination_ai(bases)
             self.fog_of_war(self.ai, self.player, bases, screen)
             self.set_pause(screen, pause_screen)
