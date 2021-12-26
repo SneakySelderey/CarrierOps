@@ -22,25 +22,13 @@ class Run:
 
     # движение игрока
     def movement_player(self, destination, player, screen):
-        stop_x, stop_y = False, False
-        if destination[0] > player.rect.centerx:
-            player.speedx = 1
-            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
-        if destination[0] < player.rect.centerx:
-            player.speedx = -1
-            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
-        elif destination[0] == player.rect.centerx:
-            player.speedx = 0
-            stop_x = True
-        if destination[1] > player.rect.centery:
-            player.speedy = 1
-            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
-        if destination[1] < player.rect.centery:
-            player.speedy = -1
-            pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
-        elif destination[1] == player.rect.centery:
-            player.speedy = 0
-            stop_y = True
+        dx, dy = destination
+        center = player.rect.center
+        player.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
+        stop_x = player.speedx == 0
+        player.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
+        stop_y = player.speedy == 0
+        pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
         return [stop_x, stop_y]
 
     # расчет точки движения для ИИ
