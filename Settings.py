@@ -34,3 +34,5 @@ WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
 
 # Шрифты
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
+SC_TEXT = MAIN_FONT.render('PAUSE', True, WHITE)
+POS = SC_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))
