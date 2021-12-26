@@ -28,7 +28,7 @@ class Run:
 
         # Флаги
         self.running = True
-        self.pause = False
+        self.pause = True
         self.hostile_bases = []
         self.ai_detected = False
         self.play_new_contact, self.play_contact_lost = True, False
@@ -68,52 +68,51 @@ class Run:
                 screen, BLUE, (destination[0], destination[1]), 10)
         return [stop_x, stop_y]
 
-    def destination_ai(self, bases):
+    def destination_ai(self):
         """Расчет точки движания для ИИ"""
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
-        for i in range(len(bases)):
-            base_x = bases[i].rect.centerx // self.cell_size
-            base_y = bases[i].rect.centery // self.cell_size
+        for i in self.bases:
+            base_x = i.rect.centerx // self.cell_size
+            base_y = i.rect.centery // self.cell_size
             dist = [ai_pos_x - base_x, ai_pos_y - base_y]
             if [base_x, base_y] not in self.hostile_bases:
                 distance.append(
-                    (dist, [bases[i].rect.centerx, bases[i].rect.centery]))
+                    (dist, [i.rect.centerx, i.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
             dest = self.movement(distance[idx][1], self.ai)
-            self.base_lost(dest, distance[idx][1], bases)
+            self.base_lost(dest, distance[idx][1])
         except ValueError:
             self.running = False
             print('Вы проиграли!')
 
-    # база захвачена союзником
-    def base_taken(self, dest, destination, bases):
+    def base_taken(self, dest, destination):
+        """Функия дял захвата базы союзником"""
         if dest[0] and dest[1]:
             player_grid_x = destination[0] // self.cell_size
             player_grid_y = destination[1] // self.cell_size
-            for i in range(len(bases)):
-                if bases[i].rect.centerx // self.cell_size == player_grid_x and bases[i].rect.centery // \
-                        self.cell_size == player_grid_y:
-                    bases[i].update('friendly')
-                    if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
-                            self.hostile_bases:
-                        self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
-                                                   self.cell_size])
+            for i in self.bases:
+                base_x = i.rect.centerx // self.cell_size
+                base_y = i.rect.centery // self.cell_size
+                if base_x == player_grid_x and base_y == player_grid_y:
+                    i.update('friendly')
+                    if [base_x, base_y] in self.hostile_bases:
+                        self.hostile_bases.remove([base_x, base_y])
 
-    # база захвачена противником
-    def base_lost(self, dest, destination, bases):
+    def base_lost(self, dest, destination):
+        """Функция для захвата базы противником"""
         if dest[0] and dest[1]:
             ai_grid_x = destination[0] // self.cell_size
             ai_grid_y = destination[1] // self.cell_size
-            for i in range(len(bases)):
-                if bases[i].rect.centerx // self.cell_size == ai_grid_x and bases[i].rect.centery // self.cell_size == \
-                        ai_grid_y:
-                    bases[i].update('hostile')
-                    self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
-                                               self.cell_size])
+            for i in self.bases:
+                base_x = i.rect.centerx // self.cell_size
+                base_y = i.rect.centery // self.cell_size
+                if base_x == ai_grid_x and base_y == ai_grid_y:
+                    i.update('hostile')
+                    self.hostile_bases.append([base_x, base_y])
 
     def set_pause(self, screen, pause_screen):
         """Функиця, ставящая игру на паузу"""
@@ -123,9 +122,10 @@ class Run:
                 self.ai.update()
             pygame.display.flip()
             screen.fill(GRAY5)
-            self.all_sprites.draw(screen)
             self.board.render(screen)
+            self.all_sprites.draw(screen)
         else:
+            self.board.render(screen)
             self.all_sprites.draw(screen)
             pause_screen.blit(SC_TEXT, POS)
             pygame.display.flip()
@@ -217,7 +217,6 @@ class Run:
 
         destination_player = self.player.rect.center
         destination_missile = self.player.rect.center
-        start = True
 
         # основной игровой цикл
         while self.running:
@@ -236,15 +235,12 @@ class Run:
             if self.missile:
                 self.missile_launch(destination_missile)
                 self.missile = False
-            dest = self.movement(destination_player, self.player, screen)
-            self.base_taken(dest, destination_player, self.bases)
-            self.destination_ai(self.bases)
+            goal = self.movement(destination_player, self.player, screen)
+            self.base_taken(goal, destination_player)
+            self.destination_ai()
             self.fog_of_war(self.ai, self.player, self.bases, screen)
             self.set_pause(screen, pause_screen)
             clock.tick(fps)
-            if start:
-                self.pause = True
-                start = False
 
 
 if __name__ == '__main__':
