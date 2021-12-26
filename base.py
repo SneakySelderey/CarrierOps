@@ -1,18 +1,19 @@
 import pygame
+from Settings import BLACK, BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL
 
 
-# класс, определяющий спрайт и местоположение базы-острова
 class Base(pygame.sprite.Sprite):
+    """Класс, определяющий спрайт и местоположение базы-острова"""
     def __init__(self, x, y, state, visibility, cell_size):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         if state == 'neutral':
-            base_img = pygame.image.load('data/img/base_neutral.png').convert()
+            base_img = BASE_NEUTRAL.convert()
         elif state == 'friendly':
-            base_img = pygame.image.load('data/img/base_friendly.png').convert()
-        elif state == 'hostile':
-            base_img = pygame.image.load('data/img/base_hostile.png').convert()
+            base_img = BASE_FRIENDLY.convert()
+        else:
+            base_img = BASE_HOSTILE.convert()
         self.image = base_img
-        self.image.set_colorkey(pygame.Color('black'))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = [x + cell_size // 2, y + cell_size // 2]
 

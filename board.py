@@ -1,8 +1,9 @@
 import pygame
+from Settings import DARK_RED
 
 
-# Класс, ответственный за отрисовку квадратов
 class Board:
+    """Класс, ответственный за отрисовку поля"""
     def __init__(self, width, height, run):
         self.run = run
         self.width = width
@@ -12,16 +13,16 @@ class Board:
         self.top = 0
         self.cell_size = 30
 
-    # метод, задающий отступ сетки и размер одного квадрата
     def set_view(self, left, top, cell_size):
+        """Метод, задающий отступ сетки и размер одной ячейки"""
         self.left = left
         self.top = top
         self.run.cell_size = cell_size
 
-    # метод, отрисовывающий сетку
     def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                pygame.draw.rect(screen, pygame.Color('darkred'),
-                                 (x * self.run.cell_size + self.left, y * self.run.cell_size + self.top,
-                                  self.run.cell_size, self.run.cell_size), 1)
+        """Метод, отрисовывающий сетку"""
+        [pygame.draw.rect(screen, DARK_RED, (
+            x * self.run.cell_size + self.left,
+            y * self.run.cell_size + self.top, self.run.cell_size,
+            self.run.cell_size), 1) for y in range(self.height)
+         for x in range(self.width)]
