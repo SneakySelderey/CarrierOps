@@ -12,6 +12,7 @@ class Base(pygame.sprite.Sprite):
             base_img = BASE_FRIENDLY.convert()
         else:
             base_img = BASE_HOSTILE.convert()
+        base_img = pygame.transform.scale(base_img, (cell_size, cell_size))
         self.image = base_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
