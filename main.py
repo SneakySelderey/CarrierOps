@@ -6,6 +6,7 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
+import menu_buttons
 
 
 # класс, в котором обрабатываются все основные игровые события
@@ -245,6 +246,7 @@ class Run:
         self.menu_screen = True
         self.game_screen = False
         self.gameover_screen = False
+        self.first_add = True
 
         # озвучка событий
         self.sound_new_contact = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
@@ -255,6 +257,7 @@ class Run:
         self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
+        self.menu_sprites = pygame.sprite.Group()
 
         screen.fill(pygame.Color('gray5'))
         new_campaign_screen.fill(pygame.Color('gray5'))
@@ -271,32 +274,24 @@ class Run:
                         self.menu_screen = False
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
-                            click_pos = event.pos
+                            self.menu_sprites.update(event.pos)
 
-                f = pygame.font.Font('data/font/Teletactile.ttf', 42)
-                title_text = f.render('CARRIER OPERATIONS', True, pygame.Color('white'))
-                pos1 = title_text.get_rect(center=(size[0] // 2, size[1] // 5))
-                screen.blit(title_text, pos1)
+                if self.first_add:
+                    self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
+                                          menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
+                                          menu_buttons.Quit(size, self))
+                    self.first_add = False
 
-                f = pygame.font.Font('data/font/Teletactile.ttf', 28)
-                new_game_text = f.render('NEW CAMPAIGN', True, pygame.Color('white'))
-                pos = new_game_text.get_rect(center=(size[0] // 2, 300))
-                new_campaign_screen.blit(new_game_text, pos)
-
-                new_game_text = f.render('SETTINGS', True, pygame.Color('white'))
-                pos = new_game_text.get_rect(center=(size[0] // 2, 400))
-                new_campaign_screen.blit(new_game_text, pos)
-
-                new_game_text = f.render('QUIT TO DESKTOP', True, pygame.Color('white'))
-                pos = new_game_text.get_rect(center=(size[0] // 2, 500))
-                new_campaign_screen.blit(new_game_text, pos)
-
+                clock.tick(fps)
                 pygame.display.flip()
+                screen.fill(pygame.Color('black'))
+                self.menu_sprites.draw(screen)
 
             while self.game_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
+                        self.game_screen = False
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
@@ -321,13 +316,14 @@ class Run:
 
                 self.fog_of_war(ai, player, bases, screen)
 
-                clock.tick(fps)
-
                 self.set_pause(screen, pause_screen, board, size, ai)
+
+                clock.tick(fps)
 
                 if start:
                     self.pause = True
                     start = False
+
 
 
 if __name__ == '__main__':
