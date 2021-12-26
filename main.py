@@ -206,7 +206,6 @@ class Run:
         size = 1400, 800
         screen = pygame.display.set_mode(size)
         pause_screen = pygame.display.set_mode(size)
-        background_screen = pygame.display.set_mode(size)
         pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
 

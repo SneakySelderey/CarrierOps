@@ -26,8 +26,7 @@ class MainMenu(pygame.sprite.Sprite):
 
     def update(self, pos):
         if self.rect.collidepoint(pos[0], pos[1]):
-            self.run.menu_screen = True
-            self.run.gameover_screen = False
+            self.run.main()
 
 
 class Quit(pygame.sprite.Sprite):
