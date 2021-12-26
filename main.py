@@ -20,15 +20,17 @@ class Run:
 
         self.sound_fire_VLS.play()
 
-    # движение игрока
-    def movement_player(self, destination, player, screen):
+    # движение игрока или ИИ
+    def movement(self, destination, game_obj, screen=None):
         dx, dy = destination
-        center = player.rect.center
-        player.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
-        stop_x = player.speedx == 0
-        player.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
-        stop_y = player.speedy == 0
-        pygame.draw.circle(screen, BLUE, (destination[0], destination[1]), 10)
+        center = game_obj.rect.center
+        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
+        stop_x = game_obj.speedx == 0
+        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
+        stop_y = game_obj.speedy == 0
+        if screen is not None:
+            pygame.draw.circle(
+                screen, BLUE, (destination[0], destination[1]), 10)
         return [stop_x, stop_y]
 
     # расчет точки движения для ИИ
@@ -51,30 +53,11 @@ class Run:
             try:
                 destination_ai = min(distance)
                 a = distance.index(destination_ai)
-                dest = self.movement_ai(distance[a + 1], ai, fps)
+                dest = self.movement(distance[a + 1], ai)
                 self.base_lost(dest, distance[a + 1], bases)
             except ValueError:
                 self.running = False
                 print('Вы проиграли!')
-
-    # движение ИИ
-    def movement_ai(self, destination, ai, fps):
-        stop_x, stop_y = False, False
-        if destination[0] > ai.rect.centerx:
-            ai.speedx = 1
-        if destination[0] < ai.rect.centerx:
-            ai.speedx = -1
-        elif destination[0] == ai.rect.centerx:
-            ai.speedx = 0
-            stop_x = True
-        if destination[1] > ai.rect.centery:
-            ai.speedy = 1
-        if destination[1] < ai.rect.centery:
-            ai.speedy = -1
-        elif destination[1] == ai.rect.centery:
-            ai.speedy = 0
-            stop_y = True
-        return [stop_x, stop_y]
 
     # база захвачена союзником
     def base_taken(self, dest, destination, bases, player, ai):
@@ -257,7 +240,7 @@ class Run:
                 self.missile_launch(destination_missile, player, bases, ai)
                 self.missile = False
 
-            dest = self.movement_player(destination_player, player, screen)
+            dest = self.movement(destination_player, player, screen)
 
             self.base_taken(dest, destination_player, bases, player, ai)
 
