@@ -7,7 +7,7 @@ class AI(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт ИИ"""
     def __init__(self, board, visibility, cell_size):
         super().__init__()
-        self.image = AI_IMAGE.convert()
+        self.image = AI_IMAGE
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = [cell_size * board.width,
