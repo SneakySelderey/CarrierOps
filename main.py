@@ -12,7 +12,7 @@ from Settings import *
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
-        self.cell_size = 75
+        self.cell_size = CELL_SIZE
         self.cells_x = WIDTH // self.cell_size
         self.cells_y = HEIGHT // self.cell_size
 
@@ -97,8 +97,7 @@ class Run:
             for i in range(len(bases)):
                 if bases[i].rect.centerx // self.cell_size == player_grid_x and bases[i].rect.centery // \
                         self.cell_size == player_grid_y:
-                    bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery - self.cell_size
-                                    // 2, 'friendly', True, self.cell_size)
+                    bases[i].update('friendly')
                     if [bases[i].rect.centerx // self.cell_size, bases[i].rect.centery // self.cell_size] in \
                             self.hostile_bases:
                         self.hostile_bases.remove([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
@@ -112,8 +111,7 @@ class Run:
             for i in range(len(bases)):
                 if bases[i].rect.centerx // self.cell_size == ai_grid_x and bases[i].rect.centery // self.cell_size == \
                         ai_grid_y:
-                    bases[i] = Base(bases[i].rect.centerx - self.cell_size // 2, bases[i].rect.centery -
-                                    self.cell_size // 2, 'hostile', True, self.cell_size)
+                    bases[i].update('hostile')
                     self.hostile_bases.append([bases[i].rect.centerx // self.cell_size, bases[i].rect.centery //
                                                self.cell_size])
 
