@@ -6,6 +6,7 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
+from Settings import *
 
 
 # класс, в котором обрабатываются все основные игровые события
@@ -239,12 +240,11 @@ class Run:
         self.missile = False
 
         # озвучка событий
-        self.sound_new_contact = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
-        self.sound_contact_lost = pygame.mixer.Sound('data/sound/contact_lost.wav')
-        self.sound_fire_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
-        self.sound_weapon_acquire = pygame.mixer.Sound('data/sound/weapon acquire.wav')
-        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
-        self.sound_explosion = pygame.mixer.Sound('data/sound/explosion.wav')
+        self.sound_new_contact = NEW_CONTACT
+        self.sound_contact_lost = CONTACT_LOST
+        self.sound_fire_VLS = FIRE_VLS
+        self.sound_weapon_acquire = WEAPON_ACQUIRE
+        self.sound_explosion = EXPLOSION
 
         self.list_all_sprites = [player, ai, bases, self.friendly_missiles, self.hostile_missiles]
 
