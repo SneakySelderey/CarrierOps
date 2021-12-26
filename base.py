@@ -7,11 +7,11 @@ class Base(pygame.sprite.Sprite):
     def __init__(self, x, y, state, visibility, cell_size):
         super().__init__()
         if state == 'neutral':
-            base_img = BASE_NEUTRAL.convert()
+            base_img = BASE_NEUTRAL
         elif state == 'friendly':
-            base_img = BASE_FRIENDLY.convert()
+            base_img = BASE_FRIENDLY
         else:
-            base_img = BASE_HOSTILE.convert()
+            base_img = BASE_HOSTILE
         base_img = pygame.transform.scale(base_img, (cell_size, cell_size))
         self.image = base_img
         self.image.set_colorkey(BLACK)

@@ -38,10 +38,21 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         self.player = Player(True)
         self.ai = AI(False)
+        self.bases = []
+        for i in range(10):
+            x = random.randint(0, self.cells_x - 1) * self.cell_size
+            y = random.randint(0, self.cells_y - 1) * self.cell_size
+            self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
+        self.friendly_missiles = []
+        self.hostile_missiles = []
+        self.list_all_sprites = [self.player, self.ai, self.bases,
+                                 self.friendly_missiles, self.hostile_missiles]
 
-    # пуск противокорабельной ракеты
     def missile_launch(self, destination):
-        self.friendly_missiles.append(MissileFriendly(self.player, True, destination, self.ai, True, self.sound_explosion))
+        """Функция для запуска противокорабельной ракеты"""
+        self.friendly_missiles.append(MissileFriendly(
+            self.player, True, destination, self.ai, True,
+            self.sound_explosion))
         self.sound_fire_VLS.play()
 
     def movement(self, destination, game_obj, screen=None):
@@ -121,30 +132,37 @@ class Run:
             pause_screen.blit(SC_TEXT, POS)
             pygame.display.flip()
 
-    # отрисовка тумана войны
     def fog_of_war(self, ai, player, bases, screen):
         # если противник обнаружен ракетой
         missile_tracking = False
         for missile in self.friendly_missiles:
-            # если цель в радиусе обнаружения ракеты, то поднимается соответствующий флаг
-            if (sqrt((missile.rect.centerx - self.ai.rect.centerx) ** 2 + (missile.rect.centery - self.ai.rect.centery) ** 2)) \
+            # если цель в радиусе обнаружения ракеты, то
+            # поднимается соответствующий флаг
+            if (sqrt((missile.rect.centerx - ai.rect.centerx) ** 2 + (
+                missile.rect.centery - ai.rect.centery) ** 2)) \
                     <= 150:
                 missile_tracking = True
-            # если ракета исчерпала свой ресурс, она падает в море и спрайт удаляется
+            # если ракета исчерпала свой ресурс, она падает в море и
+            # спрайт удаляется
             if missile.total_ticks >= 10:
                 self.friendly_missiles.remove(missile)
                 self.all_sprites.remove(missile)
             # отрисовка радиуса обнаружения ракеты
             if not missile.activated:
-                pygame.draw.line(screen, BLUE, (missile.rect.centerx, missile.rect.centery),
+                pygame.draw.line(screen, BLUE,
+                                 (missile.rect.centerx, missile.rect.centery),
                                  (missile.activation[0], missile.activation[1]))
-            pygame.draw.circle(screen, BLUE, (missile.rect.centerx, missile.rect.centery), 150, 1)
+            pygame.draw.circle(screen, BLUE,
+                               (missile.rect.centerx, missile.rect.centery),
+                               150, 1)
 
         # отрисовка спрайта противника
-        if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
+        if (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (
+            ai.rect.centery - player.rect.centery) ** 2)) \
                 <= 300 or missile_tracking:
             ai.visibility = True
-            pygame.draw.circle(screen, RED, (ai.rect.centerx, ai.rect.centery), 300, 1)
+            pygame.draw.circle(screen, RED,
+                               (ai.rect.centerx, ai.rect.centery), 300, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
@@ -158,7 +176,8 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (ai.rect.centery - player.rect.centery) ** 2)) \
+        elif (sqrt((ai.rect.centerx - player.rect.centerx) ** 2 + (
+            ai.rect.centery - player.rect.centery) ** 2)) \
                 > 300 or missile_tracking:
             ai.visibility = False
             self.ai_detected = False
@@ -182,8 +201,10 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, BLUE, (self.player.rect.centerx, self.player.rect.centery), 300, 1)
-        pygame.draw.circle(screen, BLUE, (self.player.rect.centerx, self.player.rect.centery), 1050, 1)
+        pygame.draw.circle(screen, BLUE,
+                           (player.rect.centerx, player.rect.centery), 300, 1)
+        pygame.draw.circle(screen, BLUE,
+                           (player.rect.centerx, player.rect.centery), 1050, 1)
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -196,20 +217,9 @@ class Run:
         clock = pygame.time.Clock()
         fps = 60
 
-        # добавление спрайтов в группы
-        bases = []
-        self.friendly_missiles = []
-        self.hostile_missiles = []
-        for i in range(10):
-            x = random.randint(0, self.cells_x - 1) * self.cell_size
-            y = random.randint(0, self.cells_y - 1) * self.cell_size
-            bases.append(Base(x, y, 'neutral', True, self.cell_size))
-
         destination_player = self.player.rect.center
         destination_missile = self.player.rect.center
         start = True
-
-        self.list_all_sprites = [self.player, self.ai, bases, self.friendly_missiles, self.hostile_missiles]
 
         # основной игровой цикл
         while self.running:
@@ -229,9 +239,9 @@ class Run:
                 self.missile_launch(destination_missile)
                 self.missile = False
             dest = self.movement(destination_player, self.player, screen)
-            self.base_taken(dest, destination_player, bases)
-            self.destination_ai(bases)
-            self.fog_of_war(self.ai, self.player, bases, screen)
+            self.base_taken(dest, destination_player, self.bases)
+            self.destination_ai(self.bases)
+            self.fog_of_war(self.ai, self.player, self.bases, screen)
             self.set_pause(screen, pause_screen)
             clock.tick(fps)
             if start:
