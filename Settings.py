@@ -7,6 +7,7 @@ pygame.mixer.init()
 WIDTH = 1400
 HEIGHT = 800
 CELL_SIZE = 75
+pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -32,6 +33,8 @@ SETTINGS_BUTTON = pygame.image.load('data/img/settings.png')
 QUIT_BUTTON = pygame.image.load('data/img/quit.png')
 BASES_LOST_IMAGE = pygame.image.load('data/img/all_bases_lost.png')
 MAIN_MENU_BUTTON = pygame.image.load('data/img/main_menu.png')
+MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
+GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

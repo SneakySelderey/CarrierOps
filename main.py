@@ -5,8 +5,8 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
-import menu_buttons
-import gameover_buttons
+from menu_buttons import *
+from gameover_buttons import *
 import game_buttons
 from Settings import *
 
@@ -57,12 +57,12 @@ class Run:
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
 
-        self.menu_sprites.add(menu_buttons.Title(), menu_buttons.NewGame(self),
-                              menu_buttons.Load(self), menu_buttons.Settings(self),
-                              menu_buttons.Quit(self))
-        self.gameover_sprites.add(gameover_buttons.MainMenu(self),
-                                  gameover_buttons.Quit(self),
-                                  gameover_buttons.BasesLost(self))
+        self.menu_sprites.add(Title(), NewGame(self),
+                              Load(self), Settings(self),
+                              Quit(self))
+        self.gameover_sprites.add(MainMenu(self),
+                                  Quit(self),
+                                  BasesLost(self))
         self.game_sprites.add(game_buttons.MainMenu(self))
 
     def missile_launch(self, destination):
@@ -214,18 +214,10 @@ class Run:
         clock = pygame.time.Clock()
         fps = 60
 
-        #destination_player = self.player.rect.center
-
-        screen.fill(pygame.Color('gray5'))
-
-        self.menu_screen = True
-        self.game_screen = False
-        self.gameover_screen = False
-
         # основной игровой цикл
         while self.running:
             # цикл для стартового меню
-            while self.menu_screen:
+            if self.menu_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
@@ -234,14 +226,12 @@ class Run:
                         if event.button == 1:
                             self.menu_sprites.update(event.pos)
 
-                screen.blit(pygame.image.load('data/img/menu_background.png'), (0, 0))
+                screen.blit(MENU_BACKGROUND, (0, 0))
 
                 self.menu_sprites.draw(screen)
 
-                clock.tick(fps)
-                pygame.display.flip()
             # цикл для игрового экрана
-            while self.game_screen:
+            if self.game_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
@@ -270,10 +260,9 @@ class Run:
                         self.ai.update()
                 else:
                     pause_screen.blit(SC_TEXT, POS)
-                pygame.display.flip()
-                clock.tick(fps)
+
             # цикл для экрана поражения игрока
-            while self.gameover_screen:
+            if self.gameover_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
@@ -282,12 +271,12 @@ class Run:
                         if event.button == 1:
                             self.gameover_sprites.update(event.pos)
 
-                screen.blit(pygame.image.load('data/img/gameover_background.png'), (0, 0))
+                screen.blit(GAMEOVER_SCREEN, (0, 0))
 
                 self.gameover_sprites.draw(screen)
 
-                clock.tick(fps)
-                pygame.display.flip()
+            clock.tick(fps)
+            pygame.display.flip()
 
 
 if __name__ == '__main__':
