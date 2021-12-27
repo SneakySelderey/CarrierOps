@@ -36,6 +36,9 @@ class Run:
         self.ai_detected = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
+        self.menu_screen = True
+        self.game_screen = False
+        self.gameover_screen = False
 
         self.all_sprites = pygame.sprite.Group()
         self.player = Player(True)
