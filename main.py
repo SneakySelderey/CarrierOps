@@ -41,6 +41,10 @@ class Run:
         self.gameover_screen = False
 
         self.all_sprites = pygame.sprite.Group()
+        self.menu_sprites = pygame.sprite.Group()
+        self.gameover_sprites = pygame.sprite.Group()
+        self.game_sprites = pygame.sprite.Group()
+
         self.player = Player(True)
         self.ai = AI(False)
         self.bases = []
@@ -53,6 +57,13 @@ class Run:
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
 
+        self.menu_sprites.add(menu_buttons.Title((WIDTH, HEIGHT)), menu_buttons.NewGame((WIDTH, HEIGHT), self),
+                              menu_buttons.Load((WIDTH, HEIGHT), self), menu_buttons.Settings((WIDTH, HEIGHT), self),
+                              menu_buttons.Quit((WIDTH, HEIGHT), self))
+        self.gameover_sprites.add(gameover_buttons.MainMenu((WIDTH, HEIGHT), self),
+                                  gameover_buttons.Quit((WIDTH, HEIGHT), self),
+                                  gameover_buttons.BasesLost((WIDTH, HEIGHT), self))
+        self.game_sprites.add(game_buttons.MainMenu((WIDTH, HEIGHT), self))
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -200,18 +211,6 @@ class Run:
         pygame.display.set_caption("CarrierOps")
         clock = pygame.time.Clock()
         fps = 60
-
-        # добавление спрайтов в группы
-        self.menu_sprites = pygame.sprite.Group()
-        self.gameover_sprites = pygame.sprite.Group()
-        self.game_sprites = pygame.sprite.Group()
-
-        self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
-                              menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
-                              menu_buttons.Quit(size, self))
-        self.gameover_sprites.add(gameover_buttons.MainMenu(size, self), gameover_buttons.Quit(size, self),
-                                  gameover_buttons.BasesLost(size, self))
-        self.game_sprites.add(game_buttons.MainMenu(size, self))
 
         destination_player = self.player.rect.center
 
