@@ -1,26 +1,29 @@
-import pygame
+from Settings import *
 
 
 class Title(pygame.sprite.Sprite):
-    def __init__(self, size):
+    """Класс с названием игры"""
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/title.png')
+        img = TITLE_IMAGE
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, size[1] // 5
+        self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
 
     def update(self, pos):
+        # сюда можно впихнуть пасхалку
         if self.rect.collidepoint(pos[0], pos[1]):
             pass
 
 
 class NewGame(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой начала новой игры"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/new_campaign.png')
+        img = NEW_CAMPAIGN_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 300
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 300
         self.run = run
 
     def update(self, pos):
@@ -30,12 +33,13 @@ class NewGame(pygame.sprite.Sprite):
 
 
 class Load(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой загрузки сохранения"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/load.png')
+        img = LOAD_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 400
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 400
         self.run = run
 
     def update(self, pos):
@@ -44,12 +48,13 @@ class Load(pygame.sprite.Sprite):
 
 
 class Settings(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой настроек"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/settings.png')
+        img = SETTINGS_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 500
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 500
 
     def update(self, pos):
         if self.rect.collidepoint(pos[0], pos[1]):
@@ -57,12 +62,13 @@ class Settings(pygame.sprite.Sprite):
 
 
 class Quit(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой выхода из игры"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/quit.png')
+        img = QUIT_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 600
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 600
         self.run = run
 
     def update(self, pos):

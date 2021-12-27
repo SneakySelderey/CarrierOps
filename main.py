@@ -1,4 +1,3 @@
-import pygame
 import random
 from math import hypot
 from board import Board
@@ -57,13 +56,13 @@ class Run:
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
 
-        self.menu_sprites.add(menu_buttons.Title((WIDTH, HEIGHT)), menu_buttons.NewGame((WIDTH, HEIGHT), self),
-                              menu_buttons.Load((WIDTH, HEIGHT), self), menu_buttons.Settings((WIDTH, HEIGHT), self),
-                              menu_buttons.Quit((WIDTH, HEIGHT), self))
-        self.gameover_sprites.add(gameover_buttons.MainMenu((WIDTH, HEIGHT), self),
-                                  gameover_buttons.Quit((WIDTH, HEIGHT), self),
-                                  gameover_buttons.BasesLost((WIDTH, HEIGHT), self))
-        self.game_sprites.add(game_buttons.MainMenu((WIDTH, HEIGHT), self))
+        self.menu_sprites.add(menu_buttons.Title(), menu_buttons.NewGame(self),
+                              menu_buttons.Load(self), menu_buttons.Settings(self),
+                              menu_buttons.Quit(self))
+        self.gameover_sprites.add(gameover_buttons.MainMenu(self),
+                                  gameover_buttons.Quit(self),
+                                  gameover_buttons.BasesLost(self))
+        self.game_sprites.add(game_buttons.MainMenu(self))
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""

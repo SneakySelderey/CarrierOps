@@ -1,13 +1,14 @@
-import pygame
+from Settings import *
 
 
 class BasesLost(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с надписью о том, что все базы захвачены противником"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/all_bases_lost.png')
+        img = BASES_LOST_IMAGE
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 300
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 300
         self.run = run
 
     def update(self, pos):
@@ -16,12 +17,13 @@ class BasesLost(pygame.sprite.Sprite):
 
 
 class MainMenu(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой, ведущей в главное меню"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/main_menu.png')
+        img = MAIN_MENU_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 500
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 500
         self.run = run
 
     def update(self, pos):
@@ -30,12 +32,13 @@ class MainMenu(pygame.sprite.Sprite):
 
 
 class Quit(pygame.sprite.Sprite):
-    def __init__(self, size, run):
+    """Класс с кнопкой выхода из игры"""
+    def __init__(self, run):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('data/img/quit.png')
+        img = QUIT_BUTTON
         self.image = img
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = size[0] // 2, 600
+        self.rect.centerx, self.rect.centery = WIDTH // 2, 600
         self.run = run
 
     def update(self, pos):

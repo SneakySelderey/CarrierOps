@@ -25,6 +25,13 @@ BASE_HOSTILE = pygame.image.load('data/img/base_hostile.png')
 BASE_NEUTRAL = pygame.image.load('data/img/base_neutral.png')
 MISSILE_FRIENDLY = pygame.image.load('data/img/missile_friendly.png')
 MISSILE_HOSTILE = pygame.image.load('data/img/missile_hostile.png')
+TITLE_IMAGE = pygame.image.load('data/img/title.png')
+NEW_CAMPAIGN_BUTTON = pygame.image.load('data/img/new_campaign.png')
+LOAD_BUTTON = pygame.image.load('data/img/load.png')
+SETTINGS_BUTTON = pygame.image.load('data/img/settings.png')
+QUIT_BUTTON = pygame.image.load('data/img/quit.png')
+BASES_LOST_IMAGE = pygame.image.load('data/img/all_bases_lost.png')
+MAIN_MENU_BUTTON = pygame.image.load('data/img/main_menu.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
