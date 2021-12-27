@@ -51,8 +51,7 @@ class Run:
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         self.friendly_missiles.append(MissileFriendly(
-            self.player, True, destination, self.ai, True,
-            self.sound_explosion))
+            self.player, True, destination, self.ai, True))
         self.sound_fire_VLS.play()
 
     def move(self, destination, game_obj, screen=None):

@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         image = PLAYER_IMAGE
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
-            x * x // (70 + CELL_SIZE), y * y // (70 + CELL_SIZE)))
+            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = [40, randint(40, HEIGHT - 40)]
