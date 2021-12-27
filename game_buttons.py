@@ -13,4 +13,6 @@ class MainMenu(pygame.sprite.Sprite):
 
     def update(self, pos):
         if self.rect.collidepoint(pos[0], pos[1]):
-            self.run.main()
+            for sound in ALL_SOUNDS:
+                sound.stop()
+                self.run.__init__()

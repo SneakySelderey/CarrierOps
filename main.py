@@ -78,7 +78,7 @@ class Run:
         stop_x = game_obj.speedx == 0
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
-        if screen is not None:
+        if screen is not None and self.player.rect.center != destination:
             pygame.draw.circle(
                 screen, BLUE, (destination[0], destination[1]), 10)
         return [stop_x, stop_y]
@@ -103,6 +103,8 @@ class Run:
         except ValueError:
             self.game_screen = False
             self.gameover_screen = True
+            for sound in ALL_SOUNDS:
+                sound.stop()
 
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""

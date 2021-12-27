@@ -39,6 +39,7 @@ EXPLOSION = pygame.mixer.Sound('data/sound/explosion.wav')
 FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
+ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE]
 
 # Для меню паузы
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
