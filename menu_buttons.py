@@ -1,13 +1,15 @@
 from Settings import *
+import pygame
 
 
 class Title(pygame.sprite.Sprite):
     """Класс с названием игры"""
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        img = TITLE_IMAGE
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('CARRIER OPERATIONS', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
 
     def update(self, pos):
@@ -19,10 +21,11 @@ class Title(pygame.sprite.Sprite):
 class NewGame(pygame.sprite.Sprite):
     """Класс с кнопкой начала новой игры"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = NEW_CAMPAIGN_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('NEW CAMPAIGN', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 300
         self.run = run
 
@@ -35,10 +38,11 @@ class NewGame(pygame.sprite.Sprite):
 class Load(pygame.sprite.Sprite):
     """Класс с кнопкой загрузки сохранения"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = LOAD_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('LOAD SAVE', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 400
         self.run = run
 
@@ -50,11 +54,12 @@ class Load(pygame.sprite.Sprite):
 class Settings(pygame.sprite.Sprite):
     """Класс с кнопкой настроек"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = SETTINGS_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.centery = WIDTH // 2, 500
+        super().__init__()
+        txt = MAIN_FONT.render('SETTINGS', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
+        self.rect.center = WIDTH // 2, 500
 
     def update(self, pos):
         if self.rect.collidepoint(pos[0], pos[1]):
@@ -64,10 +69,11 @@ class Settings(pygame.sprite.Sprite):
 class Quit(pygame.sprite.Sprite):
     """Класс с кнопкой выхода из игры"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = QUIT_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 600
         self.run = run
 

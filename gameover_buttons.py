@@ -4,10 +4,11 @@ from Settings import *
 class BasesLost(pygame.sprite.Sprite):
     """Класс с надписью о том, что все базы захвачены противником"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = BASES_LOST_IMAGE
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES.", True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 300
         self.run = run
 
@@ -19,10 +20,11 @@ class BasesLost(pygame.sprite.Sprite):
 class MainMenu(pygame.sprite.Sprite):
     """Класс с кнопкой, ведущей в главное меню"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = MAIN_MENU_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('MAIN MENU', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 500
         self.run = run
 
@@ -34,10 +36,11 @@ class MainMenu(pygame.sprite.Sprite):
 class Quit(pygame.sprite.Sprite):
     """Класс с кнопкой выхода из игры"""
     def __init__(self, run):
-        pygame.sprite.Sprite.__init__(self)
-        img = QUIT_BUTTON
-        self.image = img
-        self.rect = self.image.get_rect()
+        super().__init__()
+        txt = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, 600
         self.run = run
 
