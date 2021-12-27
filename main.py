@@ -33,7 +33,6 @@ class Run:
         self.ai_detected = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-        self.missile = False
 
         self.all_sprites = pygame.sprite.Group()
         self.player = Player(True)
@@ -113,23 +112,8 @@ class Run:
                     i.update('hostile')
                     self.hostile_bases.append([base_x, base_y])
 
-    def set_pause(self, screen, pause_screen):
-        """Функиця, ставящая игру на паузу"""
-        if not self.pause:
-            self.all_sprites.update()
-            if not self.ai_detected:
-                self.ai.update()
-            pygame.display.flip()
-            screen.fill(GRAY5)
-            self.board.render(screen)
-            self.all_sprites.draw(screen)
-        else:
-            self.board.render(screen)
-            self.all_sprites.draw(screen)
-            pause_screen.blit(SC_TEXT, POS)
-            pygame.display.flip()
-
     def fog_of_war(self, screen):
+        """Отрисовка тумана войны"""
         # если противник обнаружен ракетой
         missile_tracking = False
         ai_x, ai_y = self.ai.rect.center
@@ -211,7 +195,6 @@ class Run:
         fps = 60
 
         destination_player = self.player.rect.center
-        destination_missile = self.player.rect.center
 
         # основной игровой цикл
         while self.running:
@@ -222,19 +205,24 @@ class Run:
                     if event.button == 1:
                         destination_player = event.pos
                     if event.button == 3:
-                        destination_missile = event.pos
-                        self.missile = True
+                        self.missile_launch(event.pos)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
-            if self.missile:
-                self.missile_launch(destination_missile)
-                self.missile = False
+            screen.fill(GRAY5)
+            self.board.render(screen)
+            self.all_sprites.draw(screen)
             goal = self.move(destination_player, self.player, screen)
             self.base_taken(goal, destination_player)
             self.destination_ai()
             self.fog_of_war(screen)
-            self.set_pause(screen, pause_screen)
+            if not self.pause:
+                self.all_sprites.update()
+                if not self.ai_detected:
+                    self.ai.update()
+            else:
+                pause_screen.blit(SC_TEXT, POS)
+            pygame.display.flip()
             clock.tick(fps)
 
 
