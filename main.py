@@ -6,6 +6,9 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
+import menu_buttons
+import gameover_buttons
+import game_buttons
 from Settings import *
 
 
@@ -46,6 +49,7 @@ class Run:
         self.hostile_missiles = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
+
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -194,38 +198,162 @@ class Run:
         clock = pygame.time.Clock()
         fps = 60
 
+        # добавление спрайтов в группы
+        self.menu_sprites = pygame.sprite.Group()
+        self.gameover_sprites = pygame.sprite.Group()
+        self.game_sprites = pygame.sprite.Group()
+
+        self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
+                              menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
+                              menu_buttons.Quit(size, self))
+        self.gameover_sprites.add(gameover_buttons.MainMenu(size, self), gameover_buttons.Quit(size, self),
+                                  gameover_buttons.BasesLost(size, self))
+        self.game_sprites.add(game_buttons.MainMenu(size, self))
+
         destination_player = self.player.rect.center
+
+        screen.fill(pygame.Color('gray5'))
 
         # основной игровой цикл
         while self.running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and not self.pause:
-                    if event.button == 1:
-                        destination_player = event.pos
-                    if event.button == 3:
-                        self.missile_launch(event.pos)
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_p:
-                        self.pause = not self.pause
-            screen.fill(GRAY5)
-            self.board.render(screen)
-            self.all_sprites.draw(screen)
-            goal = self.move(destination_player, self.player, screen)
-            self.base_taken(goal, destination_player)
-            self.destination_ai()
-            self.fog_of_war(screen)
-            if not self.pause:
-                self.all_sprites.update()
-                if not self.ai_detected:
-                    self.ai.update()
-            else:
-                pause_screen.blit(SC_TEXT, POS)
-            pygame.display.flip()
-            clock.tick(fps)
 
+            while self.menu_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.menu_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.menu_sprites.update(event.pos)
 
+                screen.blit(pygame.image.load('data/img/menu_background.png'), (0, 0))
+
+                self.menu_sprites.draw(screen)
+
+                clock.tick(fps)
+                pygame.display.flip()
+
+            while self.game_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.game_screen = False
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            destination_player = event.pos
+                            self.game_sprites.update(event.pos)
+                        if event.button == 3:
+                            destination_missile = event.pos
+                            self.missile = True
+
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_p:
+                            self.pause = not self.pause
+
+                if self.missile:
+                    self.missile_launch(destination_missile, player, bases, ai)
+                    self.missile = False
+
+                dest = self.movement_player(destination_player, player, screen)
+
+                self.base_taken(dest, destination_player, bases, player, ai)
+
+                self.destination_ai(bases, ai, player, fps)
+
+                self.fog_of_war(ai, player, bases, screen)
+
+                self.set_pause(screen, pause_screen, board, size, ai)
+
+                self.game_sprites.draw(screen)
+
+                clock.tick(fps)
+
+                if start:
+                    self.pause = True
+                    start = False
+
+            while self.gameover_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.gameover_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.gameover_sprites.update(event.pos)
+
+                screen.blit(pygame.image.load('data/img/gameover_background.png'), (0, 0))
+
+                self.gameover_sprites.draw(screen)
+
+                clock.tick(fps)
+                pygame.display.flip()
+
+            while self.menu_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.menu_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.menu_sprites.update(event.pos)
+
+                screen.blit(pygame.image.load('data/img/menu_background.png'), (0, 0))
+
+                self.menu_sprites.draw(screen)
+
+                clock.tick(fps)
+                pygame.display.flip()
+                
+            while self.game_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.game_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN and not self.pause:
+                        if event.button == 1:
+                            destination_player = event.pos
+                            self.game_sprites.update(event.pos)
+                        if event.button == 3:
+                            self.missile_launch(event.pos)
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_p:
+                            self.pause = not self.pause
+                screen.fill(GRAY5)
+                self.board.render(screen)
+                self.all_sprites.draw(screen)
+                goal = self.move(destination_player, self.player, screen)
+                self.base_taken(goal, destination_player)
+                self.destination_ai()
+                self.fog_of_war(screen)
+                self.game_sprites.draw(screen)
+                
+                if not self.pause:
+                    self.all_sprites.update()
+                    if not self.ai_detected:
+                        self.ai.update()
+                else:
+                    pause_screen.blit(SC_TEXT, POS)
+                pygame.display.flip()
+                clock.tick(fps)
+             
+            while self.gameover_screen:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.running = False
+                        self.gameover_screen = False
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.gameover_sprites.update(event.pos)
+
+                screen.blit(pygame.image.load('data/img/gameover_background.png'), (0, 0))
+
+                self.gameover_sprites.draw(screen)
+
+                clock.tick(fps)
+                pygame.display.flip()
+
+                
 if __name__ == '__main__':
     game = Run()
     game.main()
