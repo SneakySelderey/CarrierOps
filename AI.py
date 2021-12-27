@@ -1,21 +1,24 @@
 import pygame
+from random import randint
+from Settings import BLACK, AI_IMAGE, WIDTH, HEIGHT, CELL_SIZE
 
 
-# класс, определяющий параметры и спрайт ИИ
 class AI(pygame.sprite.Sprite):
-    def __init__(self, board, visibility, cell_size):
-        pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('data/img/AI_cursor.png').convert()
-        self.image = player_img
-        self.image.set_colorkey(pygame.Color('black'))
+    """Класс, определяющий параметры и спрайт ИИ"""
+    def __init__(self, visibility):
+        super().__init__()
+        image = AI_IMAGE
+        x, y = image.get_size()
+        self.image = pygame.transform.scale(image, (
+            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.center = [cell_size * board.width, cell_size * board.height]
+        self.rect.center = [WIDTH, randint(0, HEIGHT)]
         self.speedx = 0
         self.speedy = 0
-
         self.visibility = visibility
 
-    # обновление позиции спрайта
     def update(self):
+        """Обновление позиции спрайта"""
         self.rect.x += self.speedx
         self.rect.y += self.speedy

@@ -1,21 +1,25 @@
 import pygame
+from random import randint
+from Settings import BLACK, PLAYER_IMAGE, HEIGHT, CELL_SIZE
 
 
-# класс, определяющий параметеры и спрайт игрока
 class Player(pygame.sprite.Sprite):
+    """Класс, определяющий параметры и спрайт игрока"""
     def __init__(self, visibility):
-        pygame.sprite.Sprite.__init__(self)
-        player_img = pygame.image.load('data/img/Player_cursor.png').convert()
-        self.image = player_img
-        self.image.set_colorkey(pygame.Color('black'))
+        super().__init__()
+        image = PLAYER_IMAGE
+        x, y = image.get_size()
+        self.image = pygame.transform.scale(image, (
+            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.center = [25, 25]
+        self.rect.center = [40, randint(40, HEIGHT - 40)]
         self.speedx = 0
         self.speedy = 0
 
         self.visibility = visibility
 
-    # обновление позиции спрайта
     def update(self):
+        """Обновление позиции игрока"""
         self.rect.x += self.speedx
         self.rect.y += self.speedy
