@@ -8,6 +8,7 @@ from base import Base
 from friendly_missile import MissileFriendly
 import menu_buttons
 import gameover_buttons
+import game_buttons
 
 
 # класс, в котором обрабатываются все основные игровые события
@@ -221,12 +222,14 @@ class Run:
         self.all_sprites = pygame.sprite.Group()
         self.menu_sprites = pygame.sprite.Group()
         self.gameover_sprites = pygame.sprite.Group()
+        self.game_sprites = pygame.sprite.Group()
 
         self.menu_sprites.add(menu_buttons.Title(size), menu_buttons.NewGame(size, self),
                               menu_buttons.Load(size, self), menu_buttons.Settings(size, self),
                               menu_buttons.Quit(size, self))
         self.gameover_sprites.add(gameover_buttons.MainMenu(size, self), gameover_buttons.Quit(size, self),
                                   gameover_buttons.BasesLost(size, self))
+        self.game_sprites.add(game_buttons.MainMenu(size, self))
 
         player = Player(True)
         bases = []
@@ -294,6 +297,7 @@ class Run:
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
                             destination_player = event.pos
+                            self.game_sprites.update(event.pos)
                         if event.button == 3:
                             destination_missile = event.pos
                             self.missile = True
@@ -315,6 +319,8 @@ class Run:
                 self.fog_of_war(ai, player, bases, screen)
 
                 self.set_pause(screen, pause_screen, board, size, ai)
+
+                self.game_sprites.draw(screen)
 
                 clock.tick(fps)
 
