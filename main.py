@@ -45,6 +45,7 @@ class Run:
         self.game_sprites = pygame.sprite.Group()
 
         self.player = Player(True)
+        self.destination_player = self.player.rect.center
         self.ai = AI(False)
         self.bases = []
         for i in range(10):
@@ -213,7 +214,7 @@ class Run:
         clock = pygame.time.Clock()
         fps = 60
 
-        destination_player = self.player.rect.center
+        #destination_player = self.player.rect.center
 
         screen.fill(pygame.Color('gray5'))
 
@@ -247,7 +248,7 @@ class Run:
                         self.game_screen = False
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
-                            destination_player = event.pos
+                            self.destination_player = event.pos
                             self.game_sprites.update(event.pos)
                         if event.button == 3:
                             self.missile_launch(event.pos)
@@ -257,8 +258,8 @@ class Run:
                 screen.fill(GRAY5)
                 self.board.render(screen)
                 self.all_sprites.draw(screen)
-                goal = self.move(destination_player, self.player, screen)
-                self.base_taken(goal, destination_player)
+                goal = self.move(self.destination_player, self.player, screen)
+                self.base_taken(goal, self.destination_player)
                 self.destination_ai()
                 self.fog_of_war(screen)
                 self.game_sprites.draw(screen)
@@ -288,7 +289,7 @@ class Run:
                 clock.tick(fps)
                 pygame.display.flip()
 
-                
+
 if __name__ == '__main__':
     game = Run()
     game.main()
