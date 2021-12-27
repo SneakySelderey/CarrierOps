@@ -215,9 +215,13 @@ class Run:
 
         screen.fill(pygame.Color('gray5'))
 
+        self.menu_screen = True
+        self.game_screen = False
+        self.gameover_screen = False
+
         # основной игровой цикл
         while self.running:
-
+            # цикл для стартового меню
             while self.menu_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -233,13 +237,13 @@ class Run:
 
                 clock.tick(fps)
                 pygame.display.flip()
-                
+            # цикл для игрового экрана
             while self.game_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.running = False
                         self.game_screen = False
-                    if event.type == pygame.MOUSEBUTTONDOWN and not self.pause:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
                         if event.button == 1:
                             destination_player = event.pos
                             self.game_sprites.update(event.pos)
@@ -265,7 +269,7 @@ class Run:
                     pause_screen.blit(SC_TEXT, POS)
                 pygame.display.flip()
                 clock.tick(fps)
-             
+            # цикл для экрана поражения игрока
             while self.gameover_screen:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
