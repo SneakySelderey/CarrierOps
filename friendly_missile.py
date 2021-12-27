@@ -1,16 +1,20 @@
 import pygame
 from math import sqrt
+from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE
 
 
-# класс, определяющий параметры и спрайт дружественной противокорабельной ракеты
 class MissileFriendly(pygame.sprite.Sprite):
-    def __init__(self, player, first_pos_check, activation, ai, visibility, sound_explosion):
-        pygame.sprite.Sprite.__init__(self)
-        base_img = pygame.image.load('data/img/missile_friendly.png').convert()
-        self.image = base_img
+    """Класс, определяющий параметры и спрайт дружественной
+    противокорабельной ракеты"""
+    def __init__(self, player, first_pos_check, activation, ai, visibility):
+        super().__init__()
+        image = MISSILE_FRIENDLY
+        x, y = image.get_size()
+        self.image = pygame.transform.scale(image, (
+            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
-        self.sound_explosion = sound_explosion
+        self.sound_explosion = EXPLOSION
         if first_pos_check:
             self.rect.center = [player.rect.centerx, player.rect.centery]
             first_pos_check = False
