@@ -101,8 +101,8 @@ class Run:
             dest = self.move(distance[idx][1], self.ai)
             self.base_lost(dest, distance[idx][1])
         except ValueError:
-            self.running = False
-            print('Вы проиграли!')
+            self.game_screen = False
+            self.gameover_screen = True
 
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""
