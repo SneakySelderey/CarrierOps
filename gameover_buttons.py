@@ -1,50 +1,41 @@
 from Settings import *
+import pygame_gui
+
+
+manager2 = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
+
+
+menu_text = MAIN_FONT.render('MAIN MENU', True, WHITE)
+rect = menu_text.get_rect()
+rect.center = (WIDTH // 2, int(0.625 * HEIGHT))
+rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
+                                          rect.width + 40, rect.height + 40
+MAIN_MENU_BUTTON = pygame_gui.elements.UIButton(
+    relative_rect=rect,
+    text='MAIN MENU',
+    manager=manager2
+)
+
+quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
+rect = quit_text.get_rect()
+rect.center = (WIDTH // 2, int(0.75 * HEIGHT))
+rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
+                                          rect.width + 40, rect.height + 40
+QUIT_BUTTON = pygame_gui.elements.UIButton(
+    relative_rect=rect,
+    text='QUIT TO DESKTOP',
+    manager=manager2
+)
+
+GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON, "MENU": MAIN_MENU_BUTTON}
 
 
 class BasesLost(pygame.sprite.Sprite):
     """Класс с надписью о том, что все базы захвачены противником"""
-    def __init__(self, run):
-        super().__init__()
-        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES.", True, WHITE)
+    def __init__(self, group):
+        super().__init__(group)
+        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES", True, WHITE)
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = WIDTH // 2, 300
-        self.run = run
-
-    def update(self, pos):
-        if self.rect.collidepoint(pos[0], pos[1]):
-            pass
-
-
-class MainMenu(pygame.sprite.Sprite):
-    """Класс с кнопкой, ведущей в главное меню"""
-    def __init__(self, run):
-        super().__init__()
-        txt = MAIN_FONT.render('MAIN MENU', True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = WIDTH // 2, 500
-        self.run = run
-
-    def update(self, pos):
-        if self.rect.collidepoint(pos[0], pos[1]):
-            self.run.__init__()
-
-
-class Quit(pygame.sprite.Sprite):
-    """Класс с кнопкой выхода из игры"""
-    def __init__(self, run):
-        super().__init__()
-        txt = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = WIDTH // 2, 600
-        self.run = run
-
-    def update(self, pos):
-        if self.rect.collidepoint(pos[0], pos[1]):
-            self.run.menu_screen = False
-            self.run.running = False
+        self.rect.centerx, self.rect.centery = WIDTH // 2, int(0.375 * HEIGHT)

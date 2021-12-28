@@ -9,9 +9,11 @@ from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
 from gameover_buttons import *
-from menu_buttons import manager, ELEMENTS, Title
+from menu_buttons import manager, MENU_ELEMENTS, Title
 import game_buttons
 from Settings import *
+
+
 
 
 def terminate():
@@ -30,27 +32,56 @@ def show_menu_screen():
                 terminate()
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == ELEMENTS['QUIT']:
+                    if event.ui_element == MENU_ELEMENTS['QUIT']:
                         terminate()
-                    if event.ui_element == ELEMENTS['NEW_GAME']:
+                    if event.ui_element == MENU_ELEMENTS['NEW_GAME']:
                         return 1
-                    if event.ui_element == ELEMENTS['LOAD']:
+                    if event.ui_element == MENU_ELEMENTS['LOAD']:
                         return 2
-                    if event.ui_element == ELEMENTS['SETTINGS']:
+                    if event.ui_element == MENU_ELEMENTS['SETTINGS']:
                         return 3
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             manager.process_events(event)
         manager.update(delta)
-        menu_screen.blit(background, (0, 0))
-        title_group.draw(menu_screen)
-        manager.draw_ui(menu_screen)
+        screen.blit(background, (0, 0))
+        title_group.draw(screen)
+        manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
 
 def show_setting_screen():
-    pass
+    background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+    while True:
+        pass
+
+
+def show_gameover_screen():
+    """Функция для отрисовки и взаимодействия с экраном проигрыша"""
+    background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
+    while True:
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == GAMEOVER_ELEMENTS['QUIT']:
+                        terminate()
+                    if event.ui_element == GAMEOVER_ELEMENTS['MENU']:
+                        return 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                title_group.update(event.pos)
+            manager2.process_events(event)
+        manager2.update(delta)
+        screen.blit(background, (0, 0))
+        gameover_group.draw(screen)
+        manager2.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 
 
 
@@ -78,13 +109,8 @@ class Run:
         self.ai_detected = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-        self.menu_screen = True
-        self.game_screen = False
-        self.gameover_screen = False
 
         self.all_sprites = pygame.sprite.Group()
-        self.menu_sprites = pygame.sprite.Group()
-        self.gameover_sprites = pygame.sprite.Group()
         self.game_sprites = pygame.sprite.Group()
 
         self.player = Player(True)
@@ -99,10 +125,7 @@ class Run:
         self.hostile_missiles = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
-        self.gameover_sprites.add(MainMenu(self),
-                                  Quit(self),
-                                  BasesLost(self))
-        self.game_sprites.add(game_buttons.MainMenu(self))
+        #self.game_sprites.add(game_buttons.MainMenu(self))
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -141,8 +164,7 @@ class Run:
             dest = self.move(distance[idx][1], self.ai)
             self.base_lost(dest, distance[idx][1])
         except ValueError:
-            self.game_screen = False
-            self.gameover_screen = True
+            self.running = False
             for sound in ALL_SOUNDS:
                 sound.stop()
 
@@ -244,66 +266,37 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
-        pygame.init()
-        pygame.mixer.init()
-        size = WIDTH, HEIGHT
-        screen = pygame.display.set_mode(size)
-        pause_screen = pygame.display.set_mode(size)
-        pygame.display.set_caption("CarrierOps")
-        clock = pygame.time.Clock()
-        fps = 60
-
-        # основной игровой цикл
         while self.running:
-            # цикл для стартового меню
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                    self.game_screen = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        self.destination_player = event.pos
+                        self.game_sprites.update(event.pos)
+                    if event.button == 3:
+                        self.missile_launch(event.pos)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        self.pause = not self.pause
+            screen.fill(GRAY5)
+            self.board.render(screen)
+            self.all_sprites.draw(screen)
+            goal = self.move(self.destination_player, self.player, screen)
+            self.base_taken(goal, self.destination_player)
+            self.destination_ai()
+            self.fog_of_war(screen)
 
-            # цикл для игрового экрана
-            if self.game_screen:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.running = False
-                        self.game_screen = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:
-                            self.destination_player = event.pos
-                            self.game_sprites.update(event.pos)
-                        if event.button == 3:
-                            self.missile_launch(event.pos)
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_p:
-                            self.pause = not self.pause
-                screen.fill(GRAY5)
-                self.board.render(screen)
-                self.all_sprites.draw(screen)
-                goal = self.move(self.destination_player, self.player, screen)
-                self.base_taken(goal, self.destination_player)
-                self.destination_ai()
-                self.fog_of_war(screen)
-                self.game_sprites.draw(screen)
-                
-                if not self.pause:
-                    self.all_sprites.update()
-                    if not self.ai_detected:
-                        self.ai.update()
-                else:
-                    pause_screen.blit(SC_TEXT, POS)
-
-            # цикл для экрана поражения игрока
-            if self.gameover_screen:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.running = False
-                        self.gameover_screen = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:
-                            self.gameover_sprites.update(event.pos)
-
-                screen.blit(GAMEOVER_SCREEN, (0, 0))
-
-                self.gameover_sprites.draw(screen)
-
-            clock.tick(fps)
+            if not self.pause:
+                self.all_sprites.update()
+                if not self.ai_detected:
+                    self.ai.update()
+            else:
+                pause_screen.blit(SC_TEXT, POS)
+            clock.tick(FPS)
             pygame.display.flip()
+        return 1
 
 
 if __name__ == '__main__':
@@ -312,28 +305,38 @@ if __name__ == '__main__':
     size = WIDTH, HEIGHT
     screen = pygame.display.set_mode(size)
     pause_screen = pygame.display.set_mode(size)
-    menu_screen = pygame.display.set_mode(size)
-    settings_screen = pygame.Surface(size)
     pygame.display.set_caption("CarrierOps")
-    title_group = pygame.sprite.Group()
-    Title(title_group)
     clock = pygame.time.Clock()
     FPS = 60
-    game_objects = Run()
-    menu_run, setting_run, game_run = True, False, False
+
+    title_group = pygame.sprite.Group()
+    Title(title_group)
+
+    gameover_group = pygame.sprite.Group()
+    BasesLost(gameover_group)
+
+    menu_run, settings_run, game_run, load_run, gameover_run = False, False, False, False, True
     running = True
+    # Основной мега-цикл
     while running:
-        if menu_run:
+        # Отрисока разных экранов
+        if menu_run:  # Экран меню
             result = show_menu_screen()
+            game_run = result == 1
+            load_run = result == 2
+            settings_run = result == 3
             menu_run = False
-            pygame.draw.rect(screen, RED, (300, 200, 100, 100))
+        if gameover_run:  # Экран после поражения
+            result = show_gameover_screen()
+            gameover_run = False
+            menu_run = result == 1
+        if game_run:
+            game_objects = Run()
+            result = game_objects.main()
+            gameover_run = result == 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
         screen.fill(BLACK)
-        if menu_run:
-            screen.blit(menu_screen, (0, 0))
-        else:
-            screen.blit(GAMEOVER_SCREEN, (0, 0))
         pygame.display.flip()
 
