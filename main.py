@@ -173,10 +173,9 @@ class Run:
             if hypot(air_x - ai_x, air_y - ai_y) <= 250:
                 air_tracking = True
             # если самолет исчерпала свой ресурс, он возвращается на авианосец
-            if aircraft.total_ticks >= 10:
-                pass
-                # self.friendly_aircraft.remove(aircraft)
-                # self.all_sprites.remove(aircraft)
+            if aircraft.delete:
+                self.friendly_aircraft.remove(aircraft)
+                self.all_sprites.remove(aircraft)
             # отрисовка радиуса обнаружения самолета
             pygame.draw.line(screen, BLUE,
                              (air_x, air_y),

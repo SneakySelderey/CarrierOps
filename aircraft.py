@@ -12,23 +12,15 @@ class AircraftFriendly(pygame.sprite.Sprite):
             x * CELL_SIZE // 70, y * CELL_SIZE // 70))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.pos = (player.rect.centerx, player.rect.centery)
-        self.destination = destination
-        self.rect.center = self.pos
+        self.rect.center = [player.rect.centerx, player.rect.centery]
+        self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
+        self.dir = pygame.math.Vector2((destination[0] - player.rect.centerx,
+                                        destination[1] - player.rect.centery)).normalize()
 
         self.visibility = visibility
 
         self.playerx, self.playery = player.rect.centerx, player.rect.centery
         self.ai_x, self.ai_y = ai.rect.center
-
-        self.k = (self.destination[1] - self.pos[1]) / (self.destination[0] - self.pos[0])
-        self.b = self.pos[1] - self.k * self.pos[0]
-
-        # флаги, ответственные за паттерн поиска самолета
-        self.activated = False
-        self.turn_one_side = True
-        self.turn_another_side = False
-        self.first_rotate = True
 
         # три таймера, отсчитывающие время полета самолета
 
@@ -36,7 +28,11 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.speed1 = 50
         self.total_ticks = 0
 
+        self.player = player
         self.ai = ai
+        self.destination = destination
+        self.stop = False
+        self.delete = False
 
     # обновление координат самолета при полете к маршрутной точке
     def update(self):
@@ -48,30 +44,38 @@ class AircraftFriendly(pygame.sprite.Sprite):
         clock1.tick(300)
         self.ticks1 += 1
 
-        if self.pos != self.destination:
-            self.pos = self.pos[0] + 2, self.k * (self.pos[0] + 2) + self.b
-            self.rect.center = self.pos
+        if self.pos != self.destination and not self.stop:
+            self.pos += self.dir * 2
+            x = int(self.pos.x)
+            y = int(self.pos.y)
+            self.rect.center = x, y
 
-        if self.total_ticks >= 10:
-            self.destination = self.playerx, self.playery
+        if self.destination[0] - 10 < self.rect.centerx < self.destination[0] + 10 \
+                and self.destination[1] - 10 < self.rect.centery < self.destination[1]:
+            self.stop = True
+
+        if self.total_ticks >= 15:
+            self.aircraft_return(self.player)
         else:
             self.aircraft_tracking(self.ai)
+
+    def aircraft_return(self, player):
+        try:
+            self.dir = pygame.math.Vector2((player.rect.centerx - self.rect.centerx,
+                                           player.rect.centery - self.rect.centery)).normalize()
+            self.destination = player.rect.centerx, player.rect.centery
+            self.stop = False
+        except ValueError:
+            self.delete = True
 
     # обновление координат самолета при слежении за целью
     def aircraft_tracking(self, ai):
         self.ai_x, self.ai_y = ai.rect.center
-
         try:
             dist_between_air_ai = hypot(self.ai_x - self.rect.centerx, self.ai_y - self.rect.centery)
             if dist_between_air_ai <= 250:
-                if self.pos != self.destination:
-                    self.k = (self.ai.rect.center[1] - self.pos[1]) / (self.ai.rect.center[0] - self.pos[0])
-                    self.b = self.pos[1] - self.k * self.pos[0]
-
-                    self.destination = self.ai.rect.center
-
-            if ai.rect.centerx - 10 < self.rect.centerx < ai.rect.centerx + 10 \
-                    and ai.rect.centery - 10 < self.rect.centery < ai.rect.centery + 10:
-                self.total_ticks = 10
+                self.dir = pygame.math.Vector2((self.ai_x - self.rect.centerx,
+                                                self.ai_y - self.rect.centery)).normalize()
+                self.stop = False
         except ValueError:
-            self.total_ticks = 10
+            pass
