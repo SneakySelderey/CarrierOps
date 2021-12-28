@@ -5,6 +5,7 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
+from aircraft import AircraftFriendly
 from menu_buttons import *
 from gameover_buttons import *
 import game_buttons
@@ -27,6 +28,8 @@ class Run:
         self.sound_fire_VLS = FIRE_VLS
         self.sound_weapon_acquire = WEAPON_ACQUIRE
         self.sound_explosion = EXPLOSION
+        self.takeoff = TAKEOFF
+        self.landing = LANDING
 
         # Флаги
         self.running = True
@@ -54,8 +57,9 @@ class Run:
             self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
         self.friendly_missiles = []
         self.hostile_missiles = []
+        self.friendly_aircraft = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
-                                 self.friendly_missiles, self.hostile_missiles]
+                                 self.friendly_missiles, self.hostile_missiles, self.friendly_aircraft]
 
         self.menu_sprites.add(Title(), NewGame(self),
                               Load(self), Settings(self),
@@ -70,6 +74,10 @@ class Run:
         self.friendly_missiles.append(MissileFriendly(
             self.player, True, destination, self.ai, True))
         self.sound_fire_VLS.play()
+
+    def aircraft_launch(self, destination):
+        self.friendly_aircraft.append(AircraftFriendly(self.player, destination, self.ai, True))
+        self.takeoff.play()
 
     def move(self, destination, game_obj, screen=None):
         """Движание игрока или ИИ"""
@@ -159,9 +167,30 @@ class Run:
                                (missile_x, missile_y),
                                150, 1)
 
+        # если противник обнаружен самолетом
+        air_tracking = False
+        for aircraft in self.friendly_aircraft:
+            air_x, air_y = aircraft.rect.center
+            # если цель в радиусе обнаружения самолета, то
+            # поднимается соответствующий флаг
+            if hypot(air_x - ai_x, air_y - ai_y) <= 250:
+                air_tracking = True
+            # если самолет исчерпала свой ресурс, он возвращается на авианосец
+            if aircraft.delete:
+                self.friendly_aircraft.remove(aircraft)
+                self.all_sprites.remove(aircraft)
+            # отрисовка радиуса обнаружения самолета
+            pygame.draw.line(screen, BLUE,
+                             (air_x, air_y),
+                             (aircraft.destination[0],
+                              aircraft.destination[1]))
+            pygame.draw.circle(screen, BLUE,
+                               (air_x, air_y),
+                               250, 1)
+
         # отрисовка спрайта противника
         dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= 300 or missile_tracking:
+        if dist_between_ai_player <= 300 or missile_tracking or air_tracking:
             self.ai.visibility = True
             pygame.draw.circle(screen, RED, (ai_x, ai_y), 300, 1)
             self.ai_detected = True
@@ -177,7 +206,7 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif dist_between_ai_player > 300 and not missile_tracking:
+        elif dist_between_ai_player > 300 and not missile_tracking and not air_tracking:
             self.ai.visibility = False
             self.ai_detected = False
             self.play_new_contact = True
@@ -240,6 +269,8 @@ class Run:
                         if event.button == 1:
                             self.destination_player = event.pos
                             self.game_sprites.update(event.pos)
+                        if event.button == 2:
+                            self.aircraft_launch(event.pos)
                         if event.button == 3:
                             self.missile_launch(event.pos)
                     if event.type == pygame.KEYDOWN:
