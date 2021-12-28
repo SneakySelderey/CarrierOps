@@ -1,3 +1,6 @@
+import pygame
+import pygame_gui
+import sys
 import random
 from math import hypot
 from board import Board
@@ -5,10 +8,53 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
-from menu_buttons import *
 from gameover_buttons import *
+from menu_buttons import manager, ELEMENTS, Title
 import game_buttons
 from Settings import *
+
+
+def terminate():
+    """"Функция для завершения работы программы"""
+    pygame.quit()
+    sys.exit()
+
+
+def show_menu_screen():
+    """Фукнция для отрисовки основного меню и для работы с ним"""
+    background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+    menu_screen.blit(background, (0, 0))
+    manager.draw_ui(screen)
+    while True:
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == ELEMENTS['QUIT']:
+                        terminate()
+                    if event.ui_element == ELEMENTS['NEW_GAME']:
+                        return 1
+                    if event.ui_element == ELEMENTS['LOAD']:
+                        return 2
+                    if event.ui_element == ELEMENTS['SETTINGS']:
+                        return 3
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                title_group.update(event.pos)
+            manager.process_events(event)
+
+        manager.update(delta)
+        menu_screen.blit(background, (0, 0))
+        title_group.draw(menu_screen)
+        manager.draw_ui(menu_screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def show_setting_screen():
+    pass
+
 
 
 class Run:
@@ -56,10 +102,6 @@ class Run:
         self.hostile_missiles = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
-
-        self.menu_sprites.add(Title(), NewGame(self),
-                              Load(self), Settings(self),
-                              Quit(self))
         self.gameover_sprites.add(MainMenu(self),
                                   Quit(self),
                                   BasesLost(self))
@@ -217,18 +259,6 @@ class Run:
         # основной игровой цикл
         while self.running:
             # цикл для стартового меню
-            if self.menu_screen:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.running = False
-                        self.menu_screen = False
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 1:
-                            self.menu_sprites.update(event.pos)
-
-                screen.blit(MENU_BACKGROUND, (0, 0))
-
-                self.menu_sprites.draw(screen)
 
             # цикл для игрового экрана
             if self.game_screen:
@@ -280,5 +310,33 @@ class Run:
 
 
 if __name__ == '__main__':
-    game = Run()
-    game.main()
+    pygame.init()
+    pygame.mixer.init()
+    size = WIDTH, HEIGHT
+    screen = pygame.display.set_mode(size)
+    pause_screen = pygame.display.set_mode(size)
+    menu_screen = pygame.display.set_mode(size)
+    settings_screen = pygame.Surface(size)
+    pygame.display.set_caption("CarrierOps")
+    title_group = pygame.sprite.Group()
+    Title(title_group)
+    clock = pygame.time.Clock()
+    FPS = 60
+    game_objects = Run()
+    menu_run, setting_run, game_run = True, False, False
+    running = True
+    while running:
+        if menu_run:
+            result = show_menu_screen()
+            menu_run = False
+            if result == 1:
+                result = show_setting_screen()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+        screen.fill(BLACK)
+        if menu_run:
+            screen.blit(menu_screen, (0, 0))
+        else:
+            screen.blit(GAMEOVER_SCREEN, (0, 0))
+
