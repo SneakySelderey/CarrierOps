@@ -56,7 +56,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
                 and self.destination[1] - 10 < self.rect.centery < self.destination[1]:
             self.stop = True
 
-        if self.total_ticks >= 15:
+        if self.total_ticks >= 30:
             self.aircraft_return(self.player)
         else:
             self.aircraft_tracking(self.ai)
