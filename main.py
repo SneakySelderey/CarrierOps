@@ -174,8 +174,9 @@ class Run:
                 air_tracking = True
             # если самолет исчерпала свой ресурс, он возвращается на авианосец
             if aircraft.total_ticks >= 10:
-                self.friendly_aircraft.remove(aircraft)
-                self.all_sprites.remove(aircraft)
+                pass
+                # self.friendly_aircraft.remove(aircraft)
+                # self.all_sprites.remove(aircraft)
             # отрисовка радиуса обнаружения самолета
             pygame.draw.line(screen, BLUE,
                              (air_x, air_y),
