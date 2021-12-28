@@ -28,6 +28,8 @@ class Run:
         self.sound_fire_VLS = FIRE_VLS
         self.sound_weapon_acquire = WEAPON_ACQUIRE
         self.sound_explosion = EXPLOSION
+        self.takeoff = TAKEOFF
+        self.landing = LANDING
 
         # Флаги
         self.running = True
@@ -75,6 +77,7 @@ class Run:
 
     def aircraft_launch(self, destination):
         self.friendly_aircraft.append(AircraftFriendly(self.player, destination, self.ai, True))
+        self.takeoff.play()
 
     def move(self, destination, game_obj, screen=None):
         """Движание игрока или ИИ"""

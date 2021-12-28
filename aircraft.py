@@ -33,6 +33,8 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = destination
         self.stop = False
         self.delete = False
+        self.play_sound = True
+        self.landing = LANDING
 
     # обновление координат самолета при полете к маршрутной точке
     def update(self):
@@ -65,6 +67,9 @@ class AircraftFriendly(pygame.sprite.Sprite):
                                            player.rect.centery - self.rect.centery)).normalize()
             self.destination = player.rect.centerx, player.rect.centery
             self.stop = False
+            if self.play_sound:
+                self.landing.play()
+                self.play_sound = False
         except ValueError:
             self.delete = True
 
