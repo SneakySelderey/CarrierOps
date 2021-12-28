@@ -12,24 +12,24 @@ class AircraftFriendly(pygame.sprite.Sprite):
             x * CELL_SIZE // 70, y * CELL_SIZE // 70))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        self.rect.center = [player.rect.centerx, player.rect.centery]
-        self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
-        self.dir = pygame.math.Vector2((destination[0] - player.rect.centerx,
-                                        destination[1] - player.rect.centery)).normalize()
+        self.pos = (player.rect.centerx, player.rect.centery)
+        self.destination = destination
+        self.rect.center = self.pos
 
         self.visibility = visibility
 
         self.ai_x, self.ai_y = ai.rect.center
 
-        # флаги, ответственные за паттерн поиска ракеты
+        self.k = (self.destination[1] - self.pos[1]) / (self.destination[0] - self.pos[0])
+        self.b = self.pos[1] - self.k * self.pos[0]
+
+        # флаги, ответственные за паттерн поиска самолета
         self.activated = False
         self.turn_one_side = True
         self.turn_another_side = False
         self.first_rotate = True
 
-        self.destination = destination
-
-        # три таймера, отсчитывающие время полета ракеты
+        # три таймера, отсчитывающие время полета самолета
         self.ticks = 10
         self.speed = 50
         self.total_ticks = 0
@@ -42,7 +42,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
 
         self.ai = ai
 
-    # обновление координат ракеты при полете к точке активации ГСН
+    # обновление координат самолета при полете к маршрутной точке
     def update(self):
         clock1 = pygame.time.Clock()
 
@@ -54,20 +54,18 @@ class AircraftFriendly(pygame.sprite.Sprite):
             self.ticks1 += 1
 
         if self.pos != self.destination:
-            self.pos += self.dir * 2
-            x = int(self.pos.x)
-            y = int(self.pos.y)
-            self.rect.center = x, y
+            self.pos = self.pos[0] + 1, self.k * (self.pos[0] + 1) + self.b
+            self.rect.center = self.pos
 
-        if self.destination[0] - 10 < round(self.pos.x) < self.destination[0] + 10 \
-                and self.destination[1] - 10 < round(self.pos.y) < self.destination[1] + 10:
+        if self.destination[0] - 10 < round(self.pos[0]) < self.destination[0] + 10 \
+                and self.destination[1] - 10 < round(self.pos[1]) < self.destination[1] + 10:
             self.activated = True
 
         self.aircraft_searching()
         if self.activated:
             self.aircraft_tracking(self.ai)
 
-    # обновление координат ракеты при активации ГСН
+    # обновление координат самолета при поиске цели
     def aircraft_searching(self):
         clock = pygame.time.Clock()
         if self.activated:
@@ -89,7 +87,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
             clock.tick(300)
             self.ticks += 1
 
-    # обновление координат ракеты при захвате противника ГСН
+    # обновление координат самолета при слежении за целью
     def aircraft_tracking(self, ai):
         self.ai_x, self.ai_y = ai.rect.center
 
