@@ -23,8 +23,6 @@ def terminate():
 def show_menu_screen():
     """Фукнция для отрисовки основного меню и для работы с ним"""
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
-    menu_screen.blit(background, (0, 0))
-    manager.draw_ui(screen)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -43,7 +41,6 @@ def show_menu_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             manager.process_events(event)
-
         manager.update(delta)
         menu_screen.blit(background, (0, 0))
         title_group.draw(menu_screen)
@@ -329,8 +326,7 @@ if __name__ == '__main__':
         if menu_run:
             result = show_menu_screen()
             menu_run = False
-            if result == 1:
-                result = show_setting_screen()
+            pygame.draw.rect(screen, RED, (300, 200, 100, 100))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -339,4 +335,5 @@ if __name__ == '__main__':
             screen.blit(menu_screen, (0, 0))
         else:
             screen.blit(GAMEOVER_SCREEN, (0, 0))
+        pygame.display.flip()
 
