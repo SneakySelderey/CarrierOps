@@ -1,0 +1,33 @@
+{
+     "button":
+     {
+         "colours":
+         {
+             "normal_bg": "#00000000",
+             "hovered_bg": "#00000000",
+             "disabled_bg": "#25292e",
+             "selected_bg": "#193754",
+             "active_bg": "#193754",
+             "dark_bg": "#15191e",
+             "normal_text":"#c5cbd8",
+             "hovered_text":"#FFFFFF",
+             "selected_text":"#FFFFFF",
+             "disabled_text":"#6d736f",
+             "active_text": "#FFFFFF",
+             "normal_border": "#00000000",
+             "hovered_border": "#B0B0B0",
+             "disabled_border": "#00000000",
+             "selected_border": "#8080B0",
+             "active_border":"#00000000"
+         },
+         "font":
+         {
+             "name":  "Teletacticle",
+             "size":  24,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         }
+
+     }
+}
