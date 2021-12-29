@@ -53,7 +53,6 @@ def show_setting_screen():
     fps = 240
     alpha = 0
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
-    background.set_alpha(255 - alpha)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -70,7 +69,6 @@ def show_setting_screen():
                         [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
             settings_manager.process_events(event)
         settings_manager.update(delta)
-        background.set_alpha(255 - alpha)
         screen.blit(background, (0, 0))
         help_surface.fill((0, 0, 0, alpha))
         alpha = min(alpha + 30, 200)
