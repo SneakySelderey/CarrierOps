@@ -56,6 +56,7 @@ def show_menu_screen():
 
 
 def show_setting_screen(from_menu=True):
+    """Функция для отрисовки и взаимодеййствия с окном настроек"""
     fps = 240
     if from_menu:
         background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
@@ -121,6 +122,13 @@ def show_gameover_screen():
         pygame.display.flip()
         alpha = max(alpha - 0.5, 0)
         clock.tick(FPS)
+
+
+def show_in_game_menu():
+    """Функция для отрисовки и взаимодействия с внутриигровым меню"""
+    help_surface.blit(screen, (0, 0))
+
+
 
 
 class Run:

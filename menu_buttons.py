@@ -1,4 +1,4 @@
-from Settings import WIDTH, HEIGHT, WHITE, MAIN_FONT
+from Settings import WIDTH, HEIGHT, WHITE, MAIN_FONT, get_bigger_rect
 import pygame
 import pygame_gui
 
@@ -8,10 +8,7 @@ import pygame_gui
 menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
-rect = quit_text.get_rect()
-rect.center = (WIDTH // 2, int(0.75 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+rect = get_bigger_rect(quit_text.get_rect(center=(WIDTH // 2, int(0.75 * HEIGHT))), 20)
 QUIT_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='QUIT TO DESKTOP',
@@ -19,10 +16,7 @@ QUIT_BUTTON = pygame_gui.elements.UIButton(
 )
 
 settings_text = MAIN_FONT.render('SETTINGS', True, WHITE)
-rect = settings_text.get_rect()
-rect.center = (WIDTH // 2, int(0.625 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+rect = get_bigger_rect(settings_text.get_rect(center=(WIDTH // 2, int(0.625 * HEIGHT))), 20)
 SETTINGS_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='SETTINGS',
@@ -30,10 +24,7 @@ SETTINGS_BUTTON = pygame_gui.elements.UIButton(
 )
 
 new_campaign_text = MAIN_FONT.render('NEW CAMPAIGN', True, WHITE)
-rect = new_campaign_text.get_rect()
-rect.center = (WIDTH // 2, int(0.375 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+rect = get_bigger_rect(new_campaign_text.get_rect(center=(WIDTH // 2, int(0.375 * HEIGHT))), 20)
 NEW_GAME_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='NEW CAMPAIGN',
@@ -41,10 +32,7 @@ NEW_GAME_BUTTON = pygame_gui.elements.UIButton(
 )
 
 load_game_text = MAIN_FONT.render('LOAD SAVE', True, WHITE)
-rect = load_game_text.get_rect()
-rect.center = (WIDTH // 2, int(0.5 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+rect = get_bigger_rect(load_game_text.get_rect(center=(WIDTH // 2, int(0.5 * HEIGHT))), 20)
 LOAD_SAVE_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='LOAD SAVE',
@@ -53,7 +41,7 @@ LOAD_SAVE_BUTTON = pygame_gui.elements.UIButton(
 
 # Все элемнты управления
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON, "NEW_GAME": NEW_GAME_BUTTON,
-            "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
+                 "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 
 
 class Title(pygame.sprite.Sprite):

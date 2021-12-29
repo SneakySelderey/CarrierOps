@@ -1,6 +1,7 @@
 from Settings import *
 import pygame_gui
 
+"""Создание элементов экрана поражения"""
 
 gameover_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
@@ -8,8 +9,7 @@ gameover_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 menu_text = MAIN_FONT.render('MAIN MENU', True, WHITE)
 rect = menu_text.get_rect()
 rect.center = (WIDTH // 2, int(0.625 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+get_bigger_rect(rect, 20)
 MAIN_MENU_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='MAIN MENU',
@@ -19,8 +19,7 @@ MAIN_MENU_BUTTON = pygame_gui.elements.UIButton(
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
 rect = quit_text.get_rect()
 rect.center = (WIDTH // 2, int(0.75 * HEIGHT))
-rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
-                                          rect.width + 40, rect.height + 40
+get_bigger_rect(rect, 20)
 QUIT_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='QUIT TO DESKTOP',

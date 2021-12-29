@@ -1,6 +1,13 @@
 import pygame
 import ctypes
 
+
+def get_bigger_rect(rect, d):
+    rect.x, rect.y, rect.width, rect.height = \
+        rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
+    return rect
+
+
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
