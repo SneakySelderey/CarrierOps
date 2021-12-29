@@ -2,7 +2,7 @@ from Settings import WIDTH, HEIGHT, WHITE, MAIN_FONT
 import pygame
 import pygame_gui
 
-manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
+menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
 rect = quit_text.get_rect()
@@ -12,7 +12,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 QUIT_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='QUIT TO DESKTOP',
-    manager=manager
+    manager=menu_manager
 )
 
 settings_text = MAIN_FONT.render('SETTINGS', True, WHITE)
@@ -23,7 +23,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 SETTINGS_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='SETTINGS',
-    manager=manager
+    manager=menu_manager
 )
 
 new_campaign_text = MAIN_FONT.render('NEW CAMPAIGN', True, WHITE)
@@ -34,7 +34,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 NEW_GAME_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='NEW CAMPAIGN',
-    manager=manager
+    manager=menu_manager
 )
 
 load_game_text = MAIN_FONT.render('LOAD SAVE', True, WHITE)
@@ -45,7 +45,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 LOAD_SAVE_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='LOAD SAVE',
-    manager=manager
+    manager=menu_manager
 )
 
 # Все элемнты управления

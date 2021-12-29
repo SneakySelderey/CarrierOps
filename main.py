@@ -8,8 +8,8 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
-from gameover_buttons import *
-from menu_buttons import manager, MENU_ELEMENTS, Title
+from gameover_buttons import gameover_manager, GAMEOVER_ELEMENTS, BasesLost
+from menu_buttons import menu_manager, MENU_ELEMENTS, Title
 import game_buttons
 from Settings import *
 
@@ -42,11 +42,11 @@ def show_menu_screen():
                         return 3
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
-            manager.process_events(event)
-        manager.update(delta)
+            menu_manager.process_events(event)
+        menu_manager.update(delta)
         screen.blit(background, (0, 0))
         title_group.draw(screen)
-        manager.draw_ui(screen)
+        menu_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -73,16 +73,13 @@ def show_gameover_screen():
                         return 1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
-            manager2.process_events(event)
-        manager2.update(delta)
+            gameover_manager.process_events(event)
+        gameover_manager.update(delta)
         screen.blit(background, (0, 0))
         gameover_group.draw(screen)
-        manager2.draw_ui(screen)
+        gameover_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
-
-
-
 
 
 class Run:
@@ -269,8 +266,7 @@ class Run:
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
-                    self.game_screen = False
+                    terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = event.pos
@@ -293,7 +289,7 @@ class Run:
                 if not self.ai_detected:
                     self.ai.update()
             else:
-                pause_screen.blit(SC_TEXT, POS)
+                screen.blit(SC_TEXT, POS)
             clock.tick(FPS)
             pygame.display.flip()
         return 1
@@ -304,7 +300,6 @@ if __name__ == '__main__':
     pygame.mixer.init()
     size = WIDTH, HEIGHT
     screen = pygame.display.set_mode(size)
-    pause_screen = pygame.display.set_mode(size)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
@@ -315,7 +310,7 @@ if __name__ == '__main__':
     gameover_group = pygame.sprite.Group()
     BasesLost(gameover_group)
 
-    menu_run, settings_run, game_run, load_run, gameover_run = False, False, False, False, True
+    menu_run, settings_run, game_run, load_run, gameover_run = True, False, False, False, False
     running = True
     # Основной мега-цикл
     while running:
@@ -330,13 +325,14 @@ if __name__ == '__main__':
             result = show_gameover_screen()
             gameover_run = False
             menu_run = result == 1
-        if game_run:
+        if game_run:  # Игра
             game_objects = Run()
             result = game_objects.main()
+            game_run = False
             gameover_run = result == 1
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
+        #for event in pygame.event.get():
+        #    if event.type == pygame.QUIT:
+        #        terminate()
         screen.fill(BLACK)
         pygame.display.flip()
 

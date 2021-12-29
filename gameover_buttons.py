@@ -2,7 +2,7 @@ from Settings import *
 import pygame_gui
 
 
-manager2 = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
+gameover_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 
 menu_text = MAIN_FONT.render('MAIN MENU', True, WHITE)
@@ -13,7 +13,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 MAIN_MENU_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='MAIN MENU',
-    manager=manager2
+    manager=gameover_manager
 )
 
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
@@ -24,7 +24,7 @@ rect.x, rect.y, rect.width, rect.height = rect.x - 20, rect.y - 20, \
 QUIT_BUTTON = pygame_gui.elements.UIButton(
     relative_rect=rect,
     text='QUIT TO DESKTOP',
-    manager=manager2
+    manager=gameover_manager
 )
 
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON, "MENU": MAIN_MENU_BUTTON}
