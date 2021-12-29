@@ -10,10 +10,8 @@ from base import Base
 from friendly_missile import MissileFriendly
 from gameover_buttons import gameover_manager, GAMEOVER_ELEMENTS, BasesLost
 from menu_buttons import menu_manager, MENU_ELEMENTS, Title
-import game_buttons
+from settings_buttons import settings_manager, SETTINGS_ELEMENTS
 from Settings import *
-
-
 
 
 def terminate():
@@ -51,10 +49,28 @@ def show_menu_screen():
         clock.tick(FPS)
 
 
-def show_setting_screen():
-    background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+def show_setting_screen(from_menu=True):
+    if from_menu:
+        background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+    else:
+        background = None
     while True:
-        pass
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == SETTINGS_ELEMENTS['OK']:
+                        return 1
+                if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+                    print(event.text)
+            settings_manager.process_events(event)
+        settings_manager.update(delta)
+        screen.blit(background, (0, 0))
+        settings_manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def show_gameover_screen():
@@ -330,9 +346,12 @@ if __name__ == '__main__':
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
-        #for event in pygame.event.get():
-        #    if event.type == pygame.QUIT:
-        #        terminate()
+        if settings_run:
+            result = show_setting_screen()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
         screen.fill(BLACK)
         pygame.display.flip()
 

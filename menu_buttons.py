@@ -2,6 +2,9 @@ from Settings import WIDTH, HEIGHT, WHITE, MAIN_FONT
 import pygame
 import pygame_gui
 
+
+"""Создание элементов основног меню"""
+
 menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
