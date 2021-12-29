@@ -2,12 +2,6 @@ import pygame
 import ctypes
 
 
-def get_bigger_rect(rect, d):
-    rect.x, rect.y, rect.width, rect.height = \
-        rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
-    return rect
-
-
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
@@ -53,6 +47,7 @@ BASES_LOST_IMAGE = pygame.image.load('data/img/all_bases_lost.png')
 MAIN_MENU_BUTTON = pygame.image.load('data/img/main_menu.png')
 MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
+SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

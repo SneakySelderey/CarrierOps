@@ -8,10 +8,7 @@ from player import Player
 from AI import AI
 from base import Base
 from friendly_missile import MissileFriendly
-from gameover_buttons import gameover_manager, GAMEOVER_ELEMENTS, BasesLost
-from menu_buttons import menu_manager, MENU_ELEMENTS, Title
-from settings_buttons import settings_manager, SETTINGS_ELEMENTS
-from game_menu_buttons import game_manager, IN_GAME_ELEMENTS
+from gui_elements import *
 from Settings import *
 from time import sleep
 
@@ -51,15 +48,11 @@ def show_menu_screen():
         clock.tick(FPS)
 
 
-def show_setting_screen(from_menu=True):
+def show_setting_screen():
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     fps = 240
-    if from_menu:
-        alpha = 0
-        background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
-    else:
-        background = screen
-        alpha = 200
+    background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    alpha = 0
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -367,9 +360,8 @@ class Run:
             elif self.pause:
                 screen.blit(SC_TEXT, POS)
             elif self.menu:
-                print(alpha_menu)
                 # Получим код возврата от игрового меню
-                alpha_menu = 200
+                #alpha_menu = 200
                 result = show_in_game_menu()
                 if result == 1:  # пользователь нажал на RESUME
                     self.menu = False
@@ -380,9 +372,8 @@ class Run:
                     alpha_menu = 0
                     pass  # TODO: LOAD
                 if result == 4:  # Если нажал на SETTINGS
-                    show_setting_screen(False)
+                    show_setting_screen()
                     alpha_menu = 200
-                print(alpha_menu)
             if alpha == 255:
                 self.running = False
             if self.defeat:

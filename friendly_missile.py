@@ -1,6 +1,6 @@
 import pygame
-from math import sqrt
-from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE
+from math import sqrt, hypot
+from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
 
 
 class MissileFriendly(pygame.sprite.Sprite):
@@ -12,14 +12,13 @@ class MissileFriendly(pygame.sprite.Sprite):
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
             x * CELL_SIZE // 70, y * CELL_SIZE // 70))
-        self.image.set_colorkey(pygame.Color('black'))
+        self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
-        if first_pos_check:
-            self.rect.center = [player.rect.centerx, player.rect.centery]
-            first_pos_check = False
-            self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
-            self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
-                                            activation[1] - player.rect.centery)).normalize()
+
+        self.rect.center = [player.rect.centerx, player.rect.centery]
+        self.pos = pygame.math.Vector2([player.rect.centerx, player.rect.centery])
+        self.dir = pygame.math.Vector2((activation[0] - player.rect.centerx,
+                                        activation[1] - player.rect.centery)).normalize()
 
         self.visibility = visibility
 
@@ -100,7 +99,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         clock2.tick(300)
         self.ticks2 += 1
         try:
-            if (sqrt((self.rect.centerx - ai.rect.centerx) ** 2 + (self.rect.centery - ai.rect.centery) ** 2)) <= 150:
+            if hypot(self.rect.centerx - ai.rect.centerx, self.rect.centery - ai.rect.centery) <= 150:
                 self.dir = pygame.math.Vector2((ai.rect.centerx - self.rect.centerx,
                                                 ai.rect.centery - self.rect.centery)).normalize()
 
