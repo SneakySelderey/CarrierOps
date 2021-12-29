@@ -50,12 +50,16 @@ def show_menu_screen():
 
 
 def show_setting_screen(from_menu=True):
+    fps = 240
     if from_menu:
         background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     else:
         background = None
-    surface = pygame.Surface((WIDTH, HEIGHT))
-    surface.set_alpha(128)
+    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    surface2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    pygame.draw.rect(surface, pygame.Color((54, 54, 54, 100)),
+                     (0, 0, WIDTH, HEIGHT))
+    surface2.blit(background, (0, 0))
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -72,15 +76,14 @@ def show_setting_screen(from_menu=True):
                         for i in ALL_SOUNDS:
                             i.set_volume(event.value / 10)
             settings_manager.process_events(event)
+        surface2.set_alpha(130)
+        surface2.blit(background, (0, 0))
         settings_manager.update(delta)
-        if background is not None:
-            screen.blit(background, (0, 0))
-        pygame.draw.rect(surface, pygame.Color((54, 54, 54, 50)),
-                         (0, 0, WIDTH, HEIGHT))
         screen.blit(surface, (0, 0))
+        screen.blit(surface2, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(FPS)
+        clock.tick(fps)
 
 
 def show_gameover_screen():
