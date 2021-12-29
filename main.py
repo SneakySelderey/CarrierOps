@@ -100,7 +100,7 @@ def show_gameover_screen():
     screen.fill(BLACK)
     gameover_group.draw(screen)
     pygame.display.flip()
-    sleep(1.5)
+    sleep(1)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -141,6 +141,7 @@ class Run:
         self.pause = True
         self.hostile_bases = []
         self.ai_detected = False
+        self.defeat = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
@@ -198,7 +199,7 @@ class Run:
             dest = self.move(distance[idx][1], self.ai)
             self.base_lost(dest, distance[idx][1])
         except ValueError:
-            self.running = False
+            self.defeat = True
             [sound.stop() for sound in ALL_SOUNDS]
 
     def base_taken(self, dest, destination):
@@ -299,6 +300,7 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
+        alpha = 0
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -320,20 +322,25 @@ class Run:
             self.destination_ai()
             self.fog_of_war()
 
-            if not self.pause:
+            if not (self.pause or self.defeat):
                 self.all_sprites.update()
                 if not self.ai_detected:
                     self.ai.update()
-            else:
+            elif self.pause:
                 screen.blit(SC_TEXT, POS)
+            elif self.defeat:
+                if alpha == 255:
+                    self.running = False
+                help_surface.fill((0, 0, 0, alpha))
+                screen.blit(help_surface, (0, 0))
+            alpha = min(alpha + 0.5, 255)
             clock.tick(FPS)
             pygame.display.flip()
         SUB_SUNK.play()
-        surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         alpha = 255
         while alpha > 0:
-            surface.fill((10, 10, 10, alpha))
-            screen.blit(surface, (0, 0))
+            help_surface.fill((0, 0, 0, alpha))
+            screen.blit(help_surface, (0, 0))
             alpha -= 1
             pygame.display.flip()
             clock.tick(FPS)
@@ -345,6 +352,7 @@ if __name__ == '__main__':
     pygame.mixer.init()
     size = WIDTH, HEIGHT
     screen = pygame.display.set_mode(size)
+    help_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
