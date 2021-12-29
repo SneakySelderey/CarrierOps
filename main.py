@@ -205,7 +205,7 @@ class Run:
 
     def aircraft_launch(self, destination):
         self.friendly_aircraft.append(AircraftFriendly(self.player, destination, self.ai, True))
-        self.takeoff.play()
+        TAKEOFF.play()
 
     def move(self, destination, game_obj, screen=None):
         """Движание игрока или ИИ"""
@@ -371,6 +371,8 @@ class Run:
                     if event.button == 1:
                         self.destination_player = event.pos
                         self.game_sprites.update(event.pos)
+                    if event.button == 2:
+                        self.aircraft_launch(event.pos)
                     if event.button == 3:
                         self.missile_launch(event.pos)
                 if event.type == pygame.KEYDOWN:
