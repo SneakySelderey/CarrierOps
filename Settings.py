@@ -38,13 +38,7 @@ BASE_HOSTILE = pygame.image.load('data/img/base_hostile.png')
 BASE_NEUTRAL = pygame.image.load('data/img/base_neutral.png')
 MISSILE_FRIENDLY = pygame.image.load('data/img/missile_friendly.png')
 MISSILE_HOSTILE = pygame.image.load('data/img/missile_hostile.png')
-TITLE_IMAGE = pygame.image.load('data/img/title.png')
-NEW_CAMPAIGN_BUTTON = pygame.image.load('data/img/new_campaign.png')
-LOAD_BUTTON = pygame.image.load('data/img/load.png')
-SETTINGS_BUTTON = pygame.image.load('data/img/settings.png')
-QUIT_BUTTON = pygame.image.load('data/img/quit.png')
-BASES_LOST_IMAGE = pygame.image.load('data/img/all_bases_lost.png')
-MAIN_MENU_BUTTON = pygame.image.load('data/img/main_menu.png')
+AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png')
 MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
@@ -56,8 +50,9 @@ FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
 SUB_SUNK = pygame.mixer.Sound('data/sound/SubSunk.wav')
-ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
-              SUB_SUNK]
+TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
+LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
+ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SUB_SUNK]
 
 # Для меню паузы
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
