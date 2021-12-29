@@ -7,11 +7,14 @@ pygame.init()
 pygame.mixer.init()
 # Константы
 
-WINDOW_SIZE = [(1920, 1080), (1680, 1050), (1600, 1024), (1600, 900),
+WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024), (1600, 900),
                (1440, 900), (1366, 768), (1280, 1024), (1280, 960),
                (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
-WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+try:
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+except ValueError:
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH = 1280
 HEIGHT = 720
 CELL_SIZE = 75
