@@ -48,12 +48,14 @@ def show_menu_screen():
         clock.tick(FPS)
 
 
-def show_setting_screen():
+def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    background2 = screen if not flag else pygame.transform.scale(
+        MENU_BACKGROUND, (WIDTH, HEIGHT))
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -73,11 +75,13 @@ def show_setting_screen():
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
             help_surface.fill((0, 0, 0, alpha_up))
+            background2.set_alpha(255 - alpha_up)
         alpha_up = min(alpha_up + 15, 255)
         if alpha_up == 255:
             alpha_down = max(alpha_down - 15, 150)
             screen.blit(background, (0, 0))
             help_surface.fill((0, 0, 0, alpha_down))
+        screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
@@ -367,7 +371,6 @@ class Run:
                 screen.blit(SC_TEXT, POS)
             if self.menu:
                 # Получим код возврата от игрового меню
-                #alpha_menu = 200
                 result = show_in_game_menu()
                 if result == 1:  # пользователь нажал на RESUME
                     self.menu = False
@@ -378,7 +381,7 @@ class Run:
                     alpha_menu = 0
                     pass  # TODO: LOAD
                 if result == 4:  # Если нажал на SETTINGS
-                    show_setting_screen()
+                    show_setting_screen(False)
                     alpha_menu = 200
             if alpha == 255:
                 self.running = False
