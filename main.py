@@ -25,7 +25,6 @@ def show_menu_screen():
     """Фукнция для отрисовки основного меню и для работы с ним"""
     [i.stop() for i in ALL_SOUNDS]
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
-    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     alpha = 130
     while True:
         delta = clock.tick(FPS) / 1000.0
@@ -45,10 +44,10 @@ def show_menu_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             menu_manager.process_events(event)
-        surface.fill((10, 10, 10, alpha))
+        help_surface.fill((10, 10, 10, alpha))
         menu_manager.update(delta)
         screen.blit(background, (0, 0))
-        screen.blit(surface, (0, 0))
+        screen.blit(help_surface, (0, 0))
         title_group.draw(screen)
         menu_manager.draw_ui(screen)
         pygame.display.flip()
@@ -62,9 +61,8 @@ def show_setting_screen(from_menu=True):
         background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     else:
         background = None
-    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     surface2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    pygame.draw.rect(surface, pygame.Color((10, 10, 10, 100)),
+    pygame.draw.rect(help_surface, pygame.Color((10, 10, 10, 100)),
                      (0, 0, WIDTH, HEIGHT))
     surface2.blit(background, (0, 0))
     while True:
@@ -85,7 +83,7 @@ def show_setting_screen(from_menu=True):
         surface2.set_alpha(130)
         surface2.blit(background, (0, 0))
         settings_manager.update(delta)
-        screen.blit(surface, (0, 0))
+        screen.blit(help_surface, (0, 0))
         screen.blit(surface2, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
@@ -95,7 +93,6 @@ def show_setting_screen(from_menu=True):
 def show_gameover_screen():
     """Функция для отрисовки и взаимодействия с экраном проигрыша"""
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
-    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     alpha = 255
     screen.fill(BLACK)
     gameover_group.draw(screen)
@@ -115,10 +112,10 @@ def show_gameover_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             gameover_manager.process_events(event)
-        surface.fill((0, 0, 0, alpha))
+        help_surface.fill((0, 0, 0, alpha))
         gameover_manager.update(delta)
         screen.blit(background, (0, 0))
-        screen.blit(surface, (0, 0))
+        screen.blit(help_surface, (0, 0))
         gameover_group.draw(screen)
         gameover_manager.draw_ui(screen)
         pygame.display.flip()
@@ -367,6 +364,7 @@ if __name__ == '__main__':
     menu_run, settings_run, game_run, load_run, gameover_run = \
         True, False, False, False, False
     running = True
+
     # Основной мега-цикл
     while running:
         # Отрисока разных экранов
