@@ -33,6 +33,7 @@ WHITE = pygame.Color('white')
 GRAY5 = pygame.Color('gray5')
 BLUE = pygame.Color('blue')
 RED = pygame.Color('red')
+FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения
 PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png')

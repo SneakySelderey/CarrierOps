@@ -1,3 +1,4 @@
+import pygame
 import pygame_gui
 import sys
 import random
@@ -54,13 +55,11 @@ def show_setting_screen(from_menu=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     fps = 240
     if from_menu:
+        alpha = 0
         background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     else:
-        background = None
-    surface2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    pygame.draw.rect(help_surface, pygame.Color((10, 10, 10, 100)),
-                     (0, 0, WIDTH, HEIGHT))
-    surface2.blit(background, (0, 0))
+        background = screen
+        alpha = 200
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -76,11 +75,11 @@ def show_setting_screen(from_menu=True):
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
                         [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
             settings_manager.process_events(event)
-        surface2.set_alpha(130)
-        surface2.blit(background, (0, 0))
         settings_manager.update(delta)
+        screen.blit(background, (0, 0))
+        help_surface.fill((0, 0, 0, alpha))
+        alpha = min(alpha + 30, 200)
         screen.blit(help_surface, (0, 0))
-        screen.blit(surface2, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
@@ -121,8 +120,8 @@ def show_gameover_screen():
 
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
-    help_surface.blit(screen, (0, 0))
     help_surface_2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    help_surface_2.blit(screen, (0, 0))
     alpha = 0
     while True:
         delta = clock.tick(FPS) / 1000.0
@@ -148,9 +147,9 @@ def show_in_game_menu():
                 title_group.update(event.pos)
             game_manager.process_events(event)
         game_manager.update(delta)
-        screen.blit(help_surface, (0, 0))
-        help_surface_2.fill((0, 0, 0, alpha))
         screen.blit(help_surface_2, (0, 0))
+        help_surface.fill((0, 0, 0, alpha))
+        screen.blit(help_surface, (0, 0))
         game_manager.draw_ui(screen)
         pygame.display.flip()
         alpha = min(alpha + 20, 200)
@@ -368,18 +367,22 @@ class Run:
             elif self.pause:
                 screen.blit(SC_TEXT, POS)
             elif self.menu:
+                print(alpha_menu)
                 # Получим код возврата от игрового меню
+                alpha_menu = 200
                 result = show_in_game_menu()
+                if result == 1:  # пользователь нажал на RESUME
+                    self.menu = False
                 if result == 2:  # Если нажал на MAIN MENU
-                    # menu_run = True
-                    self.running = False  # TODO: MAIN MENU
+                    self.running = False
+                    return 2
                 if result == 3:  # Если нажал на LOAD SAVE
+                    alpha_menu = 0
                     pass  # TODO: LOAD
                 if result == 4:  # Если нажал на SETTINGS
-                    settings_result = show_setting_screen(False)
-                    pass  # TODO: SETTINGS
-                self.menu = not result == 1  # Если пользователь нажал RESUME
-                alpha_menu = 200
+                    show_setting_screen(False)
+                    alpha_menu = 200
+                print(alpha_menu)
             if alpha == 255:
                 self.running = False
             if self.defeat:
@@ -389,9 +392,9 @@ class Run:
 
             clock.tick(FPS)
             pygame.display.flip()
+
         # После поражения
         SUB_SUNK.play()
-        alpha = 255
         while alpha > 0:
             help_surface.fill((0, 0, 0, alpha))
             screen.blit(help_surface, (0, 0))
@@ -440,10 +443,11 @@ if __name__ == '__main__':
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
-        elif settings_run:
+            menu_run = result == 2
+        elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
-        elif load_run:
+        elif load_run:  # Меню загрузки
             pass  # TODO: LOAD
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
