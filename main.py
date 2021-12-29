@@ -118,17 +118,6 @@ class Run:
         self.board = Board(self.cells_x, self.cells_y, self.cell_size)
         self.board.set_view(0, 0, self.cell_size)
 
-        # Озвучка событий
-        self.sound_new_contact = NEW_CONTACT
-        self.sound_contact_lost = CONTACT_LOST
-        self.sound_fire_VLS = FIRE_VLS
-        self.sound_weapon_acquire = WEAPON_ACQUIRE
-        self.sound_explosion = EXPLOSION
-        self.effect_sounds = [self.sound_explosion, self.sound_fire_VLS,
-                              self.sound_contact_lost,
-                              self.sound_new_contact,
-                              self.sound_weapon_acquire]
-
         # Флаги
         self.running = True
         self.pause = True
@@ -158,7 +147,7 @@ class Run:
         """Функция для запуска противокорабельной ракеты"""
         self.friendly_missiles.append(MissileFriendly(
             self.player, True, destination, self.ai, True))
-        self.sound_fire_VLS.play()
+        FIRE_VLS.play()
 
     def move(self, destination, game_obj, screen=None):
         """Движание игрока или ИИ"""
@@ -256,9 +245,9 @@ class Run:
             self.play_contact_lost = True
             if self.play_new_contact:
                 if missile_tracking:
-                    self.sound_weapon_acquire.play()
+                    WEAPON_ACQUIRE.play()
                 else:
-                    self.sound_new_contact.play()
+                    NEW_CONTACT.play()
                 self.play_new_contact = False
                 self.play_contact_lost = True
                 self.pause = True
@@ -270,7 +259,7 @@ class Run:
             self.ai_detected = False
             self.play_new_contact = True
             if self.play_contact_lost:
-                self.sound_contact_lost.play()
+                CONTACT_LOST.play()
                 self.play_contact_lost = False
 
         # отрисовка нужных и прятанье ненужных спрайтов

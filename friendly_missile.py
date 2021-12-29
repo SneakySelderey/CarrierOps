@@ -14,7 +14,6 @@ class MissileFriendly(pygame.sprite.Sprite):
             x * CELL_SIZE // 70, y * CELL_SIZE // 70))
         self.image.set_colorkey(pygame.Color('black'))
         self.rect = self.image.get_rect()
-        self.sound_explosion = EXPLOSION
         if first_pos_check:
             self.rect.center = [player.rect.centerx, player.rect.centery]
             first_pos_check = False
@@ -108,6 +107,6 @@ class MissileFriendly(pygame.sprite.Sprite):
             if ai.rect.centerx - 10 < self.rect.centerx < ai.rect.centerx + 10 \
                     and ai.rect.centery - 10 < self.rect.centery < ai.rect.centery + 10:
                 self.total_ticks = 10
-                self.sound_explosion.play()
+                EXPLOSION.play()
         except ValueError:
             self.total_ticks = 10
