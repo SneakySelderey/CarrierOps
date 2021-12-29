@@ -12,6 +12,7 @@ from gameover_buttons import gameover_manager, GAMEOVER_ELEMENTS, BasesLost
 from menu_buttons import menu_manager, MENU_ELEMENTS, Title
 from settings_buttons import settings_manager, SETTINGS_ELEMENTS
 from Settings import *
+from time import sleep
 
 
 def terminate():
@@ -22,6 +23,7 @@ def terminate():
 
 def show_menu_screen():
     """Фукнция для отрисовки основного меню и для работы с ним"""
+    [i.stop() for i in ALL_SOUNDS]
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     alpha = 130
@@ -78,8 +80,7 @@ def show_setting_screen(from_menu=True):
                     print(event.text)
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
-                        for i in ALL_SOUNDS:
-                            i.set_volume(event.value / 10)
+                        [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
             settings_manager.process_events(event)
         surface2.set_alpha(130)
         surface2.blit(background, (0, 0))
@@ -94,6 +95,12 @@ def show_setting_screen(from_menu=True):
 def show_gameover_screen():
     """Функция для отрисовки и взаимодействия с экраном проигрыша"""
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
+    surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    alpha = 255
+    screen.fill(BLACK)
+    gameover_group.draw(screen)
+    pygame.display.flip()
+    sleep(1.5)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -108,11 +115,14 @@ def show_gameover_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             gameover_manager.process_events(event)
+        surface.fill((0, 0, 0, alpha))
         gameover_manager.update(delta)
         screen.blit(background, (0, 0))
+        screen.blit(surface, (0, 0))
         gameover_group.draw(screen)
         gameover_manager.draw_ui(screen)
         pygame.display.flip()
+        alpha = max(alpha - 0.5, 0)
         clock.tick(FPS)
 
 
@@ -141,7 +151,7 @@ class Run:
         self.destination_player = self.player.rect.center
         self.ai = AI(False)
         self.bases = []
-        for i in range(10):
+        for i in range(1):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
             self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
@@ -189,8 +199,7 @@ class Run:
             self.base_lost(dest, distance[idx][1])
         except ValueError:
             self.running = False
-            for sound in ALL_SOUNDS:
-                sound.stop()
+            [sound.stop() for sound in ALL_SOUNDS]
 
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""
@@ -217,7 +226,7 @@ class Run:
                     i.update('hostile')
                     self.hostile_bases.append([base_x, base_y])
 
-    def fog_of_war(self, screen):
+    def fog_of_war(self):
         """Отрисовка тумана войны"""
         # если противник обнаружен ракетой
         missile_tracking = False
@@ -309,7 +318,7 @@ class Run:
             goal = self.move(self.destination_player, self.player, screen)
             self.base_taken(goal, self.destination_player)
             self.destination_ai()
-            self.fog_of_war(screen)
+            self.fog_of_war()
 
             if not self.pause:
                 self.all_sprites.update()
@@ -319,6 +328,15 @@ class Run:
                 screen.blit(SC_TEXT, POS)
             clock.tick(FPS)
             pygame.display.flip()
+        SUB_SUNK.play()
+        surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        alpha = 255
+        while alpha > 0:
+            surface.fill((10, 10, 10, alpha))
+            screen.blit(surface, (0, 0))
+            alpha -= 1
+            pygame.display.flip()
+            clock.tick(FPS)
         return 1
 
 

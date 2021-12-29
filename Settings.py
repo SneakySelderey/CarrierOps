@@ -15,9 +15,8 @@ try:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
-WIDTH = 1280
-HEIGHT = 720
-CELL_SIZE = 75
+WIDTH, HEIGHT = 1280, 720
+CELL_SIZE = 200
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Цвета
@@ -53,7 +52,9 @@ EXPLOSION = pygame.mixer.Sound('data/sound/explosion.wav')
 FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
-ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE]
+SUB_SUNK = pygame.mixer.Sound('data/sound/SubSunk.wav')
+ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
+              SUB_SUNK]
 
 # Для меню паузы
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
