@@ -151,7 +151,7 @@ class Run:
         self.destination_player = self.player.rect.center
         self.ai = AI(False)
         self.bases = []
-        for i in range(1):
+        for i in range(10):
             x = random.randint(0, self.cells_x - 1) * self.cell_size
             y = random.randint(0, self.cells_y - 1) * self.cell_size
             self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
