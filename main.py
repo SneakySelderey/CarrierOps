@@ -1,4 +1,3 @@
-import pygame
 import pygame_gui
 import sys
 import random
@@ -11,6 +10,7 @@ from friendly_missile import MissileFriendly
 from gameover_buttons import gameover_manager, GAMEOVER_ELEMENTS, BasesLost
 from menu_buttons import menu_manager, MENU_ELEMENTS, Title
 from settings_buttons import settings_manager, SETTINGS_ELEMENTS
+from game_menu_buttons import game_manager, IN_GAME_ELEMENTS
 from Settings import *
 from time import sleep
 
@@ -35,12 +35,7 @@ def show_menu_screen():
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == MENU_ELEMENTS['QUIT']:
                         terminate()
-                    if event.ui_element == MENU_ELEMENTS['NEW_GAME']:
-                        return 1
-                    if event.ui_element == MENU_ELEMENTS['LOAD']:
-                        return 2
-                    if event.ui_element == MENU_ELEMENTS['SETTINGS']:
-                        return 3
+                    return list(MENU_ELEMENTS.values()).index(event.ui_element)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             menu_manager.process_events(event)
@@ -127,8 +122,39 @@ def show_gameover_screen():
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
     help_surface.blit(screen, (0, 0))
-
-
+    help_surface_2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    alpha = 0
+    while True:
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == IN_GAME_ELEMENTS['QUIT']:
+                        terminate()
+                    if event.ui_element == IN_GAME_ELEMENTS['RESUME']:
+                        return 1
+                    if event.ui_element == IN_GAME_ELEMENTS['MENU']:
+                        return 2
+                    if event.ui_element == IN_GAME_ELEMENTS['LOAD']:
+                        return 3
+                    if event.ui_element == IN_GAME_ELEMENTS['SETTINGS']:
+                        return 4
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                title_group.update(event.pos)
+            game_manager.process_events(event)
+        game_manager.update(delta)
+        screen.blit(help_surface, (0, 0))
+        help_surface_2.fill((0, 0, 0, alpha))
+        screen.blit(help_surface_2, (0, 0))
+        game_manager.draw_ui(screen)
+        pygame.display.flip()
+        alpha = min(alpha + 20, 200)
+        clock.tick(FPS)
 
 
 class Run:
@@ -147,6 +173,7 @@ class Run:
         self.hostile_bases = []
         self.ai_detected = False
         self.defeat = False
+        self.menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
@@ -165,7 +192,6 @@ class Run:
         self.hostile_missiles = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
                                  self.friendly_missiles, self.hostile_missiles]
-        #self.game_sprites.add(game_buttons.MainMenu(self))
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -306,6 +332,8 @@ class Run:
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
+        alpha_menu = 0
+
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -319,6 +347,9 @@ class Run:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
+                    if event.key == pygame.K_ESCAPE and not self.pause:
+                        self.menu = not self.menu
+
             screen.fill(GRAY5)
             self.board.render(screen)
             self.all_sprites.draw(screen)
@@ -326,21 +357,39 @@ class Run:
             self.base_taken(goal, self.destination_player)
             self.destination_ai()
             self.fog_of_war()
+            help_surface.fill((0, 0, 0, alpha))
+            help_surface.fill((0, 0, 0, alpha_menu))
+            screen.blit(help_surface, (0, 0))
 
-            if not (self.pause or self.defeat):
+            if not (self.pause or self.defeat or self.menu):
                 self.all_sprites.update()
                 if not self.ai_detected:
                     self.ai.update()
             elif self.pause:
                 screen.blit(SC_TEXT, POS)
-            elif self.defeat:
-                if alpha == 255:
-                    self.running = False
-                help_surface.fill((0, 0, 0, alpha))
-                screen.blit(help_surface, (0, 0))
-            alpha = min(alpha + 0.5, 255)
+            elif self.menu:
+                # Получим код возврата от игрового меню
+                result = show_in_game_menu()
+                if result == 2:  # Если нажал на MAIN MENU
+                    # menu_run = True
+                    self.running = False  # TODO: MAIN MENU
+                if result == 3:  # Если нажал на LOAD SAVE
+                    pass  # TODO: LOAD
+                if result == 4:  # Если нажал на SETTINGS
+                    settings_result = show_setting_screen(False)
+                    pass  # TODO: SETTINGS
+                self.menu = not result == 1  # Если пользователь нажал RESUME
+                alpha_menu = 200
+            if alpha == 255:
+                self.running = False
+            if self.defeat:
+                alpha = min(alpha + 10, 255)
+            if alpha_menu != 0:
+                alpha_menu = max(alpha_menu - 20, 0)
+
             clock.tick(FPS)
             pygame.display.flip()
+        # После поражения
         SUB_SUNK.play()
         alpha = 255
         while alpha > 0:
@@ -382,19 +431,20 @@ if __name__ == '__main__':
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
-        if gameover_run:  # Экран после поражения
+        elif gameover_run:  # Экран после поражения
             result = show_gameover_screen()
             gameover_run = False
             menu_run = result == 1
-        if game_run:  # Игра
+        elif game_run:  # Игра
             game_objects = Run()
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
-        if settings_run:
+        elif settings_run:
             result = show_setting_screen()
             menu_run = result == 1
-
+        elif load_run:
+            pass  # TODO: LOAD
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()

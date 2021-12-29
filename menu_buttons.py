@@ -8,33 +8,33 @@ import pygame_gui
 menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
-rect = get_bigger_rect(quit_text.get_rect(center=(WIDTH // 2, int(0.75 * HEIGHT))), 20)
+quit_rect = get_bigger_rect(quit_text.get_rect(center=(WIDTH // 2, int(0.75 * HEIGHT))), 20)
 QUIT_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=quit_rect,
     text='QUIT TO DESKTOP',
     manager=menu_manager
 )
 
 settings_text = MAIN_FONT.render('SETTINGS', True, WHITE)
-rect = get_bigger_rect(settings_text.get_rect(center=(WIDTH // 2, int(0.625 * HEIGHT))), 20)
+set_rect = get_bigger_rect(settings_text.get_rect(center=(WIDTH // 2, int(0.625 * HEIGHT))), 20)
 SETTINGS_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=set_rect,
     text='SETTINGS',
     manager=menu_manager
 )
 
 new_campaign_text = MAIN_FONT.render('NEW CAMPAIGN', True, WHITE)
-rect = get_bigger_rect(new_campaign_text.get_rect(center=(WIDTH // 2, int(0.375 * HEIGHT))), 20)
+camp_rect = get_bigger_rect(new_campaign_text.get_rect(center=(WIDTH // 2, int(0.375 * HEIGHT))), 20)
 NEW_GAME_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=camp_rect,
     text='NEW CAMPAIGN',
     manager=menu_manager
 )
 
 load_game_text = MAIN_FONT.render('LOAD SAVE', True, WHITE)
-rect = get_bigger_rect(load_game_text.get_rect(center=(WIDTH // 2, int(0.5 * HEIGHT))), 20)
+load_rect = get_bigger_rect(load_game_text.get_rect(center=(WIDTH // 2, int(0.5 * HEIGHT))), 20)
 LOAD_SAVE_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=load_rect,
     text='LOAD SAVE',
     manager=menu_manager
 )

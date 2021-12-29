@@ -1,4 +1,5 @@
 from Settings import *
+from menu_buttons import quit_rect
 import pygame_gui
 
 """Создание элементов экрана поражения"""
@@ -7,17 +8,15 @@ gameover_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
 
 menu_text = MAIN_FONT.render('MAIN MENU', True, WHITE)
-rect = get_bigger_rect(menu_text.get_rect(center=(WIDTH // 2, int(0.625 * HEIGHT))), 20)
+menu_rect = get_bigger_rect(menu_text.get_rect(center=(WIDTH // 2, int(0.625 * HEIGHT))), 20)
 MAIN_MENU_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=menu_rect,
     text='MAIN MENU',
     manager=gameover_manager
 )
 
-quit_text = MAIN_FONT.render('QUIT TO DESKTOP', True, WHITE)
-rect = get_bigger_rect(quit_text.get_rect(center=(WIDTH // 2, int(0.75 * HEIGHT))), 20)
 QUIT_BUTTON = pygame_gui.elements.UIButton(
-    relative_rect=rect,
+    relative_rect=quit_rect,
     text='QUIT TO DESKTOP',
     manager=gameover_manager
 )
