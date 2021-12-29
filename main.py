@@ -51,7 +51,8 @@ def show_menu_screen():
 def show_setting_screen():
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     fps = 240
-    alpha = 0
+    alpha_up = 0
+    alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
     while True:
         delta = clock.tick(FPS) / 1000.0
@@ -69,9 +70,14 @@ def show_setting_screen():
                         [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
             settings_manager.process_events(event)
         settings_manager.update(delta)
-        screen.blit(background, (0, 0))
-        help_surface.fill((0, 0, 0, alpha))
-        alpha = min(alpha + 30, 200)
+        help_surface.blit(screen, (0, 0))
+        if alpha_up < 255:
+            help_surface.fill((0, 0, 0, alpha_up))
+        alpha_up = min(alpha_up + 15, 255)
+        if alpha_up == 255:
+            alpha_down = max(alpha_down - 15, 150)
+            screen.blit(background, (0, 0))
+            help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(help_surface, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
@@ -339,7 +345,7 @@ class Run:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
-                    if event.key == pygame.K_ESCAPE and not self.pause:
+                    if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
 
             screen.fill(GRAY5)
@@ -357,9 +363,9 @@ class Run:
                 self.all_sprites.update()
                 if not self.ai_detected:
                     self.ai.update()
-            elif self.pause:
+            if self.pause:
                 screen.blit(SC_TEXT, POS)
-            elif self.menu:
+            if self.menu:
                 # Получим код возврата от игрового меню
                 #alpha_menu = 200
                 result = show_in_game_menu()
