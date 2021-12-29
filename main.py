@@ -54,6 +54,8 @@ def show_setting_screen(from_menu=True):
         background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     else:
         background = None
+    surface = pygame.Surface((WIDTH, HEIGHT))
+    surface.set_alpha(128)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -65,9 +67,17 @@ def show_setting_screen(from_menu=True):
                         return 1
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     print(event.text)
+                if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                    if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
+                        for i in ALL_SOUNDS:
+                            i.set_volume(event.value / 10)
             settings_manager.process_events(event)
         settings_manager.update(delta)
-        screen.blit(background, (0, 0))
+        if background is not None:
+            screen.blit(background, (0, 0))
+        pygame.draw.rect(surface, pygame.Color((54, 54, 54, 50)),
+                         (0, 0, WIDTH, HEIGHT))
+        screen.blit(surface, (0, 0))
         settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(FPS)
@@ -114,6 +124,10 @@ class Run:
         self.sound_fire_VLS = FIRE_VLS
         self.sound_weapon_acquire = WEAPON_ACQUIRE
         self.sound_explosion = EXPLOSION
+        self.effect_sounds = [self.sound_explosion, self.sound_fire_VLS,
+                              self.sound_contact_lost,
+                              self.sound_new_contact,
+                              self.sound_weapon_acquire]
 
         # Флаги
         self.running = True
@@ -326,7 +340,9 @@ if __name__ == '__main__':
     gameover_group = pygame.sprite.Group()
     BasesLost(gameover_group)
 
-    menu_run, settings_run, game_run, load_run, gameover_run = True, False, False, False, False
+    game_objects = Run()
+    menu_run, settings_run, game_run, load_run, gameover_run = \
+        True, False, False, False, False
     running = True
     # Основной мега-цикл
     while running:
@@ -348,6 +364,7 @@ if __name__ == '__main__':
             gameover_run = result == 1
         if settings_run:
             result = show_setting_screen()
+            menu_run = result == 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

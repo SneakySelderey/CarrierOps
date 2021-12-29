@@ -3,7 +3,7 @@ import pygame
 import pygame_gui
 
 
-"""Создание элементов основног меню"""
+"""Создание элементов основного меню"""
 
 menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT), 'data/settings.json')
 
