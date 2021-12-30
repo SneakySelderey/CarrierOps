@@ -157,7 +157,7 @@ SETTINGS_BUTTON_2 = SETTINGS_BUTTON.get_same(game_manager)
 QUIT_BUTTON_3 = QUIT_BUTTON_1.get_same(game_manager)
 SETTINGS_LABEL = Label(36, 'SETTINGS', 0.5, 0.125,
                        settings_manager, 'settings', 'center')
-RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.2, 0.5,
+RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')
 VOLUME_LABEL = Label(24, 'VOLUME', 0.2, 0.2,
                      settings_manager, 'option', 'topleft')
@@ -165,8 +165,8 @@ MUSIC_LABEL = Label(24, 'MUSIC', 0.2, 0.3,
                     settings_manager, 'option', 'topleft')
 EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
                       settings_manager, 'option', 'topleft')
-OK_BUTTON = Button('OK', 0.5, 0.9, 10, settings_manager)
-DROP_DOWN_MENU = WindowSizesMenu(0.2, 0.6, 15, settings_manager)
+OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
+DROP_DOWN_MENU = WindowSizesMenu(0.6, 0.3, 15, settings_manager)
 MUSIC_BAR = HorizontalSlider(0, 10, 10, MUSIC_LABEL.rect, 0.16, 40,
                              settings_manager, 'right')
 EFFECT_BAR = HorizontalSlider(0, 10, 10, EFFECTS_LABEL.rect, 0.16, 30,
@@ -193,8 +193,8 @@ class Title(pygame.sprite.Sprite):
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
-                                               Settings.HEIGHT // 5
+        self.rect.centerx, self.rect.centery = \
+            Settings.WIDTH // 2, Settings.HEIGHT // 5
 
     def update(self, pos=(-1, -1)):
         self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
@@ -212,9 +212,9 @@ class BasesLost(pygame.sprite.Sprite):
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
-                                               int(0.375 * Settings.HEIGHT)
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
+            0.375 * Settings.HEIGHT)
 
     def update(self, *pos):
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
-                                               int(0.375 * Settings.HEIGHT)
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
+            0.375 * Settings.HEIGHT)

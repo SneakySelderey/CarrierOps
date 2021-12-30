@@ -110,8 +110,6 @@ def show_setting_screen(flag=True):
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                         game_objects.all_sprites.update()
-                        print(screen.get_rect())
-                        print(help_surface.get_rect())
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
