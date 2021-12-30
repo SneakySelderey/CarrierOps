@@ -116,8 +116,8 @@ music_bar_rect = pygame.Rect(MUSIC_LABEL.rect.topright[0] + 40,
                              MUSIC_LABEL.rect.height)
 MUSIC_BAR = pygame_gui.elements.UIHorizontalSlider(
     manager=settings_manager,
-    value_range=(0, 10),
-    start_value=10,
+    value_range=(0, 100),
+    start_value=20,
     relative_rect=music_bar_rect
 )
 
@@ -126,8 +126,8 @@ effect_bar_rect = pygame.Rect(EFFECTS_LABEL.rect.topright[0] + 40,
                               EFFECTS_LABEL.rect.height)
 EFFECT_BAR = pygame_gui.elements.UIHorizontalSlider(
     manager=settings_manager,
-    value_range=(0, 10),
-    start_value=10,
+    value_range=(0, 100),
+    start_value=100,
     relative_rect=effect_bar_rect
 )
 
