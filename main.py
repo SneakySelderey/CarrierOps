@@ -103,17 +103,22 @@ def show_setting_screen(flag=True):
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
                         Settings.CELL_SIZE = WIDTH // 25
                         gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
-                        pygame.display.set_mode((WIDTH, HEIGHT))
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
+                        screen = pygame.display.set_mode((WIDTH, HEIGHT))
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                         game_objects.all_sprites.update()
+                        print(screen.get_rect())
+                        print(help_surface.get_rect())
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
                         [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return 1
             settings_manager.process_events(event)
         settings_manager.update(delta)
         help_surface.blit(screen, (0, 0))
@@ -127,6 +132,7 @@ def show_setting_screen(flag=True):
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
+        settings_manager.draw_ui(screen)
         settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
