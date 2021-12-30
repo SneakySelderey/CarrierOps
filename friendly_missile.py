@@ -1,6 +1,7 @@
 import pygame
 from math import sqrt, hypot
 from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
+import Settings
 
 
 class MissileFriendly(pygame.sprite.Sprite):
@@ -67,6 +68,11 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.missile_activation()
         if self.activated:
             self.missile_tracking(self.ai)
+
+        img = MISSILE_FRIENDLY
+        x, y = img.get_size()
+        self.image = pygame.transform.scale(img, (
+            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
 
     # обновление координат ракеты при активации ГСН
     def missile_activation(self):

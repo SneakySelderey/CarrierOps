@@ -1,5 +1,7 @@
+import pygame
 from math import hypot
-from Settings import *
+from Settings import AIRCRAFT_FRIENDLY, CELL_SIZE, LANDING, BLACK
+import Settings
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -60,6 +62,11 @@ class AircraftFriendly(pygame.sprite.Sprite):
             self.aircraft_return(self.player)
         else:
             self.aircraft_tracking(self.ai)
+
+        image = AIRCRAFT_FRIENDLY
+        x, y = image.get_size()
+        self.image = pygame.transform.scale(image, (
+            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
 
     def aircraft_return(self, player):
         try:
