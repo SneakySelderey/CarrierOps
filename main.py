@@ -2,7 +2,6 @@ import pygame
 import pygame_gui
 from random import choice
 import sys
-import os
 import random
 from math import hypot
 from board import Board
@@ -75,7 +74,9 @@ def show_setting_screen(flag=True):
                     print(event.text)
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
-                        [i.set_volume(event.value / 10) for i in ALL_EFFECTS]
+                        [i.set_volume(event.value / 100) for i in ALL_EFFECTS]
+                    if event.ui_element == SETTINGS_ELEMENTS['MUSIC']:
+                        pygame.mixer.music.set_volume(event.value / 100)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
@@ -119,7 +120,7 @@ def show_gameover_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/' + choice(MENU_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/' + choice(GAMEOVER_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
             gameover_manager.process_events(event)
         help_surface.fill((0, 0, 0, alpha))
@@ -161,7 +162,7 @@ def show_in_game_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(MENU_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
             game_manager.process_events(event)
         game_manager.update(delta)
@@ -394,6 +395,9 @@ class Run:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                if event.type == MUSIC_END:
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+                    pygame.mixer.music.play(fade_ms=5000)
 
             screen.fill(GRAY5)
             self.board.render(screen)
