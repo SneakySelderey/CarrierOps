@@ -479,16 +479,19 @@ if __name__ == '__main__':
     while running:
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            pygame.mixer.music.fadeout(1000)
             result = show_menu_screen()
             game_run = result == 1
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
-        elif gameover_run:  # Экран после поражения
+        elif gameover_run: # Экран после поражения
+            pygame.mixer.music.fadeout(1000)
             result = show_gameover_screen()
             gameover_run = False
             menu_run = result == 1
         elif game_run:  # Игра
+            pygame.mixer.music.fadeout(1000)
             game_objects = Run()
             result = game_objects.main()
             game_run = False
