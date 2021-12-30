@@ -11,6 +11,8 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from Settings import *
+import Settings
+import gui_elements
 from time import sleep
 
 
@@ -51,6 +53,7 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
+    global WIDTH, HEIGHT, help_surface
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -67,8 +70,14 @@ def show_setting_screen(flag=True):
                     if event.ui_element == SETTINGS_ELEMENTS['OK']:
                         return 1
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-                    print(event.text)
+                    # Изменение размера окна
+                    WIDTH, HEIGHT = map(int, event.text.split('X'))
+                    Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
+                    pygame.display.set_mode((WIDTH, HEIGHT))
+                    rebase_elements(WIDTH, HEIGHT)
+                    help_surface = pygame.transform.scale(help_surface, (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
+                    # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
                         [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
             settings_manager.process_events(event)

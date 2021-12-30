@@ -1,8 +1,20 @@
-from Settings import WIDTH, HEIGHT, WHITE, MAIN_FONT, WINDOW_SIZE
+from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, WIDTH, HEIGHT
+import Settings
 import pygame
 import pygame_gui
 
-"""Создание элементов основного меню"""
+"""Создание элементов интерфейса"""
+
+
+WIDTH, HEIGHT = WIDTH, HEIGHT
+
+def rebase_elements(width, height):
+    """Функция для изменения всех элементов интерфейса"""
+    global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, GAMEOVER_ELEMENTS
+    MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
+    SETTINGS_ELEMENTS = {i: SETTINGS_ELEMENTS[i].get_same() for i in SETTINGS_ELEMENTS}
+    IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in IN_GAME_ELEMENTS}
+    GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in GAMEOVER_ELEMENTS}
 
 
 def get_bigger_rect(rect, d):
@@ -12,14 +24,76 @@ def get_bigger_rect(rect, d):
     return rect
 
 
+class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
+    """Класс горизонтального ползунка"""
+    def __init__(self, start, end, default, rect, pos_w, d, manager,
+                 relative_to_label):
+        if relative_to_label == 'right':
+            slider_rect = pygame.Rect(rect.topright[0] + d,
+                                      rect.topright[1], WIDTH * pos_w,
+                                      rect.height)
+        else:
+            slider_rect = pygame.Rect(rect.topleft[0] - d,
+                                      rect.topleft[1], WIDTH * pos_w,
+                                      rect.height)
+        super().__init__(value_range=(start, end), start_value=default,
+                         manager=manager, relative_rect=slider_rect)
+        self.v_range = range(start, end + 1)
+        self.default = default
+        self.pos_w = pos_w
+        self.d = d
+        self.relative_to_label = relative_to_label
+        self.label_rect = rect
+        self.manager = manager
+
+    def get_same(self, manager=None):
+        """Функция для получения идентичного ползунка"""
+        manager = self.manager if manager is None else manager
+        return HorizontalSlider(self.v_range[0], self.v_range[-1],
+                                self.default, self.label_rect, self.pos_w,
+                                self.d, manager, self.relative_to_label)
+
+
+class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
+    """Класс для выпадающего меню с возможными разрешениями экрана"""
+    def __init__(self, pos1, pos2, d, manager):
+        """Инициализация. Принимает положение относительно ширины и высоты,
+        изменение размера прямоугольника и менеджер"""
+        max_scr = max(WINDOW_SIZE, key=lambda x: len(f'{x[0]}{x[1]}'))
+        max_scr_text = MAIN_FONT.render(f'{max_scr[0]}X{max_scr[1]}', True,
+                                        WHITE)
+        max_scr_rect = get_bigger_rect(max_scr_text.get_rect(
+            topleft=(int(pos1 * WIDTH), int(pos2 * HEIGHT))), d)
+        variants = [f'{i[0]}X{i[1]}' for i in WINDOW_SIZE]
+        self.d = d
+        self.pos = pos1, pos2
+        self.manager = manager
+        super().__init__(manager=manager, options_list=variants,
+                         starting_option=variants[0],
+                         relative_rect=max_scr_rect)
+
+    def get_same(self, manager=None):
+        """Функция дял полученяи идентичногго выпадающего спсика"""
+        manager = self.manager if manager is None else manager
+        return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager)
+
+
 class Label(pygame_gui.elements.UILabel):
     """Класс для метки"""
-    def __init__(self, font_size, title, x, y, manager, obj_id=None,
+    def __init__(self, font_size, title, pos1, pos2, manager, obj_id=None,
                  pos='center'):
-        """Инициализация. Принимает размер шрифта, заголовок, положегние,
-        менеджер, id, и часть прямоугольника, которую задают x и y"""
+        """Инициализация. Принимает размер шрифта, заголовок, положегние
+        относительно ширины и высоты, менеджер, id, и часть прямоугольника,
+        которую задают x и y"""
         text = pygame.font.Font('data/font/Teletactile.ttf', font_size).render(
             title, True, WHITE)
+        x, y = int(WIDTH * pos1), int(HEIGHT * pos2)
+        self.font_size = font_size
+        self.title = title
+        self.place = pos
+        self.manager = manager
+        self.pos = pos1, pos2
+        self.obj_id = obj_id
         if pos == 'center':
             rect = text.get_rect(center=(x, y))
         elif pos == 'topleft':
@@ -36,25 +110,33 @@ class Label(pygame_gui.elements.UILabel):
             super().__init__(text=title, relative_rect=rect, manager=manager,
                              object_id=obj_id)
 
+    def get_same(self, manager=None):
+        """Функция дял получения идентичной метки"""
+        manager = self.manager if manager is None else manager
+        return Label(self.font_size, self.title, self.pos[0], self.pos[1],
+                     manager, self.obj_id, self.place)
+
 
 class Button(pygame_gui.elements.UIButton):
     """Класс для кнопки"""
-    def __init__(self, title, x, y, d, manager):
-        """Инициализация. Принимает текст на кнопке, положение, изменение
-        размера кнопки и менеджер"""
+    def __init__(self, title, pos1, pos2, d, manager):
+        """Инициализация. Принимает текст на кнопке, положение относительно
+        ширины и высоты, изменение размера кнопки и менеджер"""
         text = MAIN_FONT.render(title, True, WHITE)
         rect = get_bigger_rect(
-            text.get_rect(center=(x, y)), d)
+            text.get_rect(center=(int(pos1 * WIDTH), int(pos2 * HEIGHT))), d)
         self.title = title
+        self.manager = manager
+        self.pos = pos1, pos2
         self.d = d
         super().__init__(relative_rect=rect, text=title, manager=manager)
 
-    def get_same(self, manager, x=None, y=None):
+    def get_same(self, manager=None, pos1=None, pos2=None):
         """Функция для получения идентичной кнопки"""
-        if x is None and y is None:
-            return Button(self.title, self.rect.centerx, self.rect.centery,
-                          self.d, manager)
-        return Button(self.title, x, y, self.d, manager)
+        manager = self.manager if manager is None else manager
+        pos1 = self.pos[0] if pos1 is None else pos1
+        pos2 = self.pos[0] if pos2 is None else pos2
+        return Button(self.title, pos1, pos2, self.d, manager)
 
 
 # Создание менеджеров
@@ -68,69 +150,33 @@ settings_manager = pygame_gui.UIManager((WIDTH, HEIGHT),
                                         'data/system/settings.json')
 
 # Создание элементов интерфейса
-QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', WIDTH // 2, int(0.75 * HEIGHT), 20,
-                       menu_manager)
-SETTINGS_BUTTON = Button('SETTINGS', WIDTH // 2, int(0.625 * HEIGHT), 20,
-                         menu_manager)
-NEW_GAME_BUTTON = Button('NEW CAMPAIGN', WIDTH // 2, int(0.375 * HEIGHT), 20,
-                         menu_manager)
-LOAD_SAVE_BUTTON = Button('LOAD SAVE', WIDTH // 2, HEIGHT // 2, 20,
-                          menu_manager)
-MAIN_MENU_BUTTON = Button('MAIN MENU', WIDTH // 2, int(0.625 * HEIGHT), 20,
-                          gameover_manager)
+QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
+SETTINGS_BUTTON = Button('SETTINGS', 0.5, 0.625, 20, menu_manager)
+NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
+LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
+MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
-RESUME_BUTTON = Button('RESUME', WIDTH // 2, int(0.250 * HEIGHT), 20,
-                       game_manager)
-MAIN_MENU_BUTTON_2 = MAIN_MENU_BUTTON.get_same(game_manager, WIDTH // 2,
-                                               int(0.375 * HEIGHT))
+RESUME_BUTTON = Button('RESUME', 0.5, 0.250, 20, game_manager)
+MAIN_MENU_BUTTON_2 = MAIN_MENU_BUTTON.get_same(game_manager, 0.5, 0.375)
 LOAD_SAVE_BUTTON_2 = LOAD_SAVE_BUTTON.get_same(game_manager)
 SETTINGS_BUTTON_2 = SETTINGS_BUTTON.get_same(game_manager)
 QUIT_BUTTON_3 = QUIT_BUTTON_1.get_same(game_manager)
-SETTINGS_LABEL = Label(36, 'SETTINGS', WIDTH // 2, HEIGHT // 8,
+SETTINGS_LABEL = Label(36, 'SETTINGS', 0.5, 0.125,
                        settings_manager, 'settings', 'center')
-RESOLUTION_LABEL = Label(24, 'RESOLUTION', WIDTH // 5, int(0.5 * HEIGHT),
+RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.2, 0.5,
                          settings_manager, 'option', 'topleft')
-VOLUME_LABEL = Label(24, 'VOLUME', WIDTH // 5, int(0.2 * HEIGHT),
+VOLUME_LABEL = Label(24, 'VOLUME', 0.2, 0.2,
                      settings_manager, 'option', 'topleft')
-MUSIC_LABEL = Label(24, 'MUSIC', WIDTH // 5, int(0.3 * HEIGHT),
+MUSIC_LABEL = Label(24, 'MUSIC', 0.2, 0.3,
                     settings_manager, 'option', 'topleft')
-EFFECTS_LABEL = Label(24, 'EFFECTS', WIDTH // 5, int(0.37 * HEIGHT),
+EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
                       settings_manager, 'option', 'topleft')
-OK_BUTTON = Button('OK', WIDTH // 2, int(0.9 * HEIGHT), 10, settings_manager)
-
-
-max_scr = max(WINDOW_SIZE, key=lambda x: len(f'{x[0]}{x[1]}'))
-max_scr_text = MAIN_FONT.render(f'{max_scr[0]}X{max_scr[1]}', True, WHITE)
-max_scr_rect = get_bigger_rect(max_scr_text.get_rect(
-    topleft=(WIDTH // 5 + 15, int(0.6 * HEIGHT))), 15)
-variantss = [f'{i[0]}X{i[1]}' for i in WINDOW_SIZE]
-DROP_DOWN_MENU = pygame_gui.elements.UIDropDownMenu(
-    relative_rect=max_scr_rect,
-    manager=settings_manager,
-    options_list=variantss,
-    starting_option=variantss[0]
-)
-
-music_bar_rect = pygame.Rect(MUSIC_LABEL.rect.topright[0] + 40,
-                             MUSIC_LABEL.rect.topright[1], WIDTH // 6,
-                             MUSIC_LABEL.rect.height)
-MUSIC_BAR = pygame_gui.elements.UIHorizontalSlider(
-    manager=settings_manager,
-    value_range=(0, 10),
-    start_value=10,
-    relative_rect=music_bar_rect
-)
-
-effect_bar_rect = pygame.Rect(EFFECTS_LABEL.rect.topright[0] + 40,
-                              EFFECTS_LABEL.rect.topright[1], WIDTH // 6,
-                              EFFECTS_LABEL.rect.height)
-EFFECT_BAR = pygame_gui.elements.UIHorizontalSlider(
-    manager=settings_manager,
-    value_range=(0, 10),
-    start_value=10,
-    relative_rect=effect_bar_rect
-)
-
+OK_BUTTON = Button('OK', 0.5, 0.9, 10, settings_manager)
+DROP_DOWN_MENU = WindowSizesMenu(0.2, 0.6, 15, settings_manager)
+MUSIC_BAR = HorizontalSlider(0, 10, 10, MUSIC_LABEL.rect, 0.16, 40,
+                             settings_manager, 'right')
+EFFECT_BAR = HorizontalSlider(0, 10, 10, EFFECTS_LABEL.rect, 0.16, 30,
+                              settings_manager, 'right')
 
 # Создание групп с элементами
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
