@@ -117,7 +117,7 @@ music_bar_rect = pygame.Rect(MUSIC_LABEL.rect.topright[0] + 40,
 MUSIC_BAR = pygame_gui.elements.UIHorizontalSlider(
     manager=settings_manager,
     value_range=(0, 100),
-    start_value=50,
+    start_value=20,
     relative_rect=music_bar_rect
 )
 

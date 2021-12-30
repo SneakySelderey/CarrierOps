@@ -77,7 +77,7 @@ def show_setting_screen(flag=True):
                         pygame.mixer.music.set_volume(event.value / 100)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
-                pygame.mixer.music.play(fade_ms=5000)
+                pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
         settings_manager.update(delta)
         help_surface.blit(screen, (0, 0))
@@ -119,7 +119,7 @@ def show_gameover_screen():
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/' + choice(GAMEOVER_MUSIC))
-                pygame.mixer.music.play(fade_ms=5000)
+                pygame.mixer.music.play(fade_ms=3000)
             gameover_manager.process_events(event)
         help_surface.fill((0, 0, 0, alpha))
         gameover_manager.update(delta)
@@ -161,7 +161,7 @@ def show_in_game_menu():
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
-                pygame.mixer.music.play(fade_ms=5000)
+                pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
         game_manager.update(delta)
         screen.blit(help_surface_2, (0, 0))
@@ -395,7 +395,7 @@ class Run:
                         self.menu = not self.menu
                 if event.type == MUSIC_END:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
-                    pygame.mixer.music.play(fade_ms=5000)
+                    pygame.mixer.music.play(fade_ms=3000)
 
             screen.fill(GRAY5)
             self.board.render(screen)
@@ -470,26 +470,27 @@ if __name__ == '__main__':
     running = True
 
     pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
-    pygame.mixer.music.play(fade_ms=5000)
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play(fade_ms=3000)
     pygame.mixer.music.set_endevent(MUSIC_END)
 
     # Основной мега-цикл
     while running:
         # Отрисока разных экранов
         if menu_run:  # Экран меню
-            pygame.mixer.music.fadeout(1000)
+            pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             game_run = result == 1
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
         elif gameover_run:  # Экран после поражения
-            pygame.mixer.music.fadeout(1000)
+            pygame.mixer.music.fadeout(500)
             result = show_gameover_screen()
             gameover_run = False
             menu_run = result == 1
         elif game_run:  # Игра
-            pygame.mixer.music.fadeout(1000)
+            pygame.mixer.music.fadeout(500)
             game_objects = Run()
             result = game_objects.main()
             game_run = False
