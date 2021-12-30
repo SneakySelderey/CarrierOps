@@ -1,6 +1,7 @@
 import pygame
 from Settings import DARK_RED
 import Settings
+from base import Base
 
 
 class Board:
@@ -9,7 +10,8 @@ class Board:
         self.cell_size = cell_size
         self.width = width
         self.height = height
-        self.board = [[0] * width for _ in range(height)]
+        self.board = [[0] * height for _ in range(width)]
+        self.bases = []
         self.left = 0
         self.top = 0
         self.cell_size = 30
@@ -19,6 +21,12 @@ class Board:
         self.left = left
         self.top = top
         self.cell_size = cell_size
+
+    def add_base(self, x, y, group):
+        """Функция для добавления базы на поле"""
+        base = Base(x, y, 'neutral', True, self.cell_size, group)
+        self.board[x][y] = base
+        self.bases.append(base)
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
@@ -30,4 +38,25 @@ class Board:
          for x in range(self.width)]
 
     def update(self):
+        """Обновление размера сетки"""
         self.cell_size = Settings.CELL_SIZE
+
+    def get_cell(self, mouse_pos):
+        """Функция для определения ячейки, на которую нажал пользователь"""
+        x, y = mouse_pos
+        x = (x - self.left) // self.cell_size
+        y = (y - self.top) // self.cell_size
+        if not 0 <= x <= self.width or not 0 <= y <= self.height:
+            return
+        return x, y
+
+    def on_click(self, cell_pos):
+        """Функция"""
+        x, y = cell_pos  # TODO: WHEN PRESSING ON BOARD
+
+    def get_click(self, mouse_pos):
+        """Функия для полчения клика на поле. Если пользователь нажал на поле,
+         идет обработка этого события"""
+        cell = self.get_cell(mouse_pos)
+        if cell is not None:
+            self.on_click(cell)

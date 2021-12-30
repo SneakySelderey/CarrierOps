@@ -101,15 +101,15 @@ def show_setting_screen(flag=True):
                         # Изменение размера окна
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
-                        Settings.CELL_SIZE = WIDTH // 25
+                        Settings.CELL_SIZE = WIDTH // 15
                         gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        game_objects.all_sprites.update()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
-                        game_objects.all_sprites.update()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -228,20 +228,18 @@ class Run:
         self.battle = False
 
         self.all_sprites = pygame.sprite.Group()
-        self.game_sprites = pygame.sprite.Group()
 
         self.player = Player(True)
         self.destination_player = self.player.rect.center
         self.ai = AI(False)
-        self.bases = []
         for i in range(10):
-            x = random.randint(0, self.cells_x - 1) * self.cell_size
-            y = random.randint(0, self.cells_y - 1) * self.cell_size
-            self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
+            x = random.randint(0, self.cells_x - 1)
+            y = random.randint(0, self.cells_y - 1)
+            self.board.add_base(x, y, self.all_sprites)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
-        self.list_all_sprites = [self.player, self.ai, self.bases,
+        self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
                                  self.hostile_missiles, self.friendly_aircraft]
 
@@ -274,13 +272,11 @@ class Run:
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
-        for i in self.bases:
-            base_x = i.rect.centerx // self.cell_size
-            base_y = i.rect.centery // self.cell_size
-            dist = [ai_pos_x - base_x, ai_pos_y - base_y]
-            if [base_x, base_y] not in self.hostile_bases:
+        for base in self.board.bases:
+            dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+            if [base.x, base.y] not in self.hostile_bases:
                 distance.append(
-                    (dist, [i.rect.centerx, i.rect.centery]))
+                    (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
@@ -295,25 +291,21 @@ class Run:
         if dest[0] and dest[1]:
             player_grid_x = destination[0] // self.cell_size
             player_grid_y = destination[1] // self.cell_size
-            for i in self.bases:
-                base_x = i.rect.centerx // self.cell_size
-                base_y = i.rect.centery // self.cell_size
-                if base_x == player_grid_x and base_y == player_grid_y:
-                    i.update('friendly')
-                    if [base_x, base_y] in self.hostile_bases:
-                        self.hostile_bases.remove([base_x, base_y])
+            for base in self.board.bases:
+                if base.x == player_grid_x and base.y == player_grid_y:
+                    base.update('friendly')
+                    if [base.x, base.y] in self.hostile_bases:
+                        self.hostile_bases.remove([base.x, base.y])
 
     def base_lost(self, dest, destination):
         """Функция для захвата базы противником"""
         if dest[0] and dest[1]:
             ai_grid_x = destination[0] // self.cell_size
             ai_grid_y = destination[1] // self.cell_size
-            for i in self.bases:
-                base_x = i.rect.centerx // self.cell_size
-                base_y = i.rect.centery // self.cell_size
-                if base_x == ai_grid_x and base_y == ai_grid_y:
-                    i.update('hostile')
-                    self.hostile_bases.append([base_x, base_y])
+            for base in self.board.bases:
+                if base.x == ai_grid_x and base.y == ai_grid_y:
+                    base.update('hostile')
+                    self.hostile_bases.append([base.x, base.y])
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -419,7 +411,6 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = event.pos
-                        self.game_sprites.update(event.pos)
                     if event.button == 2:
                         self.aircraft_launch(event.pos)
                     if event.button == 3:
@@ -526,6 +517,7 @@ if __name__ == '__main__':
             menu_run = result == 2
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
+            game_objects.all_sprites.update()
             menu_run = result == 1
         elif load_run:  # Меню загрузки
             pass  # TODO: LOAD
