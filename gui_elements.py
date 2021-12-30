@@ -1,11 +1,9 @@
-from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, WIDTH, HEIGHT
+from Settings import WHITE, MAIN_FONT, WINDOW_SIZE
 import pygame
 import pygame_gui
+import Settings
 
 """Создание элементов интерфейса"""
-
-
-WIDTH, HEIGHT = WIDTH, HEIGHT
 
 
 def get_bigger_rect(rect, d):
@@ -21,11 +19,11 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
                  relative_to_label):
         if relative_to_label == 'right':
             slider_rect = pygame.Rect(rect.topright[0] + d,
-                                      rect.topright[1], WIDTH * pos_w,
+                                      rect.topright[1], Settings.WIDTH * pos_w,
                                       rect.height)
         else:
             slider_rect = pygame.Rect(rect.topleft[0] - d,
-                                      rect.topleft[1], WIDTH * pos_w,
+                                      rect.topleft[1], Settings.WIDTH * pos_w,
                                       rect.height)
         super().__init__(value_range=(start, end), start_value=default,
                          manager=manager, relative_rect=slider_rect)
@@ -37,11 +35,12 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
         self.label_rect = rect
         self.manager = manager
 
-    def get_same(self, manager=None):
+    def get_same(self, manager=None, rect=None):
         """Функция для получения идентичного ползунка"""
         manager = self.manager if manager is None else manager
+        rect = self.label_rect if rect is None else rect
         return HorizontalSlider(self.v_range[0], self.v_range[-1],
-                                self.default, self.label_rect, self.pos_w,
+                                self.default, rect, self.pos_w,
                                 self.d, manager, self.relative_to_label)
 
 
@@ -54,7 +53,8 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
         max_scr_text = MAIN_FONT.render(f'{max_scr[0]}X{max_scr[1]}', True,
                                         WHITE)
         max_scr_rect = get_bigger_rect(max_scr_text.get_rect(
-            topleft=(int(pos1 * WIDTH), int(pos2 * HEIGHT))), d)
+            topleft=(int(pos1 * Settings.WIDTH),
+                     int(pos2 * Settings.HEIGHT))), d)
         variants = [f'{i[0]}X{i[1]}' for i in WINDOW_SIZE]
         self.d = d
         self.pos = pos1, pos2
@@ -68,7 +68,7 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
         """Функция дял полученяи идентичногго выпадающего спсика"""
         manager = self.manager if manager is None else manager
         return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager,
-                               f'{WIDTH}X{HEIGHT}')
+                               f'{Settings.WIDTH}X{Settings.HEIGHT}')
 
 
 class Label(pygame_gui.elements.UILabel):
@@ -80,7 +80,7 @@ class Label(pygame_gui.elements.UILabel):
         которую задают x и y"""
         text = pygame.font.Font('data/font/Teletactile.ttf', font_size).render(
             title, True, WHITE)
-        x, y = int(WIDTH * pos1), int(HEIGHT * pos2)
+        x, y = int(Settings.WIDTH * pos1), int(Settings.HEIGHT * pos2)
         self.font_size = font_size
         self.title = title
         self.place = pos
@@ -117,7 +117,8 @@ class Button(pygame_gui.elements.UIButton):
         ширины и высоты, изменение размера кнопки и менеджер"""
         text = MAIN_FONT.render(title, True, WHITE)
         rect = get_bigger_rect(
-            text.get_rect(center=(int(pos1 * WIDTH), int(pos2 * HEIGHT))), d)
+            text.get_rect(center=(int(pos1 * Settings.WIDTH),
+                                  int(pos2 * Settings.HEIGHT))), d)
         self.title = title
         self.manager = manager
         self.pos = pos1, pos2
@@ -133,13 +134,13 @@ class Button(pygame_gui.elements.UIButton):
 
 
 # Создание менеджеров
-menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT),
+menu_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                     'data/system/settings.json')
-gameover_manager = pygame_gui.UIManager((WIDTH, HEIGHT),
+gameover_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                         'data/system/settings.json')
-game_manager = pygame_gui.UIManager((WIDTH, HEIGHT),
+game_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                     'data/system/settings.json')
-settings_manager = pygame_gui.UIManager((WIDTH, HEIGHT),
+settings_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                         'data/system/settings.json')
 
 # Создание элементов интерфейса
@@ -192,10 +193,12 @@ class Title(pygame.sprite.Sprite):
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
+                                               Settings.HEIGHT // 5
 
     def update(self, pos=(-1, -1)):
-        self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
+                                               Settings.HEIGHT // 5
         # сюда можно впихнуть пасхалку
         if self.rect.collidepoint(pos[0], pos[1]):
             pass
@@ -209,7 +212,9 @@ class BasesLost(pygame.sprite.Sprite):
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = WIDTH // 2, int(0.375 * HEIGHT)
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
+                                               int(0.375 * Settings.HEIGHT)
 
     def update(self, *pos):
-        self.rect.centerx, self.rect.centery = WIDTH // 2, int(0.375 * HEIGHT)
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
+                                               int(0.375 * Settings.HEIGHT)

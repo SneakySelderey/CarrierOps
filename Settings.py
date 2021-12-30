@@ -16,7 +16,7 @@ try:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
-WIDTH, HEIGHT = 1920, 1080
+WIDTH, HEIGHT = 1280, 720
 CELL_SIZE = WIDTH // 15
 pygame.display.set_mode((WIDTH, HEIGHT))
 

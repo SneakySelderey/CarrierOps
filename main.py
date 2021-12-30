@@ -24,14 +24,21 @@ def rebase_elements():
     settings_manager.clear_and_reset()
     gameover_manager.clear_and_reset()
     game_manager.clear_and_reset()
+    LABELS = [i.get_same() for i in LABELS]
     MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
-    SETTINGS_ELEMENTS = {i: SETTINGS_ELEMENTS[i].get_same() for i in
-                         SETTINGS_ELEMENTS}
+    for i in SETTINGS_ELEMENTS:
+        if i == 'MUSIC':
+            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
+                rect=LABELS[4].rect)
+        elif i == 'EFFECTS':
+            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
+                rect=LABELS[3].rect)
+        else:
+            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
     IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in
                         IN_GAME_ELEMENTS}
     GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
                          GAMEOVER_ELEMENTS}
-    LABELS = [i.get_same() for i in LABELS]
     gameover_group.update()
     title_group.update()
 
@@ -100,6 +107,7 @@ def show_setting_screen(flag=True):
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
+                        game_objects.all_sprites.update()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
