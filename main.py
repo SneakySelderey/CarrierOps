@@ -1,5 +1,3 @@
-import pygame
-import pygame_gui
 from random import choice
 import sys
 import random
@@ -485,7 +483,7 @@ if __name__ == '__main__':
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
-        elif gameover_run: # Экран после поражения
+        elif gameover_run:  # Экран после поражения
             pygame.mixer.music.fadeout(1000)
             result = show_gameover_screen()
             gameover_run = False
