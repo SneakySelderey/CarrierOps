@@ -16,8 +16,8 @@ try:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
-WIDTH, HEIGHT = 1280, 720
-CELL_SIZE = 75
+WIDTH, HEIGHT = 1920, 1080
+CELL_SIZE = WIDTH // 15
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Цвета
@@ -54,7 +54,5 @@ TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
 LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
 ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SUB_SUNK]
 
-# Для меню паузы
+# Шрифты
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
-SC_TEXT = MAIN_FONT.render('PAUSE', True, WHITE)
-POS = SC_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))

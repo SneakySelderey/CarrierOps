@@ -6,7 +6,7 @@ from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
 class MissileFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, player, first_pos_check, activation, ai, visibility):
+    def __init__(self, player, activation, ai, visibility):
         super().__init__()
         image = MISSILE_FRIENDLY
         x, y = image.get_size()

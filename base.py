@@ -1,5 +1,7 @@
 import pygame
-from Settings import BLACK, BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL
+from Settings import BLACK, BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
+    CELL_SIZE
+import Settings
 
 
 class Base(pygame.sprite.Sprite):
@@ -22,3 +24,5 @@ class Base(pygame.sprite.Sprite):
         if args and Base.Images[args[0]] != self.image:
             self.image = pygame.transform.scale(Base.Images[args[0]],
                                           (self.size, self.size))
+        self.size = Settings.CELL_SIZE
+        self.image = pygame.transform.scale(self.image, (self.size, self.size))

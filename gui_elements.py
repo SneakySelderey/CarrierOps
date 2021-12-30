@@ -1,5 +1,4 @@
 from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, WIDTH, HEIGHT
-import Settings
 import pygame
 import pygame_gui
 
@@ -7,15 +6,6 @@ import pygame_gui
 
 
 WIDTH, HEIGHT = WIDTH, HEIGHT
-
-
-def rebase_elements():
-    """Функция для изменения всех элементов интерфейса"""
-    global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, GAMEOVER_ELEMENTS
-    MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
-    SETTINGS_ELEMENTS = {i: SETTINGS_ELEMENTS[i].get_same() for i in SETTINGS_ELEMENTS}
-    IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in IN_GAME_ELEMENTS}
-    GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in GAMEOVER_ELEMENTS}
 
 
 def get_bigger_rect(rect, d):
@@ -57,7 +47,7 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
 
 class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
     """Класс для выпадающего меню с возможными разрешениями экрана"""
-    def __init__(self, pos1, pos2, d, manager):
+    def __init__(self, pos1, pos2, d, manager, start=None):
         """Инициализация. Принимает положение относительно ширины и высоты,
         изменение размера прямоугольника и менеджер"""
         max_scr = max(WINDOW_SIZE, key=lambda x: len(f'{x[0]}{x[1]}'))
@@ -69,14 +59,16 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
         self.d = d
         self.pos = pos1, pos2
         self.manager = manager
+        start = variants[0] if start is None else start
         super().__init__(manager=manager, options_list=variants,
-                         starting_option=variants[0],
+                         starting_option=start,
                          relative_rect=max_scr_rect)
 
     def get_same(self, manager=None):
         """Функция дял полученяи идентичногго выпадающего спсика"""
         manager = self.manager if manager is None else manager
-        return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager)
+        return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager,
+                               f'{WIDTH}X{HEIGHT}')
 
 
 class Label(pygame_gui.elements.UILabel):
@@ -112,7 +104,7 @@ class Label(pygame_gui.elements.UILabel):
                              object_id=obj_id)
 
     def get_same(self, manager=None):
-        """Функция дял получения идентичной метки"""
+        """Функция для получения идентичной метки"""
         manager = self.manager if manager is None else manager
         return Label(self.font_size, self.title, self.pos[0], self.pos[1],
                      manager, self.obj_id, self.place)
@@ -157,7 +149,6 @@ NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
 LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
 MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
-print(QUIT_BUTTON_1.rect, QUIT_BUTTON_2.rect)
 RESUME_BUTTON = Button('RESUME', 0.5, 0.250, 20, game_manager)
 MAIN_MENU_BUTTON_2 = MAIN_MENU_BUTTON.get_same(game_manager, 0.5, 0.375)
 LOAD_SAVE_BUTTON_2 = LOAD_SAVE_BUTTON.get_same(game_manager)
@@ -181,6 +172,8 @@ EFFECT_BAR = HorizontalSlider(0, 10, 10, EFFECTS_LABEL.rect, 0.16, 30,
                               settings_manager, 'right')
 
 # Создание групп с элементами
+LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
+          MUSIC_LABEL]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
@@ -201,7 +194,8 @@ class Title(pygame.sprite.Sprite):
         self.image.blit(txt, self.rect)
         self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
 
-    def update(self, pos):
+    def update(self, pos=(-1, -1)):
+        self.rect.centerx, self.rect.centery = WIDTH // 2, HEIGHT // 5
         # сюда можно впихнуть пасхалку
         if self.rect.collidepoint(pos[0], pos[1]):
             pass
@@ -215,4 +209,7 @@ class BasesLost(pygame.sprite.Sprite):
         self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
         self.rect = txt.get_rect()
         self.image.blit(txt, self.rect)
+        self.rect.centerx, self.rect.centery = WIDTH // 2, int(0.375 * HEIGHT)
+
+    def update(self, *pos):
         self.rect.centerx, self.rect.centery = WIDTH // 2, int(0.375 * HEIGHT)

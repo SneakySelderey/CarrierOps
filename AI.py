@@ -1,6 +1,7 @@
 import pygame
 from random import randint
 from Settings import BLACK, AI_IMAGE, WIDTH, HEIGHT, CELL_SIZE
+import Settings
 
 
 class AI(pygame.sprite.Sprite):
@@ -22,3 +23,7 @@ class AI(pygame.sprite.Sprite):
         """Обновление позиции спрайта"""
         self.rect.x += self.speedx
         self.rect.y += self.speedy
+        img = AI_IMAGE
+        self.image = pygame.transform.scale(img, (
+            img.get_size()[0] * Settings.CELL_SIZE // 70,
+            img.get_size()[1] * Settings.CELL_SIZE // 70))

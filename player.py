@@ -1,6 +1,7 @@
 import pygame
 from random import randint
 from Settings import BLACK, PLAYER_IMAGE, HEIGHT, CELL_SIZE
+import Settings
 
 
 class Player(pygame.sprite.Sprite):
@@ -23,3 +24,7 @@ class Player(pygame.sprite.Sprite):
         """Обновление позиции игрока"""
         self.rect.x += self.speedx
         self.rect.y += self.speedy
+        img = PLAYER_IMAGE
+        self.image = pygame.transform.scale(img, (
+            img.get_size()[0] * Settings.CELL_SIZE // 70,
+            img.get_size()[1] * Settings.CELL_SIZE // 70))

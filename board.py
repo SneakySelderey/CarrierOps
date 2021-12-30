@@ -1,5 +1,6 @@
 import pygame
 from Settings import DARK_RED
+import Settings
 
 
 class Board:
@@ -21,8 +22,12 @@ class Board:
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
+        cell = Settings.CELL_SIZE
         [pygame.draw.rect(screen, DARK_RED, (
-            x * self.cell_size + self.left,
-            y * self.cell_size + self.top, self.cell_size,
-            self.cell_size), 1) for y in range(self.height)
+            x * cell + self.left,
+            y * cell + self.top, cell,
+            cell), 1) for y in range(self.height)
          for x in range(self.width)]
+
+    def update(self):
+        self.cell_size = Settings.CELL_SIZE

@@ -16,6 +16,26 @@ import gui_elements
 from time import sleep
 
 
+def rebase_elements():
+    """Функция для изменения всех элементов интерфейса"""
+    global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, \
+        GAMEOVER_ELEMENTS, LABELS
+    menu_manager.clear_and_reset()
+    settings_manager.clear_and_reset()
+    gameover_manager.clear_and_reset()
+    game_manager.clear_and_reset()
+    MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
+    SETTINGS_ELEMENTS = {i: SETTINGS_ELEMENTS[i].get_same() for i in
+                         SETTINGS_ELEMENTS}
+    IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in
+                        IN_GAME_ELEMENTS}
+    GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
+                         GAMEOVER_ELEMENTS}
+    LABELS = [i.get_same() for i in LABELS]
+    gameover_group.update()
+    title_group.update()
+
+
 def terminate():
     """"Функция для завершения работы программы"""
     pygame.quit()
@@ -53,7 +73,7 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface
+    global WIDTH, HEIGHT, help_surface, screen
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -70,12 +90,16 @@ def show_setting_screen(flag=True):
                     if event.ui_element == SETTINGS_ELEMENTS['OK']:
                         return 1
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-                    # Изменение размера окна
-                    WIDTH, HEIGHT = map(int, event.text.split('X'))
-                    Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
-                    pygame.display.set_mode((WIDTH, HEIGHT))
-                    rebase_elements(WIDTH, HEIGHT)
-                    help_surface = pygame.transform.scale(help_surface, (WIDTH, HEIGHT))
+                    if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
+                        # Изменение размера окна
+                        WIDTH, HEIGHT = map(int, event.text.split('X'))
+                        Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
+                        Settings.CELL_SIZE = WIDTH // 25
+                        gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
+                        pygame.display.set_mode((WIDTH, HEIGHT))
+                        rebase_elements()
+                        help_surface = pygame.transform.scale(help_surface,
+                                                              (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -204,16 +228,18 @@ class Run:
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.list_all_sprites = [self.player, self.ai, self.bases,
-                                 self.friendly_missiles, self.hostile_missiles, self.friendly_aircraft]
+                                 self.friendly_missiles,
+                                 self.hostile_missiles, self.friendly_aircraft]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         self.friendly_missiles.append(MissileFriendly(
-            self.player, True, destination, self.ai, True))
+            self.player, destination, self.ai, True))
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
-        self.friendly_aircraft.append(AircraftFriendly(self.player, destination, self.ai, True))
+        self.friendly_aircraft.append(AircraftFriendly(
+            self.player, destination, self.ai, True))
         TAKEOFF.play()
 
     def move(self, destination, game_obj, screen=None):
@@ -406,7 +432,9 @@ class Run:
                 if not self.ai_detected:
                     self.ai.update()
             if self.pause:
-                screen.blit(SC_TEXT, POS)
+                text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
+                screen.blit(text_pause, text_pause.get_rect(
+                    center=(WIDTH // 2, HEIGHT // 2)))
             if self.menu:
                 # Получим код возврата от игрового меню
                 result = show_in_game_menu()
