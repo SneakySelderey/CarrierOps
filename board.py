@@ -22,9 +22,9 @@ class Board:
         self.top = top
         self.cell_size = cell_size
 
-    def add_base(self, x, y, group):
+    def add_base(self, x, y):
         """Функция для добавления базы на поле"""
-        base = Base(x, y, 'neutral', True, self.cell_size, group)
+        base = Base(x, y, 'neutral', True, self.cell_size)
         self.board[x][y] = base
         self.bases.append(base)
 

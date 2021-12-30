@@ -1,5 +1,6 @@
 import pygame
-from Settings import BLACK, BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL
+from Settings import BLACK, BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
+    ALL_SPRITES
 import Settings
 
 
@@ -8,8 +9,8 @@ class Base(pygame.sprite.Sprite):
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
               'hostile': BASE_HOSTILE}
 
-    def __init__(self, x, y, state, visibility, cell_size, group):
-        super().__init__(group)
+    def __init__(self, x, y, state, visibility, cell_size):
+        super().__init__(ALL_SPRITES)
         base_img = pygame.transform.scale(Base.Images[state],
                                           (cell_size, cell_size))
         self.x, self.y = x, y
@@ -27,6 +28,8 @@ class Base(pygame.sprite.Sprite):
             self.state = args[0]
             self.image = pygame.transform.scale(Base.Images[args[0]],
                                                 (self.size, self.size))
+
+    def new_position(self):
         self.size = Settings.CELL_SIZE
         self.rect.topleft = [self.x * self.size, self.y * self.size]
         self.image = pygame.transform.scale(Base.Images[self.state],

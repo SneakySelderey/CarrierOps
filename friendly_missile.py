@@ -2,14 +2,14 @@ import pygame
 from math import hypot
 from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
 import Settings
-from Settings import new_coords
+from Settings import new_coords, ALL_SPRITES
 
 
 class MissileFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
     def __init__(self, player, activation, ai, visibility):
-        super().__init__()
+        super().__init__(ALL_SPRITES)
         image = MISSILE_FRIENDLY
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
@@ -70,10 +70,11 @@ class MissileFriendly(pygame.sprite.Sprite):
         if self.activated:
             self.missile_tracking(self.ai)
 
+    def new_position(self):
         img = MISSILE_FRIENDLY
-        x, y = img.get_size()
         self.image = pygame.transform.scale(img, (
-            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
+            img.get_size()[0] * Settings.CELL_SIZE // 70,
+            img.get_size()[1] * Settings.CELL_SIZE // 70))
         rect = self.image.get_rect()
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y, (
             Settings.P_WIDTH, Settings.P_HEIGHT), (

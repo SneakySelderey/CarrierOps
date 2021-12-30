@@ -99,7 +99,7 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
-                        #Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
+                        Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
                         Settings.CELL_SIZE = WIDTH // 20
@@ -108,7 +108,9 @@ def show_setting_screen(flag=True):
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                        game_objects.all_sprites.update()
+                        for i in ALL_SPRITES:
+                            i.new_position()
+                        ALL_SPRITES.update()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -236,7 +238,7 @@ class Run:
         for i in range(10):
             x = random.randint(0, self.cells_x - 1)
             y = random.randint(0, self.cells_y - 1)
-            self.board.add_base(x, y, self.all_sprites)
+            self.board.add_base(x, y)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
@@ -290,8 +292,8 @@ class Run:
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""
         if dest[0] and dest[1]:
-            player_grid_x = destination[0] // self.cell_size
-            player_grid_y = destination[1] // self.cell_size
+            player_grid_x = destination[0] // Settings.CELL_SIZE
+            player_grid_y = destination[1] // Settings.CELL_SIZE
             for base in self.board.bases:
                 if base.x == player_grid_x and base.y == player_grid_y:
                     base.update('friendly')
@@ -301,8 +303,8 @@ class Run:
     def base_lost(self, dest, destination):
         """Функция для захвата базы противником"""
         if dest[0] and dest[1]:
-            ai_grid_x = destination[0] // self.cell_size
-            ai_grid_y = destination[1] // self.cell_size
+            ai_grid_x = destination[0] // Settings.CELL_SIZE
+            ai_grid_y = destination[1] // Settings.CELL_SIZE
             for base in self.board.bases:
                 if base.x == ai_grid_x and base.y == ai_grid_y:
                     base.update('hostile')
@@ -420,6 +422,11 @@ class Run:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
+                        print(self.player.rect)
+                        for i in game_objects.all_sprites:
+                            print(i.rect)
+                        print()
+                        print()
                         self.menu = not self.menu
 
             screen.fill(GRAY5)

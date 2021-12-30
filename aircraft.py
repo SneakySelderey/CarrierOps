@@ -2,12 +2,13 @@ import pygame
 from math import hypot
 from Settings import AIRCRAFT_FRIENDLY, CELL_SIZE, LANDING, BLACK
 import Settings
+from Settings import new_coords, ALL_SPRITES
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
     def __init__(self, player, destination, ai, visibility):
-        super().__init__()
+        super().__init__(ALL_SPRITES)
         image = AIRCRAFT_FRIENDLY
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
@@ -67,6 +68,17 @@ class AircraftFriendly(pygame.sprite.Sprite):
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
             x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
+
+    def new_position(self):
+        img = AIRCRAFT_FRIENDLY
+        self.image = pygame.transform.scale(img, (
+            img.get_size()[0] * Settings.CELL_SIZE // 70,
+            img.get_size()[1] * Settings.CELL_SIZE // 70))
+        rect = self.image.get_rect()
+        rect.x, rect.y = new_coords(self.rect.x, self.rect.y, (
+            Settings.P_WIDTH, Settings.P_HEIGHT), (
+                                        Settings.WIDTH, Settings.HEIGHT))
+        self.rect = rect
 
     def aircraft_return(self, player):
         try:
