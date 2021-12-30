@@ -7,7 +7,7 @@ from Settings import new_coords, ALL_SPRITES
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
-    def __init__(self, player, destination, ai, visibility):
+    def __init__(self, player, destination, ai, visibility, cell_x, cell_y):
         super().__init__(ALL_SPRITES)
         image = AIRCRAFT_FRIENDLY
         x, y = image.get_size()
@@ -70,6 +70,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
             x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
 
     def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
         img = AIRCRAFT_FRIENDLY
         self.image = pygame.transform.scale(img, (
             img.get_size()[0] * Settings.CELL_SIZE // 70,
@@ -79,6 +80,18 @@ class AircraftFriendly(pygame.sprite.Sprite):
             Settings.P_WIDTH, Settings.P_HEIGHT), (
                                         Settings.WIDTH, Settings.HEIGHT))
         self.rect = rect
+        self.player.rect.center = new_coords(self.player.rect.centerx,
+                          self.player.rect.centery,
+                          (Settings.P_WIDTH, Settings.P_HEIGHT),
+                          (Settings.WIDTH, Settings.HEIGHT))
+        self.pos = pygame.math.Vector2(
+            [self.player.rect.centerx, self.player.rect.centery])
+        #self.pos = pygame.math.Vector2([x, y])
+        x, y = new_coords(self.destination[0] - self.player.rect.centerx,
+                          self.destination[1] - self.player.rect.centery,
+                          (Settings.P_WIDTH, Settings.P_HEIGHT),
+                          (Settings.WIDTH, Settings.HEIGHT))
+        #self.dir = pygame.math.Vector2((x, y)).normalize()
 
     def aircraft_return(self, player):
         try:

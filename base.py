@@ -30,6 +30,7 @@ class Base(pygame.sprite.Sprite):
                                                 (self.size, self.size))
 
     def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
         self.size = Settings.CELL_SIZE
         self.rect.topleft = [self.x * self.size, self.y * self.size]
         self.image = pygame.transform.scale(Base.Images[self.state],

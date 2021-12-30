@@ -71,6 +71,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.missile_tracking(self.ai)
 
     def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
         img = MISSILE_FRIENDLY
         self.image = pygame.transform.scale(img, (
             img.get_size()[0] * Settings.CELL_SIZE // 70,

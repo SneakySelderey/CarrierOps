@@ -267,7 +267,8 @@ class Run:
         stop_y = game_obj.speedy == 0
         if screen is not None and self.player.rect.center != destination:
             pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]), 10)
+                screen, BLUE, (destination[0], destination[1]),
+                Settings.CELL_SIZE // 7)
         return [stop_x, stop_y]
 
     def destination_ai(self):

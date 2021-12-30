@@ -27,6 +27,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += self.speedy
 
     def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
         img = PLAYER_IMAGE
         self.image = pygame.transform.scale(img, (
             img.get_size()[0] * Settings.CELL_SIZE // 70,
