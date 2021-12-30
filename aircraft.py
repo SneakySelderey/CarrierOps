@@ -7,7 +7,7 @@ from Settings import new_coords, ALL_SPRITES
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
-    def __init__(self, player, destination, ai, visibility, cell_x, cell_y):
+    def __init__(self, player, destination, ai, visibility):
         super().__init__(ALL_SPRITES)
         image = AIRCRAFT_FRIENDLY
         x, y = image.get_size()
@@ -91,7 +91,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
                           self.destination[1] - self.player.rect.centery,
                           (Settings.P_WIDTH, Settings.P_HEIGHT),
                           (Settings.WIDTH, Settings.HEIGHT))
-        #self.dir = pygame.math.Vector2((x, y)).normalize()
+        self.dir = pygame.math.Vector2((x, y)).normalize()
 
     def aircraft_return(self, player):
         try:

@@ -110,6 +110,8 @@ def show_setting_screen(flag=True):
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
                         for i in ALL_SPRITES:
                             i.new_position()
+                            if i == game_objects.player:
+                                game_objects.destination_player = new_coords(*game_objects.destination_player, (Settings.P_WIDTH, Settings.P_HEIGHT), (WIDTH, HEIGHT))
                         ALL_SPRITES.update()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
