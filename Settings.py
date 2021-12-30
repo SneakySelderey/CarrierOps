@@ -1,5 +1,6 @@
 import pygame
 import ctypes
+import os
 
 
 user32 = ctypes.windll.user32
@@ -19,6 +20,9 @@ except ValueError:
 WIDTH, HEIGHT = 1280, 720
 CELL_SIZE = 75
 pygame.display.set_mode((WIDTH, HEIGHT))
+
+# Events
+MUSIC_END = pygame.USEREVENT+1
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -49,10 +53,17 @@ EXPLOSION = pygame.mixer.Sound('data/sound/explosion.wav')
 FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
-SUB_SUNK = pygame.mixer.Sound('data/sound/SubSunk.wav')
 TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
 LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
-ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SUB_SUNK]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING]
+
+# Музыка
+MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
+GAME_MUSIC = os.listdir(os.getcwd() + '/data/music/game/')
+BATTLE_MUSIC = os.listdir(os.getcwd() + '/data/music/battle/')
+GAMEOVER_MUSIC = os.listdir(os.getcwd() + '/data/music/gameover/')
+GROUPS = [MENU_MUSIC, GAME_MUSIC, BATTLE_MUSIC, GAMEOVER_MUSIC]
+ALL_MUSIC = [track for group in GROUPS for track in group]
 
 # Для меню паузы
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
