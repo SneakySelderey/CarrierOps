@@ -65,7 +65,7 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
                          relative_rect=max_scr_rect)
 
     def get_same(self, manager=None):
-        """Функция дял полученяи идентичногго выпадающего спсика"""
+        """Функция для полученяи идентичногго выпадающего спсика"""
         manager = self.manager if manager is None else manager
         return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager,
                                f'{Settings.WIDTH}X{Settings.HEIGHT}')
