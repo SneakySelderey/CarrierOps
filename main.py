@@ -99,9 +99,10 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
+                        #Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
-                        Settings.CELL_SIZE = WIDTH // 15
+                        Settings.CELL_SIZE = WIDTH // 20
                         gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
