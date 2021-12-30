@@ -8,7 +8,8 @@ import pygame_gui
 
 WIDTH, HEIGHT = WIDTH, HEIGHT
 
-def rebase_elements(width, height):
+
+def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
     global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, GAMEOVER_ELEMENTS
     MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
@@ -135,7 +136,7 @@ class Button(pygame_gui.elements.UIButton):
         """Функция для получения идентичной кнопки"""
         manager = self.manager if manager is None else manager
         pos1 = self.pos[0] if pos1 is None else pos1
-        pos2 = self.pos[0] if pos2 is None else pos2
+        pos2 = self.pos[1] if pos2 is None else pos2
         return Button(self.title, pos1, pos2, self.d, manager)
 
 
@@ -156,6 +157,7 @@ NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
 LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
 MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
+print(QUIT_BUTTON_1.rect, QUIT_BUTTON_2.rect)
 RESUME_BUTTON = Button('RESUME', 0.5, 0.250, 20, game_manager)
 MAIN_MENU_BUTTON_2 = MAIN_MENU_BUTTON.get_same(game_manager, 0.5, 0.375)
 LOAD_SAVE_BUTTON_2 = LOAD_SAVE_BUTTON.get_same(game_manager)
