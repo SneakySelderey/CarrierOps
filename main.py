@@ -251,6 +251,7 @@ class Run:
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
+        print()
         self.friendly_missiles.append(MissileFriendly(
             destination, self.ai, True))
         FIRE_VLS.play()

@@ -23,7 +23,6 @@ class MissileFriendly(pygame.sprite.Sprite):
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
-
         self.activation = activation
 
         # Таймеры
@@ -69,15 +68,21 @@ class MissileFriendly(pygame.sprite.Sprite):
             if self.ticks >= 50:
                 self.total_ticks += 1
                 self.ticks = 0
+                norm_vector = pygame.math.Vector2(cos(tan(self.alpha)),
+                                                  sin(tan(self.alpha)))
                 if self.turn == 0:
-                    self.alpha = atan(tan(self.alpha) - radians(40))
+                    norm_vector = norm_vector.rotate(-40)
+                    self.alpha = atan2(norm_vector.y, norm_vector.x)
                     self.turn += 1
                 elif self.turn == 1:
-                    self.alpha = atan(tan(self.alpha) + radians(80))
+                    norm_vector = norm_vector.rotate(80)
+                    self.alpha = atan2(norm_vector.y, norm_vector.x)
                     self.turn += 1
                 elif self.turn == 2:
-                    self.alpha = atan(tan(self.alpha) - radians(80))
+                    norm_vector = norm_vector.rotate(-80)
+                    self.alpha = atan2(norm_vector.y, norm_vector.x)
                     self.turn = 1
+                print(self.alpha)
             self.ticks += 1
 
     def missile_tracking(self, ai):
