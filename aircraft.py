@@ -1,10 +1,10 @@
 import pygame
-from math import hypot
+from math import hypot, sin, cos, atan2
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING
 import Settings
 import numpy as np
-np.seterr(divide='ignore', invalid='ignore')
+R = 3
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -14,15 +14,14 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
         self.rect = self.image.get_rect()
         self.rect.center = [player.rect.centerx, player.rect.centery]
-        self.pos = np.array([*self.rect.center])
-        self.dir = np.array([destination[0] - self.rect.centerx,
-                             destination[1] - self.rect.centery])
-        self.dir = self.dir / np.linalg.norm(self.dir)
+        self.pos = list(self.rect.center)
 
         self.visibility = visibility
 
         self.playerx, self.playery = player.rect.centerx, player.rect.centery
         self.ai_x, self.ai_y = ai.rect.center
+        self.alpha = atan2(destination[1] - self.pos[1],
+                           destination[0] - self.pos[0])
 
         # три таймера, отсчитывающие время полета самолета
 
@@ -47,11 +46,10 @@ class AircraftFriendly(pygame.sprite.Sprite):
         clock1.tick(300)
         self.ticks1 += 1
 
-        if list(self.pos) != self.destination and not self.stop:
-            self.pos = self.pos + self.dir * 2
-            x = self.pos[0]
-            y = self.pos[1]
-            self.rect.center = x, y
+        if self.pos != self.destination and not self.stop:
+            self.pos[0] = self.pos[0] + R * cos(self.alpha)
+            self.pos[1] = self.pos[1] + R * sin(self.alpha)
+            self.rect.center = self.pos
 
         delta = Settings.CELL_SIZE // 10
         if self.destination[0] - 10 - delta < self.rect.centerx < self.destination[0] + 10 + delta\
@@ -71,21 +69,14 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.rect = rect
         self.player.rect.center = new_coords(*self.player.rect.center)
         self.ai.rect.center = new_coords(*self.ai.rect.center)
-        self.pos = np.array([*new_coords(self.pos[0], self.pos[1])])
+        self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.destination = new_coords(*self.destination)
-        x, y = new_coords(self.destination[0] - self.rect.centerx,
-                          self.destination[1] - self.rect.centery)
-        try:
-            self.dir = np.array([x, y])
-            self.dir = self.dir / np.linalg.norm(self.dir)
-        except ValueError:
-            self.delete = True
+        self.alpha = atan2(self.destination[1] - self.rect.centery, self.destination[0] - self.rect.centerx)
 
     def aircraft_return(self, player):
         try:
-            self.dir = np.array([player.rect.centerx - self.rect.centerx,
-                                player.rect.centery - self.rect.centery])
-            self.dir = self.dir / np.linalg.norm(self.dir)
+            self.alpha = atan2(player.rect.centery - self.rect.centery,
+                               player.rect.centerx - self.rect.centerx)
             self.destination = player.rect.centerx, player.rect.centery
             self.stop = False
             if self.play_sound:
@@ -101,9 +92,8 @@ class AircraftFriendly(pygame.sprite.Sprite):
             dist_between_air_ai = hypot(self.ai_x - self.rect.centerx,
                                         self.ai_y - self.rect.centery)
             if dist_between_air_ai <= Settings.CELL_SIZE * 3.5:
-                self.dir = np.array([self.ai_x - self.rect.centerx,
-                                     self.ai_y - self.rect.centery])
-                self.dir = self.dir / np.linalg.norm(self.dir)
+                self.alpha = atan2(self.ai_y - self.rect.centery,
+                                   self.ai_x - self.rect.centerx)
                 self.stop = False
         except ValueError:
             pass
