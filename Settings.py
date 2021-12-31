@@ -55,7 +55,9 @@ NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
 TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
 LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING]
+SEAGULLS = pygame.mixer.Sound('data/sound/Seagulls.wav')
+SLIDE_EFFECTS = [SEAGULLS]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SEAGULLS]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
@@ -69,3 +71,7 @@ ALL_MUSIC = [track for group in GROUPS for track in group]
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
 SC_TEXT = MAIN_FONT.render('PAUSE', True, WHITE)
 POS = SC_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
+# Слайды пролога
+files = os.listdir(os.getcwd() + '/data/slides/')
+SLIDES = iter(sorted(files, key=lambda x: int(x[:x.find('.')])))
