@@ -80,7 +80,7 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface, screen
+    global WIDTH, HEIGHT, help_surface, screen, game_objects
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -107,12 +107,15 @@ def show_setting_screen(flag=True):
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
-                        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-                        for i in ALL_SPRITES:
-                            i.new_position()
-                            if i == game_objects.player:
-                                game_objects.destination_player = new_coords(*game_objects.destination_player)
-                        ALL_SPRITES.update()
+                        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        if not flag:
+                            for i in ALL_SPRITES:
+                                i.new_position()
+                                if i == game_objects.player:
+                                    game_objects.destination_player = new_coords(*game_objects.destination_player)
+                            ALL_SPRITES.update()
+                        else:
+                            game_objects = Run()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -148,7 +151,7 @@ def show_gameover_screen():
     screen.fill(BLACK)
     gameover_group.draw(screen)
     pygame.display.flip()
-    sleep(1)
+    sleep(0.5)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -486,7 +489,7 @@ if __name__ == '__main__':
     pygame.init()
     pygame.mixer.init()
     size = WIDTH, HEIGHT
-    screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+    screen = pygame.display.set_mode(size)
     help_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()

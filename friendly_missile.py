@@ -1,8 +1,7 @@
 import pygame
 from math import hypot
-from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
-import Settings
-from Settings import new_coords, ALL_SPRITES, new_image_size
+from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
+    MISSILE_FRIENDLY
 
 
 class MissileFriendly(pygame.sprite.Sprite):
@@ -10,11 +9,7 @@ class MissileFriendly(pygame.sprite.Sprite):
     противокорабельной ракеты"""
     def __init__(self, player, activation, ai, visibility):
         super().__init__(ALL_SPRITES)
-        image = MISSILE_FRIENDLY
-        x, y = image.get_size()
-        self.image = pygame.transform.scale(image, (
-            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
-        self.image.set_colorkey(BLACK)
+        self.image = new_image_size(MISSILE_FRIENDLY)
         self.rect = self.image.get_rect()
 
         self.rect.center = [player.rect.centerx, player.rect.centery]
