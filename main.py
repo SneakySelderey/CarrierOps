@@ -265,10 +265,9 @@ class Run:
         """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
-        speed = Settings.CELL_SIZE // 70
-        game_obj.speedx = speed if dx > center[0] else -speed if dx < center[0] else 0
+        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
         stop_x = game_obj.speedx == 0
-        game_obj.speedy = speed if dy > center[1] else -speed if dy < center[1] else 0
+        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
         if screen is not None and self.player.rect.center != destination:
             pygame.draw.circle(
@@ -326,7 +325,7 @@ class Run:
             # если цель в радиусе обнаружения ракеты, то
             # поднимается соответствующий флаг
             missile_x, missile_y = missile.rect.center
-            if hypot(missile_x - ai_x, missile_y - ai_y) <= 150:
+            if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
                 missile_tracking = True
             # если ракета исчерпала свой ресурс, она падает в море и
             # спрайт удаляется
@@ -341,7 +340,7 @@ class Run:
                                   missile.activation[1]))
             pygame.draw.circle(screen, BLUE,
                                (missile_x, missile_y),
-                               150, 1)
+                               Settings.CELL_SIZE * 2, 1)
 
         # если противник обнаружен самолетом
         air_tracking = False
@@ -349,7 +348,7 @@ class Run:
             air_x, air_y = aircraft.rect.center
             # если цель в радиусе обнаружения самолета, то
             # поднимается соответствующий флаг
-            if hypot(air_x - ai_x, air_y - ai_y) <= 250:
+            if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
                 air_tracking = True
             # если самолет исчерпала свой ресурс, он возвращается на авианосец
             if aircraft.delete:
@@ -362,13 +361,13 @@ class Run:
                               aircraft.destination[1]))
             pygame.draw.circle(screen, BLUE,
                                (air_x, air_y),
-                               250, 1)
+                               Settings.CELL_SIZE * 3.5, 1)
 
         # отрисовка спрайта противника
         dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= 300 or missile_tracking or air_tracking:
+        if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
             self.ai.visibility = True
-            pygame.draw.circle(screen, RED, (ai_x, ai_y), 300, 1)
+            pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
@@ -406,8 +405,8 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, BLUE, (player_x, player_y), 300, 1)
-        pygame.draw.circle(screen, BLUE, (player_x, player_y), 1050, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y), Settings.CELL_SIZE * 4, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y), Settings.CELL_SIZE * 15, 1)
 
     def main(self):
         """Функция с основным игровым циклом"""
