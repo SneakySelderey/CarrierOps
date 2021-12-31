@@ -3,8 +3,6 @@ from math import hypot, sin, cos, atan2
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE
 import Settings
-from numba import njit
-R = 2
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -30,12 +28,14 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.total_ticks += 1
 
         if self.pos != self.destination and not self.stop:
-            self.pos[0] = self.pos[0] + R * cos(self.alpha)
-            self.pos[1] = self.pos[1] + R * sin(self.alpha)
+            # обновление кооординат (из полярнйо системы в декартову)
+            self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(self.alpha)
+            self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
             self.rect.center = self.pos
 
         if abs(self.destination[0] - self.rect.centerx) <= 10 and \
                 abs(self.destination[1] - self.rect.centery) <= 10:
+            #  Если самолет достиг цели
             self.stop = True
 
         if self.total_ticks >= 1500:
