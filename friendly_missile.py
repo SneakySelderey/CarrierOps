@@ -59,12 +59,13 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
-        try:
-            x, y = new_coords(self.activation[0] - self.pos[0],
-                              self.activation[1] - self.pos[1])
-            self.alpha = pygame.math.Vector2((x, y)).normalize()
-        except ValueError:
-            self.total_ticks = 10
+        if not self.activated:
+            try:
+                x, y = new_coords(self.activation[0] - self.pos[0],
+                                  self.activation[1] - self.pos[1])
+                self.alpha = pygame.math.Vector2((x, y)).normalize()
+            except ValueError:
+                self.total_ticks = 10
 
     def missile_activation(self):
         """Обновление координат ракет при активации ГСН"""
