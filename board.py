@@ -49,6 +49,7 @@ class Board:
         y = (y - self.top) // self.cell_size
         if not 0 <= x <= self.width or not 0 <= y <= self.height:
             return
+        print(x, y, Settings.CELL_SIZE)
         return x, y
 
     def on_click(self, cell_pos):

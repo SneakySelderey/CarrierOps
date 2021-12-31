@@ -49,8 +49,11 @@ class AircraftFriendly(pygame.sprite.Sprite):
             y = int(self.pos.y)
             self.rect.center = x, y
 
+        print(self.destination)
+        print(self.rect.center)
+        print()
         if self.destination[0] - 10 < self.rect.centerx < self.destination[0] + 10 \
-                and self.destination[1] - 10 < self.rect.centery < self.destination[1]:
+                and self.destination[1] - 10 < self.rect.centery < self.destination[1] + 10:
             self.stop = True
 
         if self.total_ticks >= 30:
@@ -68,8 +71,8 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = pygame.math.Vector2(new_coords(*self.pos))
         self.destination = new_coords(*self.destination)
-        x, y = new_coords(self.destination[0] - self.pos[0],
-                          self.destination[1] - self.pos[1])
+        x, y = new_coords(self.destination[0] - self.rect.centerx,
+                          self.destination[1] - self.rect.centery)
         try:
             self.dir = pygame.math.Vector2((x, y)).normalize()
         except ValueError:
