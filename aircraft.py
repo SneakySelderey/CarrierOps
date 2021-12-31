@@ -2,7 +2,7 @@ import pygame
 from math import hypot
 from Settings import AIRCRAFT_FRIENDLY, CELL_SIZE, LANDING, BLACK
 import Settings
-from Settings import new_coords, ALL_SPRITES
+from Settings import new_coords, ALL_SPRITES, new_image_size
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -12,7 +12,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         image = AIRCRAFT_FRIENDLY
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
-            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
+            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.center = [player.rect.centerx, player.rect.centery]
@@ -37,7 +37,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.stop = False
         self.delete = False
         self.play_sound = True
-        self.landing = LANDING
 
     # обновление координат самолета при полете к маршрутной точке
     def update(self):
@@ -64,34 +63,22 @@ class AircraftFriendly(pygame.sprite.Sprite):
         else:
             self.aircraft_tracking(self.ai)
 
-        image = AIRCRAFT_FRIENDLY
-        x, y = image.get_size()
-        self.image = pygame.transform.scale(image, (
-            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
-
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
-        img = AIRCRAFT_FRIENDLY
-        self.image = pygame.transform.scale(img, (
-            img.get_size()[0] * Settings.CELL_SIZE // 70,
-            img.get_size()[1] * Settings.CELL_SIZE // 70))
+        self.image = new_image_size(AIRCRAFT_FRIENDLY)
         rect = self.image.get_rect()
-        rect.x, rect.y = new_coords(self.rect.x, self.rect.y, (
-            Settings.P_WIDTH, Settings.P_HEIGHT), (
-                                        Settings.WIDTH, Settings.HEIGHT))
+        rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
-        self.player.rect.center = new_coords(self.player.rect.centerx,
-                          self.player.rect.centery,
-                          (Settings.P_WIDTH, Settings.P_HEIGHT),
-                          (Settings.WIDTH, Settings.HEIGHT))
-        self.pos = pygame.math.Vector2(
-            [self.player.rect.centerx, self.player.rect.centery])
-        #self.pos = pygame.math.Vector2([x, y])
-        x, y = new_coords(self.destination[0] - self.player.rect.centerx,
-                          self.destination[1] - self.player.rect.centery,
-                          (Settings.P_WIDTH, Settings.P_HEIGHT),
-                          (Settings.WIDTH, Settings.HEIGHT))
-        self.dir = pygame.math.Vector2((x, y)).normalize()
+        self.player.rect.center = new_coords(*self.player.rect.center)
+        self.ai.rect.center = new_coords(*self.ai.rect.center)
+        self.pos = pygame.math.Vector2(new_coords(*self.pos))
+        self.destination = new_coords(*self.destination)
+        x, y = new_coords(self.destination[0] - self.pos[0],
+                          self.destination[1] - self.pos[1])
+        try:
+            self.dir = pygame.math.Vector2((x, y)).normalize()
+        except ValueError:
+            self.delete = True
 
     def aircraft_return(self, player):
         try:
@@ -100,7 +87,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
             self.destination = player.rect.centerx, player.rect.centery
             self.stop = False
             if self.play_sound:
-                self.landing.play()
+                LANDING.play()
                 self.play_sound = False
         except ValueError:
             self.delete = True

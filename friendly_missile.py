@@ -2,7 +2,7 @@ import pygame
 from math import hypot
 from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
 import Settings
-from Settings import new_coords, ALL_SPRITES
+from Settings import new_coords, ALL_SPRITES, new_image_size
 
 
 class MissileFriendly(pygame.sprite.Sprite):
@@ -13,7 +13,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         image = MISSILE_FRIENDLY
         x, y = image.get_size()
         self.image = pygame.transform.scale(image, (
-            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
+            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
 
@@ -72,15 +72,19 @@ class MissileFriendly(pygame.sprite.Sprite):
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
-        img = MISSILE_FRIENDLY
-        self.image = pygame.transform.scale(img, (
-            img.get_size()[0] * Settings.CELL_SIZE // 70,
-            img.get_size()[1] * Settings.CELL_SIZE // 70))
+        self.image = new_image_size(MISSILE_FRIENDLY)
         rect = self.image.get_rect()
-        rect.x, rect.y = new_coords(self.rect.x, self.rect.y, (
-            Settings.P_WIDTH, Settings.P_HEIGHT), (
-                                        Settings.WIDTH, Settings.HEIGHT))
+        rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
+        self.ai.rect.center = new_coords(*self.ai.rect.center)
+        self.pos = pygame.math.Vector2(new_coords(*self.pos))
+        self.activation = new_coords(*self.activation)
+        x, y = new_coords(self.activation[0] - self.pos[0],
+                          self.activation[1] - self.pos[1])
+        try:
+            self.dir = pygame.math.Vector2((x, y)).normalize()
+        except ValueError:
+            self.total_ticks = 10
 
     # обновление координат ракеты при активации ГСН
     def missile_activation(self):

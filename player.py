@@ -2,7 +2,7 @@ import pygame
 from random import randint
 from Settings import BLACK, PLAYER_IMAGE, HEIGHT, CELL_SIZE
 import Settings
-from Settings import new_coords, ALL_SPRITES
+from Settings import new_coords, ALL_SPRITES, new_image_size
 
 
 class Player(pygame.sprite.Sprite):
@@ -28,12 +28,7 @@ class Player(pygame.sprite.Sprite):
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
-        img = PLAYER_IMAGE
-        self.image = pygame.transform.scale(img, (
-            img.get_size()[0] * Settings.CELL_SIZE // 70,
-            img.get_size()[1] * Settings.CELL_SIZE // 70))
+        self.image = new_image_size(PLAYER_IMAGE)
         rect = self.image.get_rect()
-        rect.x, rect.y = new_coords(self.rect.x, self.rect.y, (
-            Settings.P_WIDTH, Settings.P_HEIGHT), (
-                                        Settings.WIDTH, Settings.HEIGHT))
+        rect.topleft = new_coords(self.rect.x, self.rect.y)
         self.rect = rect

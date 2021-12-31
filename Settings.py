@@ -2,11 +2,17 @@ import pygame
 import ctypes
 
 
-def new_coords(x, y, res1, res2):
+def new_coords(x, y):
     """Функия для пересчета координат объекта при изменении разрешения.
-    Принимет координату при старом разрешении, старое разрешение и новое
-    разрешение"""
-    return int(x / res1[0] * res2[0]), int(y / res1[1] * res2[1])
+    Принимет координату при старом разрешении"""
+    return int(x / P_WIDTH * WIDTH), int(y / P_HEIGHT * HEIGHT)
+
+
+def new_image_size(img):
+    """Функия для изменения размера изображеня"""
+    return pygame.transform.scale(img, (
+            img.get_size()[0] * CELL_SIZE // 70,
+            img.get_size()[1] * CELL_SIZE // 70))
 
 
 user32 = ctypes.windll.user32

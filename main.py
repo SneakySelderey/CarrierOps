@@ -107,11 +107,11 @@ def show_setting_screen(flag=True):
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
-                        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
                         for i in ALL_SPRITES:
                             i.new_position()
                             if i == game_objects.player:
-                                game_objects.destination_player = new_coords(*game_objects.destination_player, (Settings.P_WIDTH, Settings.P_HEIGHT), (WIDTH, HEIGHT))
+                                game_objects.destination_player = new_coords(*game_objects.destination_player)
                         ALL_SPRITES.update()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
@@ -255,6 +255,7 @@ class Run:
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
+        """Функция для запуска самолета"""
         self.friendly_aircraft.append(AircraftFriendly(
             self.player, destination, self.ai, True))
         TAKEOFF.play()
@@ -425,11 +426,6 @@ class Run:
                     if event.key == pygame.K_p:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
-                        print(self.player.rect)
-                        for i in game_objects.all_sprites:
-                            print(i.rect)
-                        print()
-                        print()
                         self.menu = not self.menu
 
             screen.fill(GRAY5)
@@ -490,7 +486,7 @@ if __name__ == '__main__':
     pygame.init()
     pygame.mixer.init()
     size = WIDTH, HEIGHT
-    screen = pygame.display.set_mode(size)
+    screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
     help_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
