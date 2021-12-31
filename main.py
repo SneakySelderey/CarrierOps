@@ -175,9 +175,13 @@ def show_in_game_menu():
 
 
 def show_slides():
+    """Функция для отрисовки и взаимодействия со слайдами пролога"""
     slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() +
                                                            '/data/slides/' + next(SLIDES)), screen.get_size())
     count = -1
+    pygame.mixer.music.load('data/music/spec/morse.wav')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -185,6 +189,10 @@ def show_slides():
                 terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                    pygame.mixer.music.set_volume(0.2)
+                    pygame.mixer.music.play(fade_ms=3000)
+                    pygame.mixer.music.set_endevent(MUSIC_END)
                     return 1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -193,13 +201,22 @@ def show_slides():
                         slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() + '/data/slides/' +
                                                                                next(SLIDES)), screen.get_size())
                         [i.stop() for i in ALL_EFFECTS]
-                        SLIDE_EFFECTS[count].play(-1)
+                        try:
+                            SLIDE_EFFECTS[count].play(-1)
+                        except:
+                            pygame.mixer.music.set_volume(0.5)
                     except StopIteration:
+                        pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                        pygame.mixer.music.set_volume(0.2)
+                        pygame.mixer.music.play(fade_ms=3000)
+                        pygame.mixer.music.set_endevent(MUSIC_END)
                         return 1
             # if event.type == MUSIC_END:
             #     pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
             #     pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
+        if count == 8:
+            pygame.mixer.music.fadeout(1000)
         screen.blit(slide, (0, 0))
         game_manager.update(delta)
         pygame.display.flip()
@@ -502,21 +519,14 @@ if __name__ == '__main__':
         False, False, False, False, False, True
     running = True
 
-    pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
-    pygame.mixer.music.set_volume(0.2)
-    pygame.mixer.music.play(fade_ms=3000)
-    pygame.mixer.music.set_endevent(MUSIC_END)
-
     # Основной мега-цикл
     while running:
         if slides_run:  #Слайды в начале игры
-            pygame.mixer.music.set_volume(0)
             result = show_slides()
             menu_run = result == 1
             slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
-            pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             game_run = result == 1

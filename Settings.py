@@ -55,9 +55,12 @@ NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
 TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
 LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
-SEAGULLS = pygame.mixer.Sound('data/sound/Seagulls.wav')
-SLIDE_EFFECTS = [SEAGULLS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SEAGULLS]
+CLOCK = pygame.mixer.Sound('data/sound/Clock.wav')
+TALKING = pygame.mixer.Sound('data/sound/talking.wav')
+FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
+MORSE = pygame.mixer.Sound('data/sound/morse.wav')
+SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
