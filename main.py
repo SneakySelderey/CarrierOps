@@ -6,7 +6,6 @@ from math import hypot
 from board import Board
 from player import Player
 from AI import AI
-from base import Base
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
@@ -108,14 +107,14 @@ def show_setting_screen(flag=True):
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                        if not flag:
+                        if game_objects is not None:
                             for i in ALL_SPRITES:
                                 i.new_position()
                                 if i == game_objects.player:
-                                    game_objects.destination_player = new_coords(*game_objects.destination_player)
+                                    game_objects.destination_player = new_coords(
+                                        *game_objects.destination_player)
+                            game_objects.cell_size = Settings.CELL_SIZE
                             ALL_SPRITES.update()
-                        else:
-                            game_objects = Run()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -138,7 +137,6 @@ def show_setting_screen(flag=True):
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
-        settings_manager.draw_ui(screen)
         settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
@@ -222,7 +220,7 @@ class Run:
         self.cells_x = WIDTH // self.cell_size
         self.cells_y = HEIGHT // self.cell_size
 
-        self.board = Board(self.cells_x, self.cells_y, self.cell_size)
+        self.board = Board(self.cells_x, self.cells_y)
         self.board.set_view(0, 0, self.cell_size)
 
         # Флаги
@@ -367,7 +365,7 @@ class Run:
 
         # отрисовка спрайта противника
         dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= 300 or missile_tracking or air_tracking:
+        if dist_between_ai_player <= 10300 or missile_tracking or air_tracking:
             self.ai.visibility = True
             pygame.draw.circle(screen, RED, (ai_x, ai_y), 300, 1)
             self.ai_detected = True
@@ -383,7 +381,8 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif dist_between_ai_player > 300 and not missile_tracking and not air_tracking:
+        elif dist_between_ai_player > 300 and not missile_tracking and \
+                not air_tracking:
             self.ai.visibility = False
             self.ai_detected = False
             self.play_new_contact = True
@@ -419,6 +418,7 @@ class Run:
                 if event.type == pygame.QUIT:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.board.get_cell(event.pos)
                     if event.button == 1:
                         self.destination_player = event.pos
                     if event.button == 2:
@@ -501,7 +501,7 @@ if __name__ == '__main__':
     gameover_group = pygame.sprite.Group()
     BasesLost(gameover_group)
 
-    game_objects = Run()
+    game_objects = None
     menu_run, settings_run, game_run, load_run, gameover_run = \
         True, False, False, False, False
     running = True
@@ -527,7 +527,6 @@ if __name__ == '__main__':
             menu_run = result == 2
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
-            game_objects.all_sprites.update()
             menu_run = result == 1
         elif load_run:  # Меню загрузки
             pass  # TODO: LOAD

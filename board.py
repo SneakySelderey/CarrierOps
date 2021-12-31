@@ -6,8 +6,8 @@ from base import Base
 
 class Board:
     """Класс, ответственный за отрисовку поля"""
-    def __init__(self, width, height, cell_size):
-        self.cell_size = cell_size
+    def __init__(self, width, height):
+        self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
         self.board = [[0] * height for _ in range(width)]
@@ -31,6 +31,7 @@ class Board:
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
         cell = Settings.CELL_SIZE
+        self.cell_size = cell
         [pygame.draw.rect(screen, DARK_RED, (
             x * cell + self.left,
             y * cell + self.top, cell,
