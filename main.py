@@ -252,13 +252,13 @@ class Run:
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         self.friendly_missiles.append(MissileFriendly(
-            self.player, destination, self.ai, True))
+            destination, self.ai, True))
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         self.friendly_aircraft.append(AircraftFriendly(
-            self.player, destination, self.ai, True))
+            destination, self.ai, True))
         TAKEOFF.play()
 
     def move(self, destination, game_obj, screen=None):
@@ -444,8 +444,6 @@ class Run:
 
             if not (self.pause or self.defeat or self.menu):
                 self.all_sprites.update()
-                #if self.friendly_aircraft:
-                #    update_aircraft(self.friendly_aircraft)
                 if not self.ai_detected:
                     self.ai.update()
             if self.pause:
@@ -519,6 +517,7 @@ if __name__ == '__main__':
         elif gameover_run:  # Экран после поражения
             result = show_gameover_screen()
             gameover_run = False
+            game_objects = None
             menu_run = result == 1
         elif game_run:  # Игра
             game_objects = Run()

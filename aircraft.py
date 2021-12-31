@@ -7,8 +7,9 @@ import Settings
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
-    def __init__(self, player, destination, ai, visibility):
+    def __init__(self, destination, ai, visibility):
         super().__init__(ALL_SPRITES)
+        player = list(PLAYER_SPRITE)[0]
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
         self.rect = self.image.get_rect(center=[player.rect.centerx,
                                                 player.rect.centery])
