@@ -1,7 +1,7 @@
 import pygame
 from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE, \
-    WIDTH, HEIGHT
+from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE
+import Settings
 
 
 class AI(pygame.sprite.Sprite):
@@ -10,7 +10,7 @@ class AI(pygame.sprite.Sprite):
         super().__init__(ALL_SPRITES)
         self.image = new_image_size(AI_IMAGE)
         self.rect = self.image.get_rect()
-        self.rect.center = [WIDTH, randint(0, HEIGHT)]
+        self.rect.center = [Settings.WIDTH, randint(0, Settings.HEIGHT)]
         self.prev_rect = self.rect
         self.speedx = 0
         self.speedy = 0

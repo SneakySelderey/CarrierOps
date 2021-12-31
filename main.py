@@ -216,9 +216,9 @@ def show_in_game_menu():
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
-        self.cell_size = CELL_SIZE
-        self.cells_x = WIDTH // self.cell_size
-        self.cells_y = HEIGHT // self.cell_size
+        self.cell_size = Settings.CELL_SIZE
+        self.cells_x = Settings.WIDTH // self.cell_size
+        self.cells_y = Settings.HEIGHT // self.cell_size
 
         self.board = Board(self.cells_x, self.cells_y)
         self.board.set_view(0, 0, self.cell_size)
@@ -521,6 +521,8 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif game_run:  # Игра
             game_objects = Run()
+            a = game_objects.board.board
+            print(len(a), len(a[0]))
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1

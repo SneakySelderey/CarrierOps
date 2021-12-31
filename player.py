@@ -1,7 +1,7 @@
 import pygame
 from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
-    HEIGHT
+from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE
+import Settings
 
 
 class Player(pygame.sprite.Sprite):
@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         super().__init__(ALL_SPRITES)
         self.image = new_image_size(PLAYER_IMAGE)
         self.rect = self.image.get_rect()
-        self.rect.center = [40, randint(40, HEIGHT - 40)]
+        self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
         self.speedx = 0
         self.speedy = 0
 
