@@ -265,9 +265,10 @@ class Run:
         """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
-        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
+        speed = Settings.CELL_SIZE // 70
+        game_obj.speedx = speed if dx > center[0] else -speed if dx < center[0] else 0
         stop_x = game_obj.speedx == 0
-        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
+        game_obj.speedy = speed if dy > center[1] else -speed if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
         if screen is not None and self.player.rect.center != destination:
             pygame.draw.circle(

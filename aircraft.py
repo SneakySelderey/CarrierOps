@@ -2,6 +2,7 @@ import pygame
 from math import hypot
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING
+import Settings
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -52,8 +53,9 @@ class AircraftFriendly(pygame.sprite.Sprite):
         print(self.destination)
         print(self.rect.center)
         print()
-        if self.destination[0] - 10 < self.rect.centerx < self.destination[0] + 10 \
-                and self.destination[1] - 10 < self.rect.centery < self.destination[1] + 10:
+        delta = Settings.CELL_SIZE // 10
+        if self.destination[0] - 10 - delta < self.rect.centerx < self.destination[0] + 10 + delta\
+                and self.destination[1] - 10 - delta < self.rect.centery < self.destination[1] + 10 + delta:
             self.stop = True
 
         if self.total_ticks >= 30:
