@@ -1,13 +1,14 @@
 import pygame
 from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE
+from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
+    PLAYER_SPRITE
 import Settings
 
 
 class Player(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт игрока"""
     def __init__(self, visibility):
-        super().__init__(ALL_SPRITES)
+        super().__init__(ALL_SPRITES, PLAYER_SPRITE)
         self.image = new_image_size(PLAYER_IMAGE)
         self.rect = self.image.get_rect()
         self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]

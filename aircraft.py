@@ -1,10 +1,10 @@
 import pygame
 from math import hypot, sin, cos, atan2
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
-    AIRCRAFT_FRIENDLY, LANDING
+    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE
 import Settings
-import numpy as np
-R = 3
+from numba import njit
+R = 2
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
@@ -12,52 +12,34 @@ class AircraftFriendly(pygame.sprite.Sprite):
     def __init__(self, player, destination, ai, visibility):
         super().__init__(ALL_SPRITES)
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
-        self.rect = self.image.get_rect()
-        self.rect.center = [player.rect.centerx, player.rect.centery]
+        self.rect = self.image.get_rect(center=[player.rect.centerx,
+                                                player.rect.centery])
         self.pos = list(self.rect.center)
-
         self.visibility = visibility
-
-        self.playerx, self.playery = player.rect.centerx, player.rect.centery
-        self.ai_x, self.ai_y = ai.rect.center
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
-
-        # три таймера, отсчитывающие время полета самолета
-
-        self.ticks1 = 0
-        self.speed1 = 50
-        self.total_ticks = 0
-
-        self.player = player
+        self.total_ticks = 0  # Общее число тиков
         self.ai = ai
-        self.destination = destination
-        self.stop = False
-        self.delete = False
-        self.play_sound = True
+        self.destination = destination  # Направление движения
+        self.to_player = False  # Если самолет возвращается на авианосец
+        self.stop = False  # Если самолет достиг точки направления
+        self.delete = False  # Если самолет вернулся на авианосец, он удаляется
 
-    # обновление координат самолета при полете к маршрутной точке
     def update(self):
-        clock1 = pygame.time.Clock()
-
-        if self.ticks1 >= self.speed1:
-            self.total_ticks += 1
-            self.ticks1 = 0
-        clock1.tick(300)
-        self.ticks1 += 1
+        """Обновление координат самолета при полете"""
+        self.total_ticks += 1
 
         if self.pos != self.destination and not self.stop:
             self.pos[0] = self.pos[0] + R * cos(self.alpha)
             self.pos[1] = self.pos[1] + R * sin(self.alpha)
             self.rect.center = self.pos
 
-        delta = Settings.CELL_SIZE // 10
-        if self.destination[0] - 10 - delta < self.rect.centerx < self.destination[0] + 10 + delta\
-                and self.destination[1] - 10 - delta < self.rect.centery < self.destination[1] + 10 + delta:
+        if abs(self.destination[0] - self.rect.centerx) <= 10 and \
+                abs(self.destination[1] - self.rect.centery) <= 10:
             self.stop = True
 
-        if self.total_ticks >= 30:
-            self.aircraft_return(self.player)
+        if self.total_ticks >= 1500:
+            self.aircraft_return()
         else:
             self.aircraft_tracking(self.ai)
 
@@ -67,33 +49,30 @@ class AircraftFriendly(pygame.sprite.Sprite):
         rect = self.image.get_rect()
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
-        self.player.rect.center = new_coords(*self.player.rect.center)
         self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.destination = new_coords(*self.destination)
-        self.alpha = atan2(self.destination[1] - self.rect.centery, self.destination[0] - self.rect.centerx)
+        self.alpha = atan2(self.destination[1] - self.rect.centery,
+                           self.destination[0] - self.rect.centerx)
 
-    def aircraft_return(self, player):
-        try:
-            self.alpha = atan2(player.rect.centery - self.rect.centery,
-                               player.rect.centerx - self.rect.centerx)
-            self.destination = player.rect.centerx, player.rect.centery
-            self.stop = False
-            if self.play_sound:
-                LANDING.play()
-                self.play_sound = False
-        except ValueError:
+    def aircraft_return(self):
+        """Обновление координат при возвращении на авианосец"""
+        player = list(PLAYER_SPRITE)[0]
+        self.alpha = atan2(player.rect.centery - self.rect.centery,
+                           player.rect.centerx - self.rect.centerx)
+        self.destination = player.rect.centerx, player.rect.centery
+        self.to_player = True
+        self.stop = False
+        if self.alpha == 0:
+            LANDING.play()
             self.delete = True
 
-    # обновление координат самолета при слежении за целью
     def aircraft_tracking(self, ai):
-        self.ai_x, self.ai_y = ai.rect.center
-        try:
-            dist_between_air_ai = hypot(self.ai_x - self.rect.centerx,
-                                        self.ai_y - self.rect.centery)
-            if dist_between_air_ai <= Settings.CELL_SIZE * 3.5:
-                self.alpha = atan2(self.ai_y - self.rect.centery,
-                                   self.ai_x - self.rect.centerx)
-                self.stop = False
-        except ValueError:
-            pass
+        """Обновление координат при слежении за целью"""
+        self.ai.rect.center = ai.rect.center
+        dist_to_ai = hypot(self.ai.rect.centerx - self.rect.centerx,
+                            self.ai.rect.centery - self.rect.centery)
+        if dist_to_ai <= Settings.CELL_SIZE * 3.5:
+            self.alpha = atan2(self.ai.rect.centery - self.rect.centery,
+                               self.ai.rect.centerx - self.rect.centerx)
+            self.stop = False

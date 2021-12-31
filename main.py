@@ -444,6 +444,8 @@ class Run:
 
             if not (self.pause or self.defeat or self.menu):
                 self.all_sprites.update()
+                #if self.friendly_aircraft:
+                #    update_aircraft(self.friendly_aircraft)
                 if not self.ai_detected:
                     self.ai.update()
             if self.pause:
@@ -470,7 +472,6 @@ class Run:
                 alpha = min(alpha + 10, 255)
             if alpha_menu != 0:
                 alpha_menu = max(alpha_menu - 20, 0)
-
             clock.tick(FPS)
             pygame.display.flip()
 
@@ -522,7 +523,6 @@ if __name__ == '__main__':
         elif game_run:  # Игра
             game_objects = Run()
             a = game_objects.board.board
-            print(len(a), len(a[0]))
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
