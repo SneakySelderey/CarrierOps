@@ -14,9 +14,11 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.image = new_image_size(MISSILE_FRIENDLY)
         self.rect = self.image.get_rect()
         self.rect.center = [player.rect.centerx, player.rect.centery]
-        self.pos = list(self.rect.center)
-        self.alpha = atan2(activation[1] - self.pos[1],
-                           activation[0] - self.pos[0])
+        self.pos = pygame.math.Vector2([player.rect.centerx,
+                                        player.rect.centery])
+        self.alpha = pygame.math.Vector2((
+            activation[0] - player.rect.centerx,
+            activation[1] - player.rect.centery)).normalize()
         self.visibility = visibility
         self.ai = ai
 
@@ -36,10 +38,8 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.total_ticks += 0.02
 
         if self.pos != self.activation:
-            # Обновление координат
-            self.pos[0] = self.pos[0] + Settings.MISSILE_SPEED * cos(self.alpha)
-            self.pos[1] = self.pos[1] + Settings.MISSILE_SPEED * sin(self.alpha)
-            self.rect.center = self.pos
+            self.pos += self.alpha * 2
+            self.rect.center = self.pos.x, self.pos.y
 
         if abs(self.activation[0] - self.rect.centerx) <= 10 and \
                 abs(self.activation[1] - self.rect.centery) <= 10:
@@ -59,8 +59,12 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
-        self.alpha = atan2(self.activation[1] - self.rect.centery,
-                           self.activation[0] - self.rect.centerx)
+        try:
+            x, y = new_coords(self.activation[0] - self.pos[0],
+                              self.activation[1] - self.pos[1])
+            self.alpha = pygame.math.Vector2((x, y)).normalize()
+        except ValueError:
+            self.total_ticks = 10
 
     def missile_activation(self):
         """Обновление координат ракет при активации ГСН"""
@@ -68,21 +72,15 @@ class MissileFriendly(pygame.sprite.Sprite):
             if self.ticks >= 50:
                 self.total_ticks += 1
                 self.ticks = 0
-                norm_vector = pygame.math.Vector2(cos(tan(self.alpha)),
-                                                  sin(tan(self.alpha)))
                 if self.turn == 0:
-                    norm_vector = norm_vector.rotate(-40)
-                    self.alpha = atan2(norm_vector.y, norm_vector.x)
+                    self.alpha = self.alpha.rotate(-40)
                     self.turn += 1
                 elif self.turn == 1:
-                    norm_vector = norm_vector.rotate(80)
-                    self.alpha = atan2(norm_vector.y, norm_vector.x)
+                    self.alpha = self.alpha.rotate(80)
                     self.turn += 1
                 elif self.turn == 2:
-                    norm_vector = norm_vector.rotate(-80)
-                    self.alpha = atan2(norm_vector.y, norm_vector.x)
+                    self.alpha = self.alpha.rotate(-80)
                     self.turn = 1
-                print(self.alpha)
             self.ticks += 1
 
     def missile_tracking(self, ai):
@@ -91,11 +89,16 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.total_ticks += 1
             self.ticks2 = 0
         self.ticks2 += 1
-        if hypot(self.rect.centerx - ai.rect.centerx,
-                 self.rect.centery - ai.rect.centery) <= Settings.CELL_SIZE * 2:
-            self.alpha = atan2(ai.rect.centery - self.rect.centery,
-                               ai.rect.centerx - self.rect.centerx)
-        if abs(ai.rect.centerx - self.rect.centerx) <= 10 and \
-                abs(ai.rect.centery - self.rect.centery) <= 10:
+        try:
+            if hypot(self.rect.centerx - ai.rect.centerx,
+                     self.rect.centery - ai.rect.centery) <= \
+                    Settings.CELL_SIZE * 2:
+                self.alpha = pygame.math.Vector2(
+                    (ai.rect.centerx - self.rect.centerx,
+                     ai.rect.centery - self.rect.centery)).normalize()
+            if abs(ai.rect.centerx - self.rect.centerx) <= 10 and \
+                    abs(ai.rect.centery - self.rect.centery) <= 10:
+                self.total_ticks = 10
+                EXPLOSION.play()
+        except ValueError:
             self.total_ticks = 10
-            EXPLOSION.play()
