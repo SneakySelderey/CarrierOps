@@ -365,7 +365,7 @@ class Run:
 
         # отрисовка спрайта противника
         dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= 10300 or missile_tracking or air_tracking:
+        if dist_between_ai_player <= 300 or missile_tracking or air_tracking:
             self.ai.visibility = True
             pygame.draw.circle(screen, RED, (ai_x, ai_y), 300, 1)
             self.ai_detected = True
