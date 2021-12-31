@@ -381,7 +381,7 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif dist_between_ai_player > 300 and not missile_tracking and \
+        elif dist_between_ai_player > Settings.CELL_SIZE * 4 and not missile_tracking and \
                 not air_tracking:
             self.ai.visibility = False
             self.ai_detected = False
