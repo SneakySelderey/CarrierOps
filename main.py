@@ -6,7 +6,6 @@ from math import hypot
 from board import Board
 from player import Player
 from AI import AI
-from base import Base
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
@@ -80,7 +79,7 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface, screen
+    global WIDTH, HEIGHT, help_surface, screen, game_objects
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -99,17 +98,25 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
+                        Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
-                        Settings.CELL_SIZE = WIDTH // 25
+                        Settings.CELL_SIZE = WIDTH // 20
                         gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        if game_objects is not None:
+                            for i in ALL_SPRITES:
+                                i.new_position()
+                                if i == game_objects.player:
+                                    game_objects.destination_player = new_coords(
+                                        *game_objects.destination_player)
+                            game_objects.cell_size = Settings.CELL_SIZE
+                            ALL_SPRITES.update()
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
-                        game_objects.all_sprites.update()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -131,7 +138,6 @@ def show_setting_screen(flag=True):
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
         settings_manager.draw_ui(screen)
-        settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
 
@@ -143,7 +149,7 @@ def show_gameover_screen():
     screen.fill(BLACK)
     gameover_group.draw(screen)
     pygame.display.flip()
-    sleep(1)
+    sleep(0.5)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -210,11 +216,11 @@ def show_in_game_menu():
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
-        self.cell_size = CELL_SIZE
-        self.cells_x = WIDTH // self.cell_size
-        self.cells_y = HEIGHT // self.cell_size
+        self.cell_size = Settings.CELL_SIZE
+        self.cells_x = Settings.WIDTH // self.cell_size
+        self.cells_y = Settings.HEIGHT // self.cell_size
 
-        self.board = Board(self.cells_x, self.cells_y, self.cell_size)
+        self.board = Board(self.cells_x, self.cells_y)
         self.board.set_view(0, 0, self.cell_size)
 
         # Флаги
@@ -228,20 +234,18 @@ class Run:
         self.battle = False
 
         self.all_sprites = pygame.sprite.Group()
-        self.game_sprites = pygame.sprite.Group()
 
         self.player = Player(True)
         self.destination_player = self.player.rect.center
         self.ai = AI(False)
-        self.bases = []
         for i in range(10):
-            x = random.randint(0, self.cells_x - 1) * self.cell_size
-            y = random.randint(0, self.cells_y - 1) * self.cell_size
-            self.bases.append(Base(x, y, 'neutral', True, self.cell_size))
+            x = random.randint(0, self.cells_x - 1)
+            y = random.randint(0, self.cells_y - 1)
+            self.board.add_base(x, y)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
-        self.list_all_sprites = [self.player, self.ai, self.bases,
+        self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
                                  self.hostile_missiles, self.friendly_aircraft]
 
@@ -252,6 +256,7 @@ class Run:
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
+        """Функция для запуска самолета"""
         self.friendly_aircraft.append(AircraftFriendly(
             self.player, destination, self.ai, True))
         TAKEOFF.play()
@@ -266,7 +271,8 @@ class Run:
         stop_y = game_obj.speedy == 0
         if screen is not None and self.player.rect.center != destination:
             pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]), 10)
+                screen, BLUE, (destination[0], destination[1]),
+                Settings.CELL_SIZE // 7)
         return [stop_x, stop_y]
 
     def destination_ai(self):
@@ -274,13 +280,11 @@ class Run:
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
-        for i in self.bases:
-            base_x = i.rect.centerx // self.cell_size
-            base_y = i.rect.centery // self.cell_size
-            dist = [ai_pos_x - base_x, ai_pos_y - base_y]
-            if [base_x, base_y] not in self.hostile_bases:
+        for base in self.board.bases:
+            dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+            if [base.x, base.y] not in self.hostile_bases:
                 distance.append(
-                    (dist, [i.rect.centerx, i.rect.centery]))
+                    (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
@@ -293,27 +297,23 @@ class Run:
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""
         if dest[0] and dest[1]:
-            player_grid_x = destination[0] // self.cell_size
-            player_grid_y = destination[1] // self.cell_size
-            for i in self.bases:
-                base_x = i.rect.centerx // self.cell_size
-                base_y = i.rect.centery // self.cell_size
-                if base_x == player_grid_x and base_y == player_grid_y:
-                    i.update('friendly')
-                    if [base_x, base_y] in self.hostile_bases:
-                        self.hostile_bases.remove([base_x, base_y])
+            player_grid_x = destination[0] // Settings.CELL_SIZE
+            player_grid_y = destination[1] // Settings.CELL_SIZE
+            for base in self.board.bases:
+                if base.x == player_grid_x and base.y == player_grid_y:
+                    base.update('friendly')
+                    if [base.x, base.y] in self.hostile_bases:
+                        self.hostile_bases.remove([base.x, base.y])
 
     def base_lost(self, dest, destination):
         """Функция для захвата базы противником"""
         if dest[0] and dest[1]:
-            ai_grid_x = destination[0] // self.cell_size
-            ai_grid_y = destination[1] // self.cell_size
-            for i in self.bases:
-                base_x = i.rect.centerx // self.cell_size
-                base_y = i.rect.centery // self.cell_size
-                if base_x == ai_grid_x and base_y == ai_grid_y:
-                    i.update('hostile')
-                    self.hostile_bases.append([base_x, base_y])
+            ai_grid_x = destination[0] // Settings.CELL_SIZE
+            ai_grid_y = destination[1] // Settings.CELL_SIZE
+            for base in self.board.bases:
+                if base.x == ai_grid_x and base.y == ai_grid_y:
+                    base.update('hostile')
+                    self.hostile_bases.append([base.x, base.y])
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -381,7 +381,8 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif dist_between_ai_player > 300 and not missile_tracking and not air_tracking:
+        elif dist_between_ai_player > 300 and not missile_tracking and \
+                not air_tracking:
             self.ai.visibility = False
             self.ai_detected = False
             self.play_new_contact = True
@@ -417,9 +418,9 @@ class Run:
                 if event.type == pygame.QUIT:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.board.get_cell(event.pos)
                     if event.button == 1:
                         self.destination_player = event.pos
-                        self.game_sprites.update(event.pos)
                     if event.button == 2:
                         self.aircraft_launch(event.pos)
                     if event.button == 3:
@@ -500,7 +501,7 @@ if __name__ == '__main__':
     gameover_group = pygame.sprite.Group()
     BasesLost(gameover_group)
 
-    game_objects = Run()
+    game_objects = None
     menu_run, settings_run, game_run, load_run, gameover_run = \
         True, False, False, False, False
     running = True
@@ -520,6 +521,8 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif game_run:  # Игра
             game_objects = Run()
+            a = game_objects.board.board
+            print(len(a), len(a[0]))
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1

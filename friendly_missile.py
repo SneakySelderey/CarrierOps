@@ -1,19 +1,15 @@
 import pygame
-from math import sqrt, hypot
-from Settings import EXPLOSION, MISSILE_FRIENDLY, CELL_SIZE, BLACK
-import Settings
+from math import hypot
+from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
+    MISSILE_FRIENDLY
 
 
 class MissileFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
     def __init__(self, player, activation, ai, visibility):
-        super().__init__()
-        image = MISSILE_FRIENDLY
-        x, y = image.get_size()
-        self.image = pygame.transform.scale(image, (
-            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
-        self.image.set_colorkey(BLACK)
+        super().__init__(ALL_SPRITES)
+        self.image = new_image_size(MISSILE_FRIENDLY)
         self.rect = self.image.get_rect()
 
         self.rect.center = [player.rect.centerx, player.rect.centery]
@@ -69,10 +65,21 @@ class MissileFriendly(pygame.sprite.Sprite):
         if self.activated:
             self.missile_tracking(self.ai)
 
-        img = MISSILE_FRIENDLY
-        x, y = img.get_size()
-        self.image = pygame.transform.scale(img, (
-            x * Settings.CELL_SIZE // 70, y * Settings.CELL_SIZE // 70))
+    def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
+        self.image = new_image_size(MISSILE_FRIENDLY)
+        rect = self.image.get_rect()
+        rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
+        self.rect = rect
+        self.ai.rect.center = new_coords(*self.ai.rect.center)
+        self.pos = pygame.math.Vector2(new_coords(*self.pos))
+        self.activation = new_coords(*self.activation)
+        x, y = new_coords(self.activation[0] - self.pos[0],
+                          self.activation[1] - self.pos[1])
+        try:
+            self.dir = pygame.math.Vector2((x, y)).normalize()
+        except ValueError:
+            self.total_ticks = 10
 
     # обновление координат ракеты при активации ГСН
     def missile_activation(self):

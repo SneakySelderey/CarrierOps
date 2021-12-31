@@ -2,22 +2,37 @@ import pygame
 import ctypes
 
 
+def new_coords(x, y):
+    """Функия для пересчета координат объекта при изменении разрешения.
+    Принимет координату при старом разрешении"""
+    return int(x / P_WIDTH * WIDTH), int(y / P_HEIGHT * HEIGHT)
+
+
+def new_image_size(img):
+    """Функия для изменения размера изображеня"""
+    return pygame.transform.scale(img, (
+            img.get_size()[0] * CELL_SIZE // 70,
+            img.get_size()[1] * CELL_SIZE // 70))
+
+
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
 pygame.mixer.init()
-# Константы
 
-WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024), (1600, 900),
-               (1440, 900), (1366, 768), (1280, 1024), (1280, 960),
-               (1280, 800), (1280, 768), (1280, 720), (1152, 864),
+# Константы
+ALL_SPRITES = pygame.sprite.Group()
+WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
+               (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
+               (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize) + 4:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
-WIDTH, HEIGHT = 1600, 900
-CELL_SIZE = WIDTH // 15
+WIDTH, HEIGHT = WINDOW_SIZE[0]
+P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
+CELL_SIZE = WIDTH // 20
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Цвета
