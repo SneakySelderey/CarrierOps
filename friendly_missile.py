@@ -82,6 +82,7 @@ class MissileFriendly(pygame.sprite.Sprite):
                 elif self.turn == 2:
                     self.alpha = self.alpha.rotate(-80)
                     self.turn = 1
+            self.activation = self.pos + self.alpha * 2
             self.ticks += 1
 
     def missile_tracking(self, ai):
