@@ -25,7 +25,7 @@ class Base(pygame.sprite.Sprite):
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
-        base_grid = self.rect.centerx // Settings.CELL_SIZE, self.rect.centery // Settings.CELL_SIZE
+        base_grid = self.x, self.y
         for player in Settings.PLAYER_SPRITE:
             if pygame.sprite.collide_mask(self, player):
                 self.image = pygame.transform.scale(Base.Images['friendly'], (Settings.CELL_SIZE, Settings.CELL_SIZE))
