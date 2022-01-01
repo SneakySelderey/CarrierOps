@@ -371,56 +371,61 @@ class Run:
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
-        # если противник обнаружен ракетой
-        missile_tracking = False
         ai_x, ai_y = self.ai.rect.center
         player_x, player_y = self.player.rect.center
-        for missile in self.friendly_missiles:
-            # если цель в радиусе обнаружения ракеты, то
-            # поднимается соответствующий флаг
-            missile_x, missile_y = missile.rect.center
-            if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
-                missile_tracking = True
-            # если ракета исчерпала свой ресурс, она падает в море и
-            # спрайт удаляется
-            if missile.total_ticks >= 10:
-                self.friendly_missiles.remove(missile)
-                Settings.ALL_SPRITES.remove(missile)
-            # отрисовка радиуса обнаружения ракеты
-            if not missile.activated:
-                pygame.draw.line(screen, BLUE,
-                                 (missile_x, missile_y),
-                                 (missile.activation[0],
-                                  missile.activation[1]))
-            pygame.draw.circle(screen, BLUE,
-                               (missile_x, missile_y),
-                               Settings.CELL_SIZE * 2, 1)
-
-        # если противник обнаружен самолетом
-        air_tracking = False
-        for aircraft in self.friendly_aircraft:
-            air_x, air_y = aircraft.rect.center
-            # если цель в радиусе обнаружения самолета, то
-            # поднимается соответствующий флаг
-            if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
-                air_tracking = True
-            # если самолет исчерпала свой ресурс, он возвращается на авианосец
-            if aircraft.delete:
-                self.friendly_aircraft.remove(aircraft)
-                Settings.ALL_SPRITES.remove(aircraft)
-            # отрисовка радиуса обнаружения самолета
-            pygame.draw.line(screen, BLUE,
-                             (air_x, air_y),
-                             (aircraft.destination[0],
-                              aircraft.destination[1]))
-            pygame.draw.circle(screen, BLUE,
-                               (air_x, air_y),
-                               Settings.CELL_SIZE * 3.5, 1)
 
         # отрисовка спрайта противника
         for player in Settings.PLAYER_SPRITE:
             for ai in Settings.AI_SPRITE:
+
+                # проверка на обнаружение ракетой
+                missile_tracking = False
+                for missile in self.friendly_missiles:
+                    # если цель в радиусе обнаружения ракеты, то
+                    # поднимается соответствующий флаг
+                    missile_x, missile_y = missile.rect.center
+                    # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
+                    if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
+                        missile_tracking = True
+                    # если ракета исчерпала свой ресурс, она падает в море и
+                    # спрайт удаляется
+                    if missile.total_ticks >= 10:
+                        self.friendly_missiles.remove(missile)
+                        Settings.ALL_SPRITES.remove(missile)
+                    # отрисовка радиуса обнаружения ракеты
+                    if not missile.activated:
+                        pygame.draw.line(screen, BLUE,
+                                         (missile_x, missile_y),
+                                         (missile.activation[0],
+                                          missile.activation[1]))
+                    pygame.draw.circle(screen, BLUE,
+                                       (missile_x, missile_y),
+                                       Settings.CELL_SIZE * 2, 1)
+
+                # проверка на обнаружение самолетом
+                air_tracking = False
+                for aircraft in self.friendly_aircraft:
+                    air_x, air_y = aircraft.rect.center
+                    # если цель в радиусе обнаружения самолета, то
+                    # поднимается соответствующий флаг
+                    # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
+                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
+                        air_tracking = True
+                    # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                    if aircraft.delete:
+                        self.friendly_aircraft.remove(aircraft)
+                        Settings.ALL_SPRITES.remove(aircraft)
+                    # отрисовка радиуса обнаружения самолета
+                    pygame.draw.line(screen, BLUE,
+                                     (air_x, air_y),
+                                     (aircraft.destination[0],
+                                      aircraft.destination[1]))
+                    pygame.draw.circle(screen, BLUE,
+                                       (air_x, air_y),
+                                       Settings.CELL_SIZE * 3.5, 1)
+
                 # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+                # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
                 if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or missile_tracking or air_tracking:
                     self.ai.visibility = True
                     pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
