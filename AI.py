@@ -1,19 +1,17 @@
 import pygame
 from random import randint
-from Settings import BLACK, AI_IMAGE, WIDTH, HEIGHT, CELL_SIZE
+from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE, AI_SPRITES
+import Settings
 
 
 class AI(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт ИИ"""
     def __init__(self, visibility):
-        super().__init__()
-        image = AI_IMAGE
-        x, y = image.get_size()
-        self.image = pygame.transform.scale(image, (
-            x * CELL_SIZE // 70, y * CELL_SIZE // 70))
-        self.image.set_colorkey(BLACK)
+        super().__init__(ALL_SPRITES, AI_SPRITES)
+        self.image = new_image_size(AI_IMAGE)
         self.rect = self.image.get_rect()
-        self.rect.center = [WIDTH, randint(0, HEIGHT)]
+        self.rect.center = [Settings.WIDTH, randint(0, Settings.HEIGHT)]
+        self.prev_rect = self.rect
         self.speedx = 0
         self.speedy = 0
         self.visibility = visibility
@@ -22,3 +20,12 @@ class AI(pygame.sprite.Sprite):
         """Обновление позиции спрайта"""
         self.rect.x += self.speedx
         self.rect.y += self.speedy
+
+    def new_position(self):
+        """Функция для подсчета новых координат после изменения разрешения"""
+        self.image = new_image_size(AI_IMAGE)
+        rect = self.image.get_rect()
+        rect.topleft = new_coords(*self.rect.topleft)
+        self.rect = rect
+
+

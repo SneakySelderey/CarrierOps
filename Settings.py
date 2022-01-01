@@ -3,22 +3,42 @@ import ctypes
 import os
 
 
+def new_coords(x, y):
+    """Функия для пересчета координат объекта при изменении разрешения.
+    Принимет координату при старом разрешении"""
+    return int(x / P_WIDTH * WIDTH), int(y / P_HEIGHT * HEIGHT)
+
+
+def new_image_size(img):
+    """Функия для изменения размера изображеня"""
+    return pygame.transform.scale(img, (
+            img.get_size()[0] * CELL_SIZE // 70,
+            img.get_size()[1] * CELL_SIZE // 70))
+
+
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
 pygame.mixer.init()
-# Константы
 
-WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024), (1600, 900),
-               (1440, 900), (1366, 768), (1280, 1024), (1280, 960),
-               (1280, 800), (1280, 768), (1280, 720), (1152, 864),
+# Константы
+ALL_SPRITES = pygame.sprite.Group()
+PLAYER_SPRITE = pygame.sprite.Group()
+AI_SPRITES = pygame.sprite.Group()
+AIR_SPEED = 2
+MISSILE_SPEED = 2
+WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
+               (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
+               (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
-WIDTH, HEIGHT = 1280, 720
-CELL_SIZE = 75
+WIDTH, HEIGHT = WINDOW_SIZE[0]
+P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
+CELL_SIZE = WIDTH // 20
+IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Events
@@ -70,10 +90,8 @@ GAMEOVER_MUSIC = os.listdir(os.getcwd() + '/data/music/gameover/')
 GROUPS = [MENU_MUSIC, GAME_MUSIC, BATTLE_MUSIC, GAMEOVER_MUSIC]
 ALL_MUSIC = [track for group in GROUPS for track in group]
 
-# Для меню паузы
+# Шрифты
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
-SC_TEXT = MAIN_FONT.render('PAUSE', True, WHITE)
-POS = SC_TEXT.get_rect(center=(WIDTH // 2, HEIGHT // 2))
 
 # Слайды пролога
 files = os.listdir(os.getcwd() + '/data/slides/')

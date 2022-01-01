@@ -137,5 +137,35 @@
              "hovered_bg": "#D3D3D3",
              "active_bg": "#A9A9A9"
          }
-     }
+     },
+  "fullscreen_btn":
+  {
+         "colours":
+         {
+             "normal_bg": "#00000000",
+             "hovered_bg": "#00000000",
+             "disabled_bg": "#00000000",
+             "selected_bg": "#00000000",
+             "active_bg": "#00000000",
+             "dark_bg": "#00000000",
+             "normal_text":"#FFFFFF",
+             "hovered_text":"#FFFFFF",
+             "selected_text":"#FFFFFF",
+             "disabled_text":"#6d736f",
+             "active_text": "#FFFFFF",
+             "normal_border": "#FFFFFF",
+             "hovered_border": "#FFFFFF",
+             "disabled_border": "#00000000",
+             "selected_border": "#FFFFFF",
+             "active_border":"#FFFFFF"
+         },
+         "font":
+         {
+             "name":  "Teletacticle",
+             "size":  24,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         }
+  }
 }
