@@ -20,6 +20,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             activation[0] - player.rect.centerx,
             activation[1] - player.rect.centery)).normalize()
         self.visibility = visibility
+        self.radius = Settings.CELL_SIZE * 2
 
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False

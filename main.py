@@ -2,6 +2,9 @@ from random import choice
 import sys
 import random
 from math import hypot
+
+import pygame.sprite
+
 from board import Board
 from player import Player
 from AI import AI
@@ -415,31 +418,33 @@ class Run:
                                Settings.CELL_SIZE * 3.5, 1)
 
         # отрисовка спрайта противника
-        dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-            self.ai.visibility = True
-            pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
-            self.ai_detected = True
-            self.play_contact_lost = True
-            if self.play_new_contact:
-                if missile_tracking:
-                    WEAPON_ACQUIRE.play()
-                else:
-                    NEW_CONTACT.play()
-                self.play_new_contact = False
-                self.play_contact_lost = True
-                self.pause = True
-                Settings.ALL_SPRITES.draw(screen)
+        for player in Settings.PLAYER_SPRITE:
+            for ai in Settings.AI_SPRITE:
+                # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+                if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or missile_tracking or air_tracking:
+                    self.ai.visibility = True
+                    pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
+                    self.ai_detected = True
+                    self.play_contact_lost = True
+                    if self.play_new_contact:
+                        if missile_tracking:
+                            WEAPON_ACQUIRE.play()
+                        else:
+                            NEW_CONTACT.play()
+                        self.play_new_contact = False
+                        self.play_contact_lost = True
+                        self.pause = True
+                        Settings.ALL_SPRITES.draw(screen)
 
-        # противник прячется в тумане войны
-        elif dist_between_ai_player > Settings.CELL_SIZE * 4 and not missile_tracking and \
-                not air_tracking:
-            self.ai.visibility = False
-            self.ai_detected = False
-            self.play_new_contact = True
-            if self.play_contact_lost:
-                CONTACT_LOST.play()
-                self.play_contact_lost = False
+                # противник прячется в тумане войны
+                elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) and not missile_tracking and \
+                        not air_tracking:
+                    self.ai.visibility = False
+                    self.ai_detected = False
+                    self.play_new_contact = True
+                    if self.play_contact_lost:
+                        CONTACT_LOST.play()
+                        self.play_contact_lost = False
 
         # отрисовка нужных и прятанье ненужных спрайтов
         for sprite in self.list_all_sprites:

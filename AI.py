@@ -14,11 +14,9 @@ class AI(pygame.sprite.Sprite):
         self.prev_rect = self.rect
         self.speedx = 0
         self.speedy = 0
-
+        self.radius = Settings.CELL_SIZE * 4
         Settings.AI_SPRITE.add(self)
-
         self.visibility = visibility
-
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):

@@ -26,6 +26,8 @@ class AircraftFriendly(pygame.sprite.Sprite):
         Settings.PLAYER_AIRCRAFT.add(self)  # Если использовать этот же класс для самолетов противника,
         # то здесь нужно прописать условие для добавления в нужную спрайт-группу
 
+        self.radius = Settings.CELL_SIZE * 3.5
+
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
