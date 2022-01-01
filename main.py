@@ -44,6 +44,17 @@ def rebase_elements():
     title_group.update()
 
 
+def clear_sprite_groups():
+    Settings.ALL_SPRITES.empty()
+    Settings.PLAYER_SPRITE.empty()
+    Settings.AI_SPRITE.empty()
+    Settings.BASES_SPRITES.empty()
+    Settings.PLAYER_MISSILES.empty()
+    Settings.PLAYER_AIRCRAFT.empty()
+    Settings.AI_MISSILES.empty()
+    Settings.AI_AIRCRAFT.empty()
+
+
 def terminate():
     """"Функция для завершения работы программы"""
     pygame.quit()
@@ -581,8 +592,7 @@ if __name__ == '__main__':
         if menu_run:  # Экран меню
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
-            [sprite.kill() for sprite in ALL_SPRITES]
-            [sprite.kill() for sprite in PLAYER_SPRITE]
+            clear_sprite_groups()
             game_run = result == 1
             load_run = result == 2
             settings_run = result == 3
