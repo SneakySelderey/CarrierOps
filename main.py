@@ -65,7 +65,8 @@ def show_menu_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
+                                        choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
             menu_manager.process_events(event)
         help_surface.fill((10, 10, 10, alpha))
@@ -142,7 +143,8 @@ def show_setting_screen(flag=True):
                 if event.key == pygame.K_ESCAPE:
                     return 1
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
+                                        choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
         settings_manager.update(delta)
@@ -185,7 +187,8 @@ def show_gameover_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/' + choice(GAMEOVER_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/'
+                                        + choice(GAMEOVER_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             gameover_manager.process_events(event)
         help_surface.fill((0, 0, 0, alpha))
@@ -227,7 +230,8 @@ def show_in_game_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
             if event.type == MUSIC_END:
-                pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+                pygame.mixer.music.load(os.getcwd() + '/data/music/game/' +
+                                        choice(GAME_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
         game_manager.update(delta)
@@ -242,8 +246,8 @@ def show_in_game_menu():
 
 def show_slides():
     """Функция для отрисовки и взаимодействия со слайдами пролога"""
-    slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() +
-                                                           '/data/slides/' + next(SLIDES)), screen.get_size())
+    slide = pygame.transform.smoothscale(pygame.image.load(
+        os.getcwd() + '/data/slides/' + next(SLIDES)), screen.get_size())
     count = -1
     pygame.mixer.music.load('data/music/spec/morse.wav')
     pygame.mixer.music.play(-1)
@@ -255,7 +259,8 @@ def show_slides():
                 terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/menu/'
+                                            + choice(MENU_MUSIC))
                     pygame.mixer.music.set_volume(0.2)
                     pygame.mixer.music.play(fade_ms=3000)
                     pygame.mixer.music.set_endevent(MUSIC_END)
@@ -264,22 +269,22 @@ def show_slides():
                 if event.button == 1:
                     try:
                         count += 1
-                        slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() + '/data/slides/' +
-                                                                               next(SLIDES)), screen.get_size())
+                        slide = pygame.transform.smoothscale(pygame.image.load(
+                            os.getcwd() + '/data/slides/' + next(SLIDES)),
+                            screen.get_size())
                         [i.stop() for i in ALL_EFFECTS]
                         try:
                             SLIDE_EFFECTS[count].play(-1)
                         except:
                             pygame.mixer.music.set_volume(0.5)
                     except StopIteration:
-                        pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                        pygame.mixer.music.load(
+                            os.getcwd() + '/data/music/menu/' +
+                            choice(MENU_MUSIC))
                         pygame.mixer.music.set_volume(0.2)
                         pygame.mixer.music.play(fade_ms=3000)
                         pygame.mixer.music.set_endevent(MUSIC_END)
                         return 1
-            # if event.type == MUSIC_END:
-            #     pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
-            #     pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
         if count == 8:
             pygame.mixer.music.fadeout(1000)
@@ -401,7 +406,8 @@ class Run:
             # если цель в радиусе обнаружения ракеты, то
             # поднимается соответствующий флаг
             missile_x, missile_y = missile.rect.center
-            if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
+            if hypot(missile_x - ai_x, missile_y - ai_y) <= \
+                    Settings.CELL_SIZE * 2:
                 missile_tracking = True
             # если ракета исчерпала свой ресурс, она падает в море и
             # спрайт удаляется
@@ -441,9 +447,11 @@ class Run:
 
         # отрисовка спрайта противника
         dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
+        if dist_between_ai_player <= Settings.CELL_SIZE * 4 or \
+                missile_tracking or air_tracking:
             self.ai.visibility = True
-            pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
+            pygame.draw.circle(screen, RED, (ai_x, ai_y),
+                               Settings.CELL_SIZE * 4, 1)
             self.ai_detected = True
             self.play_contact_lost = True
             if self.play_new_contact:
@@ -457,8 +465,8 @@ class Run:
                 self.all_sprites.draw(screen)
 
         # противник прячется в тумане войны
-        elif dist_between_ai_player > Settings.CELL_SIZE * 4 and not missile_tracking and \
-                not air_tracking:
+        elif dist_between_ai_player > Settings.CELL_SIZE * 4 and \
+                not missile_tracking and not air_tracking:
             self.ai.visibility = False
             self.ai_detected = False
             self.play_new_contact = True
@@ -509,7 +517,8 @@ class Run:
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
                 if event.type == MUSIC_END:
-                    pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/game/'
+                                            + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
 
             screen.fill(GRAY5)
@@ -570,7 +579,8 @@ if __name__ == '__main__':
     pygame.mixer.init()
     size = Settings.WIDTH, Settings.HEIGHT
     screen = pygame.display.set_mode(size)
-    help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT), pygame.SRCALPHA)
+    help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
+                                  pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
@@ -588,7 +598,7 @@ if __name__ == '__main__':
 
     # Основной мега-цикл
     while running:
-        if slides_run:  #Слайды в начале игры
+        if slides_run:  # Слайды в начале игры
             result = show_slides()
             menu_run = result == 1
             slides_run = False
