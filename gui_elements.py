@@ -170,11 +170,12 @@ MUSIC_LABEL = Label(24, 'MUSIC', 0.2, 0.3,
                     settings_manager, 'option', 'topleft')
 EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
                       settings_manager, 'option', 'topleft')
+
 OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
 DROP_DOWN_MENU = WindowSizesMenu(0.61, 0.43, 15, settings_manager)
-MUSIC_BAR = HorizontalSlider(0, 10, 10, MUSIC_LABEL.rect, 0.16, 40,
+MUSIC_BAR = HorizontalSlider(0, 100, 20, MUSIC_LABEL.rect, 0.16, 40,
                              settings_manager, 'right')
-EFFECT_BAR = HorizontalSlider(0, 10, 10, EFFECTS_LABEL.rect, 0.16, 30,
+EFFECT_BAR = HorizontalSlider(0, 100, 100, EFFECTS_LABEL.rect, 0.16, 30,
                               settings_manager, 'right')
 FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')

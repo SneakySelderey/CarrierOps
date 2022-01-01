@@ -1,5 +1,6 @@
 import pygame
 import ctypes
+import os
 
 
 def new_coords(x, y):
@@ -40,6 +41,9 @@ CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
 
+# Events
+MUSIC_END = pygame.USEREVENT+1
+
 # Цвета
 BLACK = pygame.Color('black')
 DARK_RED = pygame.Color('darkred')
@@ -69,10 +73,26 @@ EXPLOSION = pygame.mixer.Sound('data/sound/explosion.wav')
 FIRE_VLS = pygame.mixer.Sound('data/sound/FireVLS.wav')
 NEW_CONTACT = pygame.mixer.Sound('data/sound/new_radar_contact.wav')
 WEAPON_ACQUIRE = pygame.mixer.Sound('data/sound/weapon acquire.wav')
-SUB_SUNK = pygame.mixer.Sound('data/sound/SubSunk.wav')
 TAKEOFF = pygame.mixer.Sound('data/sound/air_takeoff.wav')
 LANDING = pygame.mixer.Sound('data/sound/air_heading_back.wav')
-ALL_SOUNDS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, SUB_SUNK]
+CLOCK = pygame.mixer.Sound('data/sound/Clock.wav')
+TALKING = pygame.mixer.Sound('data/sound/talking.wav')
+FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
+MORSE = pygame.mixer.Sound('data/sound/morse.wav')
+SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
+
+# Музыка
+MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
+GAME_MUSIC = os.listdir(os.getcwd() + '/data/music/game/')
+BATTLE_MUSIC = os.listdir(os.getcwd() + '/data/music/battle/')
+GAMEOVER_MUSIC = os.listdir(os.getcwd() + '/data/music/gameover/')
+GROUPS = [MENU_MUSIC, GAME_MUSIC, BATTLE_MUSIC, GAMEOVER_MUSIC]
+ALL_MUSIC = [track for group in GROUPS for track in group]
 
 # Шрифты
 MAIN_FONT = pygame.font.Font('data/font/Teletactile.ttf', 24)
+
+# Слайды пролога
+files = os.listdir(os.getcwd() + '/data/slides/')
+SLIDES = iter(sorted(files, key=lambda x: int(x[:x.find('.')])))

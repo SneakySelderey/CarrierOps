@@ -1,5 +1,4 @@
-import pygame
-import pygame_gui
+from random import choice
 import sys
 import random
 from math import hypot
@@ -50,7 +49,7 @@ def terminate():
 
 def show_menu_screen():
     """Фукнция для отрисовки основного меню и для работы с ним"""
-    [i.stop() for i in ALL_SOUNDS]
+    [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     alpha = 130
     while True:
@@ -65,6 +64,9 @@ def show_menu_screen():
                     return list(MENU_ELEMENTS.values()).index(event.ui_element)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                pygame.mixer.music.play(fade_ms=5000)
             menu_manager.process_events(event)
         help_surface.fill((10, 10, 10, alpha))
         menu_manager.update(delta)
@@ -133,10 +135,15 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
-                        [i.set_volume(event.value / 10) for i in ALL_SOUNDS]
+                        [i.set_volume(event.value / 100) for i in ALL_EFFECTS]
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
+                    if event.ui_element == SETTINGS_ELEMENTS['MUSIC']:
+                        pygame.mixer.music.set_volume(event.value / 100)
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
         settings_manager.update(delta)
         help_surface.blit(screen, (0, 0))
@@ -157,6 +164,7 @@ def show_setting_screen(flag=True):
 
 def show_gameover_screen():
     """Функция для отрисовки и взаимодействия с экраном проигрыша"""
+    [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
     alpha = 255
     screen.fill(BLACK)
@@ -176,6 +184,9 @@ def show_gameover_screen():
                         return 1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/' + choice(GAMEOVER_MUSIC))
+                pygame.mixer.music.play(fade_ms=3000)
             gameover_manager.process_events(event)
         help_surface.fill((0, 0, 0, alpha))
         gameover_manager.update(delta)
@@ -215,6 +226,9 @@ def show_in_game_menu():
                     return 1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 title_group.update(event.pos)
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+                pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
         game_manager.update(delta)
         screen.blit(help_surface_2, (0, 0))
@@ -223,6 +237,55 @@ def show_in_game_menu():
         game_manager.draw_ui(screen)
         pygame.display.flip()
         alpha = min(alpha + 20, 200)
+        clock.tick(FPS)
+
+
+def show_slides():
+    """Функция для отрисовки и взаимодействия со слайдами пролога"""
+    slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() +
+                                                           '/data/slides/' + next(SLIDES)), screen.get_size())
+    count = -1
+    pygame.mixer.music.load('data/music/spec/morse.wav')
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(0)
+    while True:
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                    pygame.mixer.music.set_volume(0.2)
+                    pygame.mixer.music.play(fade_ms=3000)
+                    pygame.mixer.music.set_endevent(MUSIC_END)
+                    return 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    try:
+                        count += 1
+                        slide = pygame.transform.smoothscale(pygame.image.load(os.getcwd() + '/data/slides/' +
+                                                                               next(SLIDES)), screen.get_size())
+                        [i.stop() for i in ALL_EFFECTS]
+                        try:
+                            SLIDE_EFFECTS[count].play(-1)
+                        except:
+                            pygame.mixer.music.set_volume(0.5)
+                    except StopIteration:
+                        pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
+                        pygame.mixer.music.set_volume(0.2)
+                        pygame.mixer.music.play(fade_ms=3000)
+                        pygame.mixer.music.set_endevent(MUSIC_END)
+                        return 1
+            # if event.type == MUSIC_END:
+            #     pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+            #     pygame.mixer.music.play(fade_ms=3000)
+            game_manager.process_events(event)
+        if count == 8:
+            pygame.mixer.music.fadeout(1000)
+        screen.blit(slide, (0, 0))
+        game_manager.update(delta)
+        pygame.display.flip()
         clock.tick(FPS)
 
 
@@ -305,7 +368,7 @@ class Run:
             self.base_lost(dest, distance[idx][1])
         except ValueError:
             self.defeat = True
-            [sound.stop() for sound in ALL_SOUNDS]
+            [sound.stop() for sound in ALL_EFFECTS]
 
     def base_taken(self, dest, destination):
         """Функия дял захвата базы союзником"""
@@ -445,6 +508,9 @@ class Run:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                if event.type == MUSIC_END:
+                    pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
+                    pygame.mixer.music.play(fade_ms=3000)
 
             screen.fill(GRAY5)
             self.board.update()
@@ -490,7 +556,6 @@ class Run:
             pygame.display.flip()
 
         # После поражения
-        SUB_SUNK.play()
         while alpha > 0:
             help_surface.fill((0, 0, 0, alpha))
             screen.blit(help_surface, (0, 0))
@@ -517,14 +582,19 @@ if __name__ == '__main__':
     BasesLost(gameover_group)
 
     game_objects = None
-    menu_run, settings_run, game_run, load_run, gameover_run = \
-        True, False, False, False, False
+    menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
+        False, False, False, False, False, True
     running = True
 
     # Основной мега-цикл
     while running:
+        if slides_run:  #Слайды в начале игры
+            result = show_slides()
+            menu_run = result == 1
+            slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             [sprite.kill() for sprite in ALL_SPRITES]
             [sprite.kill() for sprite in PLAYER_SPRITE]
@@ -533,11 +603,13 @@ if __name__ == '__main__':
             settings_run = result == 3
             menu_run = False
         elif gameover_run:  # Экран после поражения
+            pygame.mixer.music.fadeout(500)
             result = show_gameover_screen()
             gameover_run = False
             game_objects = None
             menu_run = result == 1
         elif game_run:  # Игра
+            pygame.mixer.music.fadeout(500)
             game_objects = Run()
             a = game_objects.board.board
             result = game_objects.main()
