@@ -294,6 +294,42 @@ def show_slides():
         clock.tick(FPS)
 
 
+def show_load_menu(from_main=True):
+    fps = 240
+    alpha_up = 0
+    alpha_down = 255
+    background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    background2 = screen if not from_main else pygame.transform.scale(
+        MENU_BACKGROUND, (WIDTH, HEIGHT))
+    while True:
+        delta = clock.tick(FPS) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    pass
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return 1
+            load_manager.process_events(event)
+        load_manager.update(delta)
+        help_surface.blit(screen, (0, 0))
+        if alpha_up < 255:
+            help_surface.fill((0, 0, 0, alpha_up))
+            background2.set_alpha(255 - alpha_up)
+        alpha_up = min(alpha_up + 15, 255)
+        if alpha_up == 255:
+            alpha_down = max(alpha_down - 15, 150)
+            screen.blit(background, (0, 0))
+            help_surface.fill((0, 0, 0, alpha_down))
+        screen.blit(background2, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        load_manager.draw_ui(screen)
+        pygame.display.flip()
+        clock.tick(fps)
+
+
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
@@ -592,8 +628,9 @@ if __name__ == '__main__':
     BasesLost(gameover_group)
 
     game_objects = None
+    # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, True
+        True, False, False, False, False, False
     running = True
 
     # Основной мега-цикл
@@ -630,7 +667,8 @@ if __name__ == '__main__':
             result = show_setting_screen()
             menu_run = result == 1
         elif load_run:  # Меню загрузки
-            pass  # TODO: LOAD
+            result = show_load_menu()
+            menu_run = result == 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()

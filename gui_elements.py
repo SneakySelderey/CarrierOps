@@ -147,6 +147,8 @@ game_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                     'data/system/settings.json')
 settings_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                         'data/system/settings.json')
+load_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
+                                    'data/system/settings.json')
 
 # Создание элементов интерфейса
 QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
@@ -181,10 +183,12 @@ FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')
 FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
                            'fullscreen_btn')
+LOAD_LABEL = Label(36, 'SAVE AND LOAD', 0.5, 0.1, load_manager, 'settings',
+                   'center')
 
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
-          MUSIC_LABEL, FULLSCREEN_LABEL]
+          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
@@ -194,6 +198,7 @@ IN_GAME_ELEMENTS = {"RESUME": RESUME_BUTTON, "MENU": MAIN_MENU_BUTTON_2,
 SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
                      "MUSIC": MUSIC_BAR, "EFFECTS": EFFECT_BAR,
                      'FULLSCREEN': FULLSCREEN_BUTTON}
+LOAD_ELEMENTS = {}
 
 
 class Title(pygame.sprite.Sprite):
