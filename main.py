@@ -510,6 +510,8 @@ if __name__ == '__main__':
         # Отрисока разных экранов
         if menu_run:  # Экран меню
             result = show_menu_screen()
+            [sprite.kill() for sprite in ALL_SPRITES]
+            [sprite.kill() for sprite in PLAYER_SPRITE]
             game_run = result == 1
             load_run = result == 2
             settings_run = result == 3
