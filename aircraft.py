@@ -7,7 +7,7 @@ import Settings
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
-    def __init__(self, destination, ai, visibility):
+    def __init__(self, destination, visibility):
         super().__init__(ALL_SPRITES)
         player = list(PLAYER_SPRITE)[0]
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
@@ -18,7 +18,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
         self.total_ticks = 0  # Общее число тиков
-        self.ai = ai
         self.destination = destination  # Направление движения
         self.to_player = False  # Если самолет возвращается на авианосец
         self.stop = False  # Если самолет достиг точки направления
@@ -42,7 +41,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         if self.total_ticks >= 1500:
             self.aircraft_return()
         else:
-            self.aircraft_tracking(self.ai)
+            self.aircraft_tracking()
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -50,7 +49,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
         rect = self.image.get_rect()
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
-        self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.destination = new_coords(*self.destination)
         self.alpha = atan2(self.destination[1] - self.rect.centery,
@@ -68,12 +66,13 @@ class AircraftFriendly(pygame.sprite.Sprite):
             LANDING.play()
             self.delete = True
 
-    def aircraft_tracking(self, ai):
+    def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
-        self.ai.rect.center = ai.rect.center
-        dist_to_ai = hypot(self.ai.rect.centerx - self.rect.centerx,
-                            self.ai.rect.centery - self.rect.centery)
-        if dist_to_ai <= Settings.CELL_SIZE * 3.5:
-            self.alpha = atan2(self.ai.rect.centery - self.rect.centery,
-                               self.ai.rect.centerx - self.rect.centerx)
-            self.stop = False
+        for ai in Settings.AI_SPRITES:
+            dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
+                                ai.rect.centery - self.rect.centery)
+            if dist_to_ai <= Settings.CELL_SIZE * 3.5:
+                self.alpha = atan2(ai.rect.centery - self.rect.centery,
+                                   ai.rect.centerx - self.rect.centerx)
+                self.stop = False
+                break

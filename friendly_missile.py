@@ -1,5 +1,5 @@
 import pygame
-from math import hypot, atan2, sin, cos, radians, tan, atan
+from math import hypot
 from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
     MISSILE_FRIENDLY, PLAYER_SPRITE
 import Settings
@@ -8,7 +8,7 @@ import Settings
 class MissileFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, activation, ai, visibility):
+    def __init__(self, activation, visibility):
         super().__init__(ALL_SPRITES)
         player = list(PLAYER_SPRITE)[0]
         self.image = new_image_size(MISSILE_FRIENDLY)
@@ -20,7 +20,6 @@ class MissileFriendly(pygame.sprite.Sprite):
             activation[0] - player.rect.centerx,
             activation[1] - player.rect.centery)).normalize()
         self.visibility = visibility
-        self.ai = ai
 
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
@@ -48,7 +47,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
         self.missile_activation()
         if self.activated:
-            self.missile_tracking(self.ai)
+            self.missile_tracking()
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -56,7 +55,6 @@ class MissileFriendly(pygame.sprite.Sprite):
         rect = self.image.get_rect()
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
-        self.ai.rect.center = new_coords(*self.ai.rect.center)
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
         if not self.activated:
@@ -85,22 +83,24 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.activation = self.pos + self.alpha * 2
             self.ticks += 1
 
-    def missile_tracking(self, ai):
+    def missile_tracking(self):
         """Обновление координат ракеты при захвате противника ГСН"""
         if self.ticks2 >= 50:
             self.total_ticks += 1
             self.ticks2 = 0
         self.ticks2 += 1
         try:
-            if hypot(self.rect.centerx - ai.rect.centerx,
-                     self.rect.centery - ai.rect.centery) <= \
-                    Settings.CELL_SIZE * 2:
-                self.alpha = pygame.math.Vector2(
-                    (ai.rect.centerx - self.rect.centerx,
-                     ai.rect.centery - self.rect.centery)).normalize()
-            if abs(ai.rect.centerx - self.rect.centerx) <= 10 and \
-                    abs(ai.rect.centery - self.rect.centery) <= 10:
-                self.total_ticks = 10
-                EXPLOSION.play()
+            for ai in Settings.AI_SPRITES:
+                if hypot(self.rect.centerx - ai.rect.centerx,
+                         self.rect.centery - ai.rect.centery) <= \
+                        Settings.CELL_SIZE * 2:
+                    self.alpha = pygame.math.Vector2(
+                        (ai.rect.centerx - self.rect.centerx,
+                         ai.rect.centery - self.rect.centery)).normalize()
+                if abs(ai.rect.centerx - self.rect.centerx) <= 10 and \
+                        abs(ai.rect.centery - self.rect.centery) <= 10:
+                    self.total_ticks = 10
+                    EXPLOSION.play()
+                    break
         except ValueError:
             self.total_ticks = 10

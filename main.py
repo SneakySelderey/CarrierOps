@@ -110,9 +110,8 @@ def show_setting_screen(flag=True):
                         if game_objects is not None:
                             for i in ALL_SPRITES:
                                 i.new_position()
-                                if i == game_objects.player:
-                                    game_objects.destination_player = new_coords(
-                                        *game_objects.destination_player)
+                            game_objects.destination_player = new_coords(
+                                *game_objects.destination_player)
                             game_objects.cell_size = Settings.CELL_SIZE
                             ALL_SPRITES.update()
                         background = pygame.transform.scale(
@@ -252,13 +251,13 @@ class Run:
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         self.friendly_missiles.append(MissileFriendly(
-            destination, self.ai, True))
+            destination, True))
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         self.friendly_aircraft.append(AircraftFriendly(
-            destination, self.ai, True))
+            destination, True))
         TAKEOFF.play()
 
     def move(self, destination, game_obj, screen=None):
@@ -405,8 +404,10 @@ class Run:
                     self.all_sprites.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
-        pygame.draw.circle(screen, BLUE, (player_x, player_y), Settings.CELL_SIZE * 4, 1)
-        pygame.draw.circle(screen, BLUE, (player_x, player_y), Settings.CELL_SIZE * 15, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y),
+                           Settings.CELL_SIZE * 4, 1)
+        pygame.draw.circle(screen, BLUE, (player_x, player_y),
+                           Settings.CELL_SIZE * 15, 1)
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -432,6 +433,7 @@ class Run:
                         self.menu = not self.menu
 
             screen.fill(GRAY5)
+            self.board.update()
             self.board.render(screen)
             self.all_sprites.draw(screen)
             goal = self.move(self.destination_player, self.player, screen)

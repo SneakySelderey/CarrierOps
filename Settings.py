@@ -23,6 +23,7 @@ pygame.mixer.init()
 # Константы
 ALL_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
+AI_SPRITES = pygame.sprite.Group()
 AIR_SPEED = 2
 MISSILE_SPEED = 1
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
