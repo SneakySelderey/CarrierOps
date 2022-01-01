@@ -15,7 +15,11 @@ class Player(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
 
+        Settings.PLAYER_SPRITE.add(self)
+
         self.visibility = visibility
+
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         """Обновление позиции игрока"""

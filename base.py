@@ -19,6 +19,10 @@ class Base(pygame.sprite.Sprite):
         self.rect.topleft = [x * cell_size, y * cell_size]
         self.visibility = visibility
 
+        Settings.BASES_SPRITES.add(self)
+
+        self.mask = pygame.mask.from_surface(self.image)
+
     def update(self, *args):
         """Обновление изображения базы, если она захватывается"""
         if args and Base.Images[args[0]] != self.image:

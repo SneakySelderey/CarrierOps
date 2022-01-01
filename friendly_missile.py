@@ -31,6 +31,11 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ticks2 = 0
         self.total_ticks = 0
 
+        Settings.PLAYER_MISSILES.add(self)  # Если использовать этот же класс для ракет противника,
+        # то здесь нужно прописать условие для добавления в нужную спрайт-группу
+
+        self.mask = pygame.mask.from_surface(self.image)
+
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
         if not self.activated:
@@ -97,8 +102,8 @@ class MissileFriendly(pygame.sprite.Sprite):
                     self.alpha = pygame.math.Vector2(
                         (ai.rect.centerx - self.rect.centerx,
                          ai.rect.centery - self.rect.centery)).normalize()
-                if abs(ai.rect.centerx - self.rect.centerx) <= 10 and \
-                        abs(ai.rect.centery - self.rect.centery) <= 10:
+                if pygame.sprite.collide_mask(self, ai):
+                    self.rect = self.rect.move(0, 1)
                     self.total_ticks = 10
                     EXPLOSION.play()
                     break
