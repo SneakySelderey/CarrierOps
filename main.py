@@ -136,11 +136,11 @@ def show_setting_screen(flag=True):
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
                         [i.set_volume(event.value / 100) for i in ALL_EFFECTS]
+                    if event.ui_element == SETTINGS_ELEMENTS['MUSIC']:
+                        pygame.mixer.music.set_volume(event.value / 100)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
-                    if event.ui_element == SETTINGS_ELEMENTS['MUSIC']:
-                        pygame.mixer.music.set_volume(event.value / 100)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' + choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
@@ -568,9 +568,9 @@ class Run:
 if __name__ == '__main__':
     pygame.init()
     pygame.mixer.init()
-    size = WIDTH, HEIGHT
+    size = Settings.WIDTH, Settings.HEIGHT
     screen = pygame.display.set_mode(size)
-    help_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT), pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
