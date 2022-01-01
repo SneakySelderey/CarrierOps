@@ -302,7 +302,6 @@ class Run:
         # Флаги
         self.running = True
         self.pause = True
-        self.hostile_bases = []
         self.ai_detected = False
         self.defeat = False
         self.menu = False
@@ -356,38 +355,16 @@ class Run:
         ai_pos_y = self.ai.rect.centery // self.cell_size
         for base in self.board.bases:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if [base.x, base.y] not in self.hostile_bases:
+            if (base.x, base.y) not in Settings.HOSTILE_BASES:
                 distance.append(
                     (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            dest = self.move(distance[idx][1], self.ai)
-            self.base_lost(dest, distance[idx][1])
+            self.move(distance[idx][1], self.ai)
         except ValueError:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
-
-    def base_taken(self, dest, destination):
-        """Функия дял захвата базы союзником"""
-        if dest[0] and dest[1]:
-            player_grid_x = destination[0] // Settings.CELL_SIZE
-            player_grid_y = destination[1] // Settings.CELL_SIZE
-            for base in self.board.bases:
-                if base.x == player_grid_x and base.y == player_grid_y:
-                    base.update('friendly')
-                    if [base.x, base.y] in self.hostile_bases:
-                        self.hostile_bases.remove([base.x, base.y])
-
-    def base_lost(self, dest, destination):
-        """Функция для захвата базы противником"""
-        if dest[0] and dest[1]:
-            ai_grid_x = destination[0] // Settings.CELL_SIZE
-            ai_grid_y = destination[1] // Settings.CELL_SIZE
-            for base in self.board.bases:
-                if base.x == ai_grid_x and base.y == ai_grid_y:
-                    base.update('hostile')
-                    self.hostile_bases.append([base.x, base.y])
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -515,7 +492,6 @@ class Run:
             self.board.render(screen)
             Settings.ALL_SPRITES.draw(screen)
             goal = self.move(self.destination_player, self.player, screen)
-            self.base_taken(goal, self.destination_player)
             self.destination_ai()
             self.fog_of_war()
             help_surface.fill((0, 0, 0, alpha))

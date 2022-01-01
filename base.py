@@ -23,15 +23,23 @@ class Base(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self, *args):
+    def update(self):
         """Обновление изображения базы, если она захватывается"""
-        if args and Base.Images[args[0]] != self.image:
-            self.state = args[0]
-            self.image = pygame.transform.scale(Base.Images[args[0]], (
-                Settings.CELL_SIZE, Settings.CELL_SIZE))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [self.x * Settings.CELL_SIZE,
-                             self.y * Settings.CELL_SIZE]
+        base_grid = self.rect.centerx // Settings.CELL_SIZE, self.rect.centery // Settings.CELL_SIZE
+        for player in Settings.PLAYER_SPRITE:
+            if pygame.sprite.collide_mask(self, player):
+                self.image = pygame.transform.scale(Base.Images['friendly'], (Settings.CELL_SIZE, Settings.CELL_SIZE))
+                if base_grid in Settings.HOSTILE_BASES:
+                    Settings.HOSTILE_BASES.remove(base_grid)
+                if base_grid not in Settings.FRIENDLY_BASES:
+                    Settings.FRIENDLY_BASES.append(base_grid)
+        for ai in Settings.AI_SPRITE:
+            if pygame.sprite.collide_mask(self, ai) and not pygame.sprite.collide_mask(self, player):
+                self.image = pygame.transform.scale(Base.Images['hostile'], (Settings.CELL_SIZE, Settings.CELL_SIZE))
+                if base_grid in Settings.FRIENDLY_BASES:
+                    Settings.FRIENDLY_BASES.remove(base_grid)
+                if base_grid not in Settings.HOSTILE_BASES:
+                    Settings.HOSTILE_BASES.append(base_grid)
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
