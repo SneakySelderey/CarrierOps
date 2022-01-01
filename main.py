@@ -95,6 +95,15 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == SETTINGS_ELEMENTS['OK']:
                         return 1
+                    if event.ui_element == SETTINGS_ELEMENTS['FULLSCREEN']:
+                        if event.ui_element.text == ' ':
+                            SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
+                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
+                                                             pygame.FULLSCREEN)
+                        else:
+                            SETTINGS_ELEMENTS['FULLSCREEN'].set_text(' ')
+                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        Settings.IS_FULLSCREEN = not Settings.IS_FULLSCREEN
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
@@ -106,7 +115,12 @@ def show_setting_screen(flag=True):
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
-                        screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        if not Settings.IS_FULLSCREEN:
+                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                        else:
+                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
+                                                             pygame.FULLSCREEN)
+                            SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
                         if game_objects is not None:
                             for i in ALL_SPRITES:
                                 i.new_position()

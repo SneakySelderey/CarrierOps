@@ -37,6 +37,7 @@ except ValueError:
 WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
 CELL_SIZE = WIDTH // 20
+IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Цвета

@@ -112,7 +112,7 @@ class Label(pygame_gui.elements.UILabel):
 
 class Button(pygame_gui.elements.UIButton):
     """Класс для кнопки"""
-    def __init__(self, title, pos1, pos2, d, manager):
+    def __init__(self, title, pos1, pos2, d, manager, obj_id=None):
         """Инициализация. Принимает текст на кнопке, положение относительно
         ширины и высоты, изменение размера кнопки и менеджер"""
         text = MAIN_FONT.render(title, True, WHITE)
@@ -123,14 +123,19 @@ class Button(pygame_gui.elements.UIButton):
         self.manager = manager
         self.pos = pos1, pos2
         self.d = d
-        super().__init__(relative_rect=rect, text=title, manager=manager)
+        self.obj_id = obj_id
+        if obj_id is None:
+            super().__init__(relative_rect=rect, text=title, manager=manager)
+        else:
+            super().__init__(relative_rect=rect, text=title, manager=manager,
+                             object_id=obj_id)
 
     def get_same(self, manager=None, pos1=None, pos2=None):
         """Функция для получения идентичной кнопки"""
         manager = self.manager if manager is None else manager
         pos1 = self.pos[0] if pos1 is None else pos1
         pos2 = self.pos[1] if pos2 is None else pos2
-        return Button(self.title, pos1, pos2, self.d, manager)
+        return Button(self.title, pos1, pos2, self.d, manager, self.obj_id)
 
 
 # Создание менеджеров
@@ -157,7 +162,7 @@ SETTINGS_BUTTON_2 = SETTINGS_BUTTON.get_same(game_manager)
 QUIT_BUTTON_3 = QUIT_BUTTON_1.get_same(game_manager)
 SETTINGS_LABEL = Label(36, 'SETTINGS', 0.5, 0.125,
                        settings_manager, 'settings', 'center')
-RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.6, 0.2,
+RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.6, 0.33,
                          settings_manager, 'option', 'topleft')
 VOLUME_LABEL = Label(24, 'VOLUME', 0.2, 0.2,
                      settings_manager, 'option', 'topleft')
@@ -166,15 +171,19 @@ MUSIC_LABEL = Label(24, 'MUSIC', 0.2, 0.3,
 EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
                       settings_manager, 'option', 'topleft')
 OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
-DROP_DOWN_MENU = WindowSizesMenu(0.6, 0.3, 15, settings_manager)
+DROP_DOWN_MENU = WindowSizesMenu(0.61, 0.43, 15, settings_manager)
 MUSIC_BAR = HorizontalSlider(0, 10, 10, MUSIC_LABEL.rect, 0.16, 40,
                              settings_manager, 'right')
 EFFECT_BAR = HorizontalSlider(0, 10, 10, EFFECTS_LABEL.rect, 0.16, 30,
                               settings_manager, 'right')
+FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
+                         settings_manager, 'option', 'topleft')
+FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
+                           'fullscreen_btn')
 
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
-          MUSIC_LABEL]
+          MUSIC_LABEL, FULLSCREEN_LABEL]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
@@ -182,7 +191,8 @@ IN_GAME_ELEMENTS = {"RESUME": RESUME_BUTTON, "MENU": MAIN_MENU_BUTTON_2,
                     "LOAD": LOAD_SAVE_BUTTON_2, "SETTINGS": SETTINGS_BUTTON_2,
                     "QUIT": QUIT_BUTTON_3}
 SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
-                     "MUSIC": MUSIC_BAR, "EFFECTS": EFFECT_BAR}
+                     "MUSIC": MUSIC_BAR, "EFFECTS": EFFECT_BAR,
+                     'FULLSCREEN': FULLSCREEN_BUTTON}
 
 
 class Title(pygame.sprite.Sprite):
