@@ -1,4 +1,4 @@
-from Settings import WHITE, MAIN_FONT, WINDOW_SIZE
+from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, CONNECTION
 import pygame
 import pygame_gui
 import Settings
@@ -11,6 +11,30 @@ def get_bigger_rect(rect, d):
     rect.x, rect.y, rect.width, rect.height = \
         rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
     return rect
+
+
+class OptionList(pygame_gui.elements.UISelectionList):
+    """Класс списка позиций"""
+    def __init__(self, pos1, pos2, manager):
+        """Инициализация. Принимает отношение относительно ширины и высоты,
+        менеджера"""
+        self.pos = pos1, pos2
+        self.manager = manager
+        rect = MAIN_FONT.render('LOAD_SYSTEM', True, WHITE).get_rect(
+            topleft=(Settings.WIDTH * pos1, Settings.HEIGHT * pos2))
+        rect.width = Settings.WIDTH * 0.4
+        rect.height = Settings.HEIGHT * 0.4
+        data = list(CONNECTION.execute("""SELECT Saves.Title, Saves.Date, 
+PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON Saves.Path = 
+PathsOfSaves.ID""").fetchall())
+        data = ['    '.join([i[0], i[1]]) for i in data]
+        super().__init__(relative_rect=rect, manager=manager,
+                         item_list=data, object_id='saves')
+
+    def get_same(self, manager=None):
+        """Функция для получения идентичного списка"""
+        manager = self.manager if manager is None else manager
+        return OptionList(self.pos[0], self.pos[1], manager)
 
 
 class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
@@ -182,9 +206,13 @@ EFFECT_BAR = HorizontalSlider(0, 100, 100, EFFECTS_LABEL.rect, 0.16, 30,
 FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')
 FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
-                           'fullscreen_btn')
+                           'stable_btn')
 LOAD_LABEL = Label(36, 'SAVE AND LOAD', 0.5, 0.1, load_manager, 'settings',
                    'center')
+TO_SAVE_BUTTON = Button('SAVE', 0.15, 0.2, 15, load_manager, 'stable_btn')
+TO_LOAD_BUTTON = Button('LOAD', 0.25, 0.2, 15, load_manager, 'stable_btn')
+TO_DELETE_BUTTON = Button('DELETE', 0.35, 0.2, 15, load_manager, 'stable_btn')
+USERS_LIST = OptionList(0.1, 0.3, load_manager)
 
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
@@ -198,7 +226,8 @@ IN_GAME_ELEMENTS = {"RESUME": RESUME_BUTTON, "MENU": MAIN_MENU_BUTTON_2,
 SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
                      "MUSIC": MUSIC_BAR, "EFFECTS": EFFECT_BAR,
                      'FULLSCREEN': FULLSCREEN_BUTTON}
-LOAD_ELEMENTS = {}
+LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
+                 'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON}
 
 
 class Title(pygame.sprite.Sprite):

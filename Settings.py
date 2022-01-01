@@ -1,6 +1,7 @@
 import pygame
 import ctypes
 import os
+import sqlite3
 
 
 def new_coords(x, y):
@@ -40,6 +41,10 @@ P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
 CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
+
+CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
+USER_DATA = list(CONNECTION.execute("""SELECT Saves.Title, Saves.Date, PathsOfSaves.Path FROM 
+Saves INNER JOIN PathsOfSaves ON Saves.Path = PathsOfSaves.ID""").fetchall())
 
 # Events
 MUSIC_END = pygame.USEREVENT+1

@@ -1,4 +1,5 @@
 from random import choice
+import pygame_gui
 import sys
 import random
 from math import hypot
@@ -12,16 +13,20 @@ from Settings import *
 import Settings
 import gui_elements
 from time import sleep
+import strgen
+from datetime import datetime
+import pickle
 
 
 def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
     global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, \
-        GAMEOVER_ELEMENTS, LABELS
+        GAMEOVER_ELEMENTS, LABELS, LOAD_ELEMENTS
     menu_manager.clear_and_reset()
     settings_manager.clear_and_reset()
     gameover_manager.clear_and_reset()
     game_manager.clear_and_reset()
+    load_manager.clear_and_reset()
     LABELS = [i.get_same() for i in LABELS]
     MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
     for i in SETTINGS_ELEMENTS:
@@ -37,6 +42,7 @@ def rebase_elements():
                         IN_GAME_ELEMENTS}
     GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
                          GAMEOVER_ELEMENTS}
+    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
     gameover_group.update()
     title_group.update()
 
@@ -295,12 +301,14 @@ def show_slides():
 
 
 def show_load_menu(from_main=True):
+    """Функция для отрисовки и взаимодействия с меню сохранения и загрузки"""
     fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen if not from_main else pygame.transform.scale(
         MENU_BACKGROUND, (WIDTH, HEIGHT))
+    item_selected = None
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -308,7 +316,32 @@ def show_load_menu(from_main=True):
                 terminate()
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    pass
+                    if event.ui_element == LOAD_ELEMENTS['TO_DELETE']:
+                        if item_selected is not None:
+                            path = [i for i in Settings.USER_DATA if
+                                    i[0] == item_selected][0][-1]
+                            CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
+WHERE Path = "{path}"''')
+                            CONNECTION.commit()
+                            LOAD_ELEMENTS['LIST'] = LOAD_ELEMENTS['LIST'].get_same()
+                    if event.ui_element == LOAD_ELEMENTS['TO_LOAD']:
+                        pass
+                    if event.ui_element == LOAD_ELEMENTS['TO_SAVE']:
+                        if not from_main:
+                            pass  # TODO
+                        else:
+                            message = pygame_gui.windows.UIMessageWindow(
+                                manager=load_manager,
+                                html_message='Вы не можете сохранить игру, '
+                                             'не начав ее',
+                                rect=pygame.Rect(Settings.WIDTH // 2 - 300,
+                                                 Settings.HEIGHT // 2 - 200,
+                                                 600, 400),
+                                window_title='WARNING')
+                if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                    item_selected = event.text.split('    ')[0]
+                if event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                    pass  # TODO
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
@@ -630,7 +663,7 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        True, False, False, False, False, False
+        False, False, False, True, False, False
     running = True
 
     # Основной мега-цикл
