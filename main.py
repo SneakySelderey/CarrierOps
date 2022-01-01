@@ -2,6 +2,9 @@ from random import choice
 import sys
 import random
 from math import hypot
+
+import pygame.sprite
+
 from board import Board
 from player import Player
 from AI import AI
@@ -39,6 +42,17 @@ def rebase_elements():
                          GAMEOVER_ELEMENTS}
     gameover_group.update()
     title_group.update()
+
+
+def clear_sprite_groups():
+    Settings.ALL_SPRITES.empty()
+    Settings.PLAYER_SPRITE.empty()
+    Settings.AI_SPRITE.empty()
+    Settings.BASES_SPRITES.empty()
+    Settings.PLAYER_MISSILES.empty()
+    Settings.PLAYER_AIRCRAFT.empty()
+    Settings.AI_MISSILES.empty()
+    Settings.AI_AIRCRAFT.empty()
 
 
 def terminate():
@@ -302,14 +316,11 @@ class Run:
         # Флаги
         self.running = True
         self.pause = True
-        self.hostile_bases = []
         self.ai_detected = False
         self.defeat = False
         self.menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-
-        self.all_sprites = pygame.sprite.Group()
 
         self.player = Player(True)
         self.destination_player = self.player.rect.center
@@ -358,127 +369,112 @@ class Run:
         ai_pos_y = self.ai.rect.centery // self.cell_size
         for base in self.board.bases:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if [base.x, base.y] not in self.hostile_bases:
+            if (base.x, base.y) not in Settings.HOSTILE_BASES:
                 distance.append(
                     (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            dest = self.move(distance[idx][1], self.ai)
-            self.base_lost(dest, distance[idx][1])
+            self.move(distance[idx][1], self.ai)
         except ValueError:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
 
-    def base_taken(self, dest, destination):
-        """Функия дял захвата базы союзником"""
-        if dest[0] and dest[1]:
-            player_grid_x = destination[0] // Settings.CELL_SIZE
-            player_grid_y = destination[1] // Settings.CELL_SIZE
-            for base in self.board.bases:
-                if base.x == player_grid_x and base.y == player_grid_y:
-                    base.update('friendly')
-                    if [base.x, base.y] in self.hostile_bases:
-                        self.hostile_bases.remove([base.x, base.y])
-
-    def base_lost(self, dest, destination):
-        """Функция для захвата базы противником"""
-        if dest[0] and dest[1]:
-            ai_grid_x = destination[0] // Settings.CELL_SIZE
-            ai_grid_y = destination[1] // Settings.CELL_SIZE
-            for base in self.board.bases:
-                if base.x == ai_grid_x and base.y == ai_grid_y:
-                    base.update('hostile')
-                    self.hostile_bases.append([base.x, base.y])
-
     def fog_of_war(self):
         """Отрисовка тумана войны"""
-        # если противник обнаружен ракетой
-        missile_tracking = False
         ai_x, ai_y = self.ai.rect.center
         player_x, player_y = self.player.rect.center
-        for missile in self.friendly_missiles:
-            # если цель в радиусе обнаружения ракеты, то
-            # поднимается соответствующий флаг
-            missile_x, missile_y = missile.rect.center
-            if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
-                missile_tracking = True
-            # если ракета исчерпала свой ресурс, она падает в море и
-            # спрайт удаляется
-            if missile.total_ticks >= 10:
-                self.friendly_missiles.remove(missile)
-                self.all_sprites.remove(missile)
-            # отрисовка радиуса обнаружения ракеты
-            if not missile.activated:
-                pygame.draw.line(screen, BLUE,
-                                 (missile_x, missile_y),
-                                 (missile.activation[0],
-                                  missile.activation[1]))
-            pygame.draw.circle(screen, BLUE,
-                               (missile_x, missile_y),
-                               Settings.CELL_SIZE * 2, 1)
-
-        # если противник обнаружен самолетом
-        air_tracking = False
-        for aircraft in self.friendly_aircraft:
-            air_x, air_y = aircraft.rect.center
-            # если цель в радиусе обнаружения самолета, то
-            # поднимается соответствующий флаг
-            if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
-                air_tracking = True
-            # если самолет исчерпала свой ресурс, он возвращается на авианосец
-            if aircraft.delete:
-                self.friendly_aircraft.remove(aircraft)
-                self.all_sprites.remove(aircraft)
-            # отрисовка радиуса обнаружения самолета
-            pygame.draw.line(screen, BLUE,
-                             (air_x, air_y),
-                             (aircraft.destination[0],
-                              aircraft.destination[1]))
-            pygame.draw.circle(screen, BLUE,
-                               (air_x, air_y),
-                               Settings.CELL_SIZE * 3.5, 1)
 
         # отрисовка спрайта противника
-        dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-        if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-            self.ai.visibility = True
-            pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
-            self.ai_detected = True
-            self.play_contact_lost = True
-            if self.play_new_contact:
-                if missile_tracking:
-                    WEAPON_ACQUIRE.play()
-                else:
-                    NEW_CONTACT.play()
-                self.play_new_contact = False
-                self.play_contact_lost = True
-                self.pause = True
-                self.all_sprites.draw(screen)
+        for player in Settings.PLAYER_SPRITE:
+            for ai in Settings.AI_SPRITE:
 
-        # противник прячется в тумане войны
-        elif dist_between_ai_player > Settings.CELL_SIZE * 4 and not missile_tracking and \
-                not air_tracking:
-            self.ai.visibility = False
-            self.ai_detected = False
-            self.play_new_contact = True
-            if self.play_contact_lost:
-                CONTACT_LOST.play()
-                self.play_contact_lost = False
+                # проверка на обнаружение ракетой
+                missile_tracking = False
+                for missile in self.friendly_missiles:
+                    # если цель в радиусе обнаружения ракеты, то
+                    # поднимается соответствующий флаг
+                    missile_x, missile_y = missile.rect.center
+                    # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
+                    if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
+                        missile_tracking = True
+                    # если ракета исчерпала свой ресурс, она падает в море и
+                    # спрайт удаляется
+                    if missile.total_ticks >= 10:
+                        self.friendly_missiles.remove(missile)
+                        Settings.ALL_SPRITES.remove(missile)
+                    # отрисовка радиуса обнаружения ракеты
+                    if not missile.activated:
+                        pygame.draw.line(screen, BLUE,
+                                         (missile_x, missile_y),
+                                         (missile.activation[0],
+                                          missile.activation[1]))
+                    pygame.draw.circle(screen, BLUE,
+                                       (missile_x, missile_y),
+                                       Settings.CELL_SIZE * 2, 1)
+
+                # проверка на обнаружение самолетом
+                air_tracking = False
+                for aircraft in self.friendly_aircraft:
+                    air_x, air_y = aircraft.rect.center
+                    # если цель в радиусе обнаружения самолета, то
+                    # поднимается соответствующий флаг
+                    # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
+                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
+                        air_tracking = True
+                    # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                    if aircraft.delete:
+                        self.friendly_aircraft.remove(aircraft)
+                        Settings.ALL_SPRITES.remove(aircraft)
+                    # отрисовка радиуса обнаружения самолета
+                    pygame.draw.line(screen, BLUE,
+                                     (air_x, air_y),
+                                     (aircraft.destination[0],
+                                      aircraft.destination[1]))
+                    pygame.draw.circle(screen, BLUE,
+                                       (air_x, air_y),
+                                       Settings.CELL_SIZE * 3.5, 1)
+
+                # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+                # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
+                if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or missile_tracking or air_tracking:
+                    self.ai.visibility = True
+                    pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
+                    self.ai_detected = True
+                    self.play_contact_lost = True
+                    if self.play_new_contact:
+                        if missile_tracking:
+                            WEAPON_ACQUIRE.play()
+                        else:
+                            NEW_CONTACT.play()
+                        self.play_new_contact = False
+                        self.play_contact_lost = True
+                        self.pause = True
+                        Settings.ALL_SPRITES.draw(screen)
+
+                # противник прячется в тумане войны
+                elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) and not missile_tracking and \
+                        not air_tracking:
+                    self.ai.visibility = False
+                    self.ai_detected = False
+                    self.play_new_contact = True
+                    if self.play_contact_lost:
+                        CONTACT_LOST.play()
+                        self.play_contact_lost = False
 
         # отрисовка нужных и прятанье ненужных спрайтов
         for sprite in self.list_all_sprites:
             if type(sprite) == list:
                 for i in sprite:
                     if i.visibility:
-                        self.all_sprites.add(i)
+                        Settings.ALL_SPRITES.add(i)
                     else:
-                        self.all_sprites.remove(i)
+                        Settings.ALL_SPRITES.remove(i)
             else:
                 if sprite.visibility:
-                    self.all_sprites.add(sprite)
+                    Settings.ALL_SPRITES.add(sprite)
                 else:
-                    self.all_sprites.remove(sprite)
+                    Settings.ALL_SPRITES.remove(sprite)
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
@@ -515,9 +511,8 @@ class Run:
             screen.fill(GRAY5)
             self.board.update()
             self.board.render(screen)
-            self.all_sprites.draw(screen)
+            Settings.ALL_SPRITES.draw(screen)
             goal = self.move(self.destination_player, self.player, screen)
-            self.base_taken(goal, self.destination_player)
             self.destination_ai()
             self.fog_of_war()
             help_surface.fill((0, 0, 0, alpha))
@@ -525,7 +520,7 @@ class Run:
             screen.blit(help_surface, (0, 0))
 
             if not (self.pause or self.defeat or self.menu):
-                self.all_sprites.update()
+                Settings.ALL_SPRITES.update()
                 if not self.ai_detected:
                     self.ai.update()
             if self.pause:
@@ -588,7 +583,8 @@ if __name__ == '__main__':
 
     # Основной мега-цикл
     while running:
-        if slides_run:  #Слайды в начале игры
+        # Слайды в начале игры
+        if slides_run:
             result = show_slides()
             menu_run = result == 1
             slides_run = False
@@ -596,8 +592,7 @@ if __name__ == '__main__':
         if menu_run:  # Экран меню
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
-            [sprite.kill() for sprite in ALL_SPRITES]
-            [sprite.kill() for sprite in PLAYER_SPRITE]
+            clear_sprite_groups()
             game_run = result == 1
             load_run = result == 2
             settings_run = result == 3
