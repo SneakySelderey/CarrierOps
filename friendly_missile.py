@@ -90,7 +90,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.ticks2 = 0
         self.ticks2 += 1
         try:
-            for ai in Settings.AI_SPRITES:
+            for ai in Settings.AI_SPRITE:
                 if hypot(self.rect.centerx - ai.rect.centerx,
                          self.rect.centery - ai.rect.centery) <= \
                         Settings.CELL_SIZE * 2:
