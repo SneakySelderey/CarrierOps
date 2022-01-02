@@ -14,8 +14,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
         self.speedx = 0
         self.speedy = 0
-
+        self.radius = Settings.CELL_SIZE * 4
+        Settings.PLAYER_SPRITE.add(self)
         self.visibility = visibility
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         """Обновление позиции игрока"""

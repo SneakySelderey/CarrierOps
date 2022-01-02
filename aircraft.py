@@ -1,7 +1,7 @@
 import pygame
 from math import hypot, sin, cos, atan2
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
-    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE
+    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT
 import Settings
 
 
@@ -22,6 +22,13 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.to_player = False  # Если самолет возвращается на авианосец
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
+
+        Settings.PLAYER_AIRCRAFT.add(self)  # Если использовать этот же класс для самолетов противника,
+        # то здесь нужно прописать условие для добавления в нужную спрайт-группу
+
+        self.radius = Settings.CELL_SIZE * 3.5
+
+        self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         """Обновление координат самолета при полете"""
@@ -62,13 +69,13 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = player.rect.centerx, player.rect.centery
         self.to_player = True
         self.stop = False
-        if self.alpha == 0:
+        if pygame.sprite.collide_mask(self, player):
             LANDING.play()
             self.delete = True
 
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
-        for ai in Settings.AI_SPRITES:
+        for ai in Settings.AI_SPRITE:
             dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
                                 ai.rect.centery - self.rect.centery)
             if dist_to_ai <= Settings.CELL_SIZE * 3.5:
