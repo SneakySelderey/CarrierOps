@@ -12,11 +12,15 @@ class Camera:
         obj.rect.x += self.dx
         obj.rect.y += self.dy
 
-    def apply_pos(self, obj):
+    def apply_aircraft(self, obj):
         obj.pos[0] += self.dx
         obj.pos[1] += self.dy
         obj.rect.x += self.dx
         obj.rect.y += self.dy
+
+    def apply_missiles(self, obj):
+        obj.pos.x += self.dx
+        obj.pos.y += self.dy
 
     def camera_center(self):
         for player in Settings.PLAYER_SPRITE:

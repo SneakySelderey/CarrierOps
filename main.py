@@ -496,9 +496,10 @@ class Run:
         for sprite in self.list_all_sprites:
             if type(sprite) == list:
                 for i in sprite:
-                    if i in (Settings.PLAYER_AIRCRAFT or Settings.PLAYER_MISSILES or
-                             Settings.AI_AIRCRAFT or Settings.AI_MISSILES):
-                        camera.apply_pos(i)
+                    if i in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
+                        camera.apply_aircraft(i)
+                    elif i in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                        camera.apply_missiles(i)
                     else:
                         camera.apply_rect(i)
             else:
