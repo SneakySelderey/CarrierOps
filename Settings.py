@@ -57,7 +57,7 @@ WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+3:]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+8:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
@@ -97,6 +97,14 @@ MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
+PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
+                                    (50, 50))
+MISSILE_ICON = pygame.transform.scale(pygame.image.load(
+    'data/img/missile.png'), (50, 50))
+GEAR_ICON = pygame.transform.scale(pygame.image.load('data/img/gear.png'),
+                                   (50, 50))
+OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
+                                   (50, 50))
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
