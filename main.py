@@ -28,18 +28,22 @@ def load_save(save):
     # TODO: LOAD SAVE!!!
 
 
+def create_save():
+    """Функция жяд создания сохранения"""
+    # TODO: CREATE SAVE
+
+
 def give_tooltip(num):
     if num == 1:
         pygame_gui.elements.UITooltip(
             manager=load_manager,
             hover_distance=(1, 1),
             html_text="Сохранение не выбрано")
-    else:
+    elif num == 2:
         pygame_gui.elements.UITooltip(
             manager=load_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
-
 
 
 def rebase_elements():
@@ -254,14 +258,8 @@ def show_in_game_menu():
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == IN_GAME_ELEMENTS['QUIT']:
                         terminate()
-                    if event.ui_element == IN_GAME_ELEMENTS['RESUME']:
-                        return 1
-                    if event.ui_element == IN_GAME_ELEMENTS['MENU']:
-                        return 2
-                    if event.ui_element == IN_GAME_ELEMENTS['LOAD']:
-                        return 3
-                    if event.ui_element == IN_GAME_ELEMENTS['SETTINGS']:
-                        return 4
+                    return list(IN_GAME_ELEMENTS.values()).index(
+                        event.ui_element)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
@@ -291,7 +289,6 @@ def show_slides():
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(0)
     while True:
-        delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -327,7 +324,6 @@ def show_slides():
         if count == 8:
             pygame.mixer.music.fadeout(1000)
         screen.blit(slide, (0, 0))
-        game_manager.update(delta)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -366,21 +362,23 @@ def show_load_menu(from_main=True):
                             give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE']:
                         if not from_main:
-                            pass  # TODO
+                            pass  # TODO: SAVE
                         else:
                             rebase_load_manager()
                 if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
-                    if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and from_main:
+                    if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and \
+                            from_main:
                         # Выведем сообщение, если пользователь решил
                         # сохраниться, не начав игру
                         give_tooltip(2)
                 if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
                     rebase_load_manager()
-
-                if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                if event.user_type == \
+                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
                     # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
-                if event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                if event.user_type == \
+                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
@@ -614,7 +612,6 @@ class Run:
                 if event.type == pygame.QUIT:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.board.get_cell(event.pos)
                     if event.button == 1:
                         self.destination_player = event.pos
                     if event.button == 2:
@@ -660,8 +657,8 @@ class Run:
                     self.running = False
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
-                    alpha_menu = 0
-                    pass  # TODO: LOAD
+                    show_load_menu(False)
+                    alpha_menu = 200
                 if result == 4:  # Если нажал на SETTINGS
                     show_setting_screen(False)
                     alpha_menu = 200
@@ -704,7 +701,7 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, True, False, False
+        False, False, False, False, False, True
     running = True
 
     # Основной мега-цикл
