@@ -20,9 +20,4 @@ class Camera:
 
     def apply_missiles(self, obj):
         obj.pos.x += self.dx
-        obj.pos.y += self.dy
-
-    def camera_center(self):
-        for player in Settings.PLAYER_SPRITE:
-            self.dx = -(player.rect.x + player.rect.w // 2 - Settings.WIDTH // 2)
-            self.dy = -(player.rect.y + player.rect.h // 2 - Settings.HEIGHT // 2)
+        obj.pos.y += self.d

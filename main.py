@@ -532,9 +532,6 @@ class Run:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
-                    if event.key == pygame.K_c:
-                        camera.camera_center()
-
                     if event.key == pygame.K_UP:
                         camera.dy += 20
                         arrow_pressed = True
