@@ -29,15 +29,16 @@ class Base(pygame.sprite.Sprite):
     def update(self):
         """Обновление изображения базы, если она захватывается"""
         base_grid = self.x, self.y
-        for player in Settings.PLAYER_SPRITE:
-            if pygame.sprite.collide_mask(self, player):
-                self.state = 'friendly'
-                if base_grid in Settings.HOSTILE_BASES:
-                    Settings.HOSTILE_BASES.remove(base_grid)
-                if base_grid not in Settings.FRIENDLY_BASES:
-                    Settings.FRIENDLY_BASES.append(base_grid)
+        player = list(Settings.PLAYER_SPRITE)[0]
+        if pygame.sprite.collide_mask(self, player):
+            self.state = 'friendly'
+            if base_grid in Settings.HOSTILE_BASES:
+                Settings.HOSTILE_BASES.remove(base_grid)
+            if base_grid not in Settings.FRIENDLY_BASES:
+                Settings.FRIENDLY_BASES.append(base_grid)
         for ai in Settings.AI_SPRITE:
-            if pygame.sprite.collide_mask(self, ai) and not pygame.sprite.collide_mask(self, ai):
+            if pygame.sprite.collide_mask(self, ai) and not \
+                    pygame.sprite.collide_mask(self, player):
                 self.state = 'hostile'
                 if base_grid in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.remove(base_grid)

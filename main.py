@@ -649,7 +649,7 @@ if __name__ == '__main__':
 
     game_objects = None
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, True
+        False, False, True, False, False, False
     running = True
 
     camera = Camera()
