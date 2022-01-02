@@ -34,6 +34,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
         Settings.PLAYER_MISSILES.add(self)  # Если использовать этот же класс для ракет противника,
         # то здесь нужно прописать условие для добавления в нужную спрайт-группу
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
 
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -97,9 +98,10 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ticks2 += 1
         try:
             for ai in Settings.AI_SPRITE:
-                if hypot(self.rect.centerx - ai.rect.centerx,
-                         self.rect.centery - ai.rect.centery) <= \
-                        Settings.CELL_SIZE * 2:
+                # if hypot(self.rect.centerx - ai.rect.centerx,
+                #          self.rect.centery - ai.rect.centery) <= \
+                #         Settings.CELL_SIZE * 2:
+                if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
                     self.alpha = pygame.math.Vector2(
                         (ai.rect.centerx - self.rect.centerx,
                          ai.rect.centery - self.rect.centery)).normalize()

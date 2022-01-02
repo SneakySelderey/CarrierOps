@@ -22,9 +22,11 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.to_player = False  # Если самолет возвращается на авианосец
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
+        self.play_sound = True
 
         Settings.PLAYER_AIRCRAFT.add(self)  # Если использовать этот же класс для самолетов противника,
         # то здесь нужно прописать условие для добавления в нужную спрайт-группу
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
 
         self.radius = Settings.CELL_SIZE * 3.5
 
@@ -63,6 +65,9 @@ class AircraftFriendly(pygame.sprite.Sprite):
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""
+        if self.play_sound:
+            LANDING.play()
+            self.play_sound = False
         player = list(PLAYER_SPRITE)[0]
         self.alpha = atan2(player.rect.centery - self.rect.centery,
                            player.rect.centerx - self.rect.centerx)
@@ -70,15 +75,14 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.to_player = True
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
-            LANDING.play()
             self.delete = True
 
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
         for ai in Settings.AI_SPRITE:
-            dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
-                                ai.rect.centery - self.rect.centery)
-            if dist_to_ai <= Settings.CELL_SIZE * 3.5:
+            # dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
+            #                    ai.rect.centery - self.rect.centery)
+            if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
                 self.alpha = atan2(ai.rect.centery - self.rect.centery,
                                    ai.rect.centerx - self.rect.centerx)
                 self.stop = False

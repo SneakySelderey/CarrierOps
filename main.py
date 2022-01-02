@@ -2,7 +2,6 @@ from random import choice
 import pygame_gui
 import sys
 import random
-from math import hypot
 
 import pygame.sprite
 
@@ -12,6 +11,7 @@ from AI import AI
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
+from camera import Camera
 from Settings import *
 import Settings
 import gui_elements
@@ -87,6 +87,7 @@ def rebase_load_manager():
 
 
 def clear_sprite_groups():
+    Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.ALL_SPRITES.empty()
     Settings.PLAYER_SPRITE.empty()
     Settings.AI_SPRITE.empty()
@@ -436,7 +437,7 @@ class Run:
         self.battle = False
 
         self.player = Player(True)
-        self.destination_player = self.player.rect.center
+        self.destination_player = list(self.player.rect.center)
         self.ai = AI(False)
         for i in range(10):
             x = random.randint(0, self.cells_x - 1)
@@ -469,7 +470,7 @@ class Run:
         stop_x = game_obj.speedx == 0
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
-        if screen is not None and self.player.rect.center != destination:
+        if screen is not None and list(self.player.rect.center) != destination:
             pygame.draw.circle(
                 screen, BLUE, (destination[0], destination[1]),
                 Settings.CELL_SIZE // 7)
@@ -515,8 +516,12 @@ class Run:
                     if missile.total_ticks >= 10:
                         self.friendly_missiles.remove(missile)
                         Settings.ALL_SPRITES.remove(missile)
+                        Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                     # отрисовка радиуса обнаружения ракеты
                     if not missile.activated:
+                        missile.activation = list(missile.activation)
+                        missile.activation[0] += camera.dx
+                        missile.activation[1] += camera.dy
                         pygame.draw.line(screen, BLUE,
                                          (missile_x, missile_y),
                                          (missile.activation[0],
@@ -538,7 +543,11 @@ class Run:
                     if aircraft.delete:
                         self.friendly_aircraft.remove(aircraft)
                         Settings.ALL_SPRITES.remove(aircraft)
+                        Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                     # отрисовка радиуса обнаружения самолета
+                    aircraft.destination = list(aircraft.destination)
+                    aircraft.destination[0] += camera.dx
+                    aircraft.destination[1] += camera.dy
                     pygame.draw.line(screen, BLUE,
                                      (air_x, air_y),
                                      (aircraft.destination[0],
@@ -594,18 +603,37 @@ class Run:
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 15, 1)
 
+    def camera_update(self):
+        # обновляем положение всех спрайтов
+        for sprite in self.list_all_sprites:
+            if type(sprite) == list:
+                for i in sprite:
+                    if i in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
+                        camera.apply_aircraft(i)
+                    elif i in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                        camera.apply_missiles(i)
+                    else:
+                        camera.apply_rect(i)
+            else:
+                camera.apply_rect(sprite)
+        self.board.top += camera.dy
+        self.board.left += camera.dx
+        self.destination_player = list(self.destination_player)
+        self.destination_player[0] += camera.dx
+        self.destination_player[1] += camera.dy
+
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
         alpha_menu = 0
-
+        arrow_pressed = False
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.destination_player = event.pos
+                        self.destination_player = list(event.pos)
                     if event.button == 2:
                         self.aircraft_launch(event.pos)
                     if event.button == 3:
@@ -615,10 +643,50 @@ class Run:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                    if event.key == pygame.K_UP:
+                        camera.dy += 20
+                        arrow_pressed = True
+                    if event.key == pygame.K_DOWN:
+                        camera.dy -= 20
+                        arrow_pressed = True
+                    if event.key == pygame.K_LEFT:
+                        camera.dx += 20
+                        arrow_pressed = True
+                    if event.key == pygame.K_RIGHT:
+                        camera.dx -= 20
+                        arrow_pressed = True
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_UP:
+                        camera.dy = 0
+                        arrow_pressed = False
+                    if event.key == pygame.K_DOWN:
+                        camera.dy = 0
+                        arrow_pressed = False
+                    if event.key == pygame.K_LEFT:
+                        camera.dx = 0
+                        arrow_pressed = False
+                    if event.key == pygame.K_RIGHT:
+                        camera.dx = 0
+                        arrow_pressed = False
                 if event.type == MUSIC_END:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/'
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
+
+            self.camera_update()
+
+            if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not arrow_pressed:
+                camera.dx = -20
+            elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
+                camera.dx = 20
+            elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not arrow_pressed:
+                camera.dy = -20
+            elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
+                camera.dy = 20
+            else:
+                if not arrow_pressed:
+                    camera.dx = 0
+                    camera.dy = 0
 
             screen.fill(GRAY5)
             self.board.update()
@@ -692,8 +760,10 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, True
+        False, False, True, False, False, False
     running = True
+
+    camera = Camera()
 
     # Основной мега-цикл
     while running:
