@@ -51,3 +51,4 @@ class Base(pygame.sprite.Sprite):
         self.rect.topleft = [self.x * self.size, self.y * self.size]
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
+        self.mask = pygame.mask.from_surface(self.image)
