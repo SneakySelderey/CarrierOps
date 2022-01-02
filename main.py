@@ -760,7 +760,7 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, True, False, False, False
+        False, False, False, False, False, True
     running = True
 
     camera = Camera()
