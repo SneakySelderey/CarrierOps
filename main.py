@@ -32,11 +32,12 @@ def load_save(save):
 
 
 def create_save():
-    """Функция жяд создания сохранения"""
+    """Функция для создания сохранения"""
     # TODO: CREATE SAVE
 
 
 def give_tooltip(num):
+    """Функция для создания подсказки. Принимает номер подсказки"""
     if num == 1:
         pygame_gui.elements.UITooltip(
             manager=load_manager,
@@ -74,8 +75,8 @@ def rebase_elements():
     GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
                          GAMEOVER_ELEMENTS}
     LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
-    gameover_group.update()
-    title_group.update()
+    GAMEOVER_GROUP.update()
+    TITLE_GROUP.update()
 
 
 def rebase_load_manager():
@@ -87,6 +88,7 @@ def rebase_load_manager():
 
 
 def clear_sprite_groups():
+    """Функция для очистки групп спрайтов"""
     Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.ALL_SPRITES.empty()
     Settings.PLAYER_SPRITE.empty()
@@ -120,26 +122,29 @@ def show_menu_screen():
                         terminate()
                     return list(MENU_ELEMENTS.values()).index(event.ui_element)
             if event.type == pygame.MOUSEBUTTONDOWN:
-                title_group.update(event.pos)
+                TITLE_GROUP.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
             menu_manager.process_events(event)
+        # Красивая картинка
         help_surface.fill((10, 10, 10, alpha))
-        menu_manager.update(delta)
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
-        title_group.draw(screen)
+        alpha = max(alpha - 10, 0)
+        TITLE_GROUP.draw(screen)
+        # Обновление менеджера
+        menu_manager.update(delta)
         menu_manager.draw_ui(screen)
         pygame.display.flip()
-        alpha = max(alpha - 10, 0)
         clock.tick(FPS)
 
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     global WIDTH, HEIGHT, help_surface, screen
+    # Переменные для красивой картинки и эффекта затемнения
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -167,29 +172,32 @@ def show_setting_screen(flag=True):
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
+                        # Сохраним старое разрешение
                         Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
+                        # пределим новое разрешение и размер клетки
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
                         Settings.CELL_SIZE = WIDTH // 20
-                        gui_elements.WIDTH, gui_elements.HEIGHT = WIDTH, HEIGHT
+                        # Обновим элементы интерфейса
                         rebase_elements()
                         help_surface = pygame.transform.scale(help_surface,
                                                               (WIDTH, HEIGHT))
+                        background = pygame.transform.scale(
+                            SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                         if not Settings.IS_FULLSCREEN:
                             screen = pygame.display.set_mode((WIDTH, HEIGHT))
                         else:
                             screen = pygame.display.set_mode((WIDTH, HEIGHT),
                                                              pygame.FULLSCREEN)
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
+                        # Если игра уже начата, обновим координаты всех
+                        # объектов
                         if game_objects is not None:
-                            for i in ALL_SPRITES:
-                                i.new_position()
+                            [i.new_position() for i in ALL_SPRITES]
                             game_objects.destination_player = new_coords(
                                 *game_objects.destination_player)
                             game_objects.cell_size = Settings.CELL_SIZE
                             ALL_SPRITES.update()
-                        background = pygame.transform.scale(
-                            SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -204,7 +212,7 @@ def show_setting_screen(flag=True):
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
-        settings_manager.update(delta)
+        # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
             help_surface.fill((0, 0, 0, alpha_up))
@@ -216,6 +224,8 @@ def show_setting_screen(flag=True):
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
+        # Обновление менеджера
+        settings_manager.update(delta)
         settings_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
@@ -227,7 +237,7 @@ def show_gameover_screen():
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
     alpha = 255
     screen.fill(BLACK)
-    gameover_group.draw(screen)
+    GAMEOVER_GROUP.draw(screen)
     pygame.display.flip()
     sleep(0.5)
     while True:
@@ -241,26 +251,27 @@ def show_gameover_screen():
                         terminate()
                     if event.ui_element == GAMEOVER_ELEMENTS['MENU']:
                         return 1
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                title_group.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/gameover/'
                                         + choice(GAMEOVER_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             gameover_manager.process_events(event)
+        # Создание красивой картинки и эффекта затемнения
         help_surface.fill((0, 0, 0, alpha))
-        gameover_manager.update(delta)
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
-        gameover_group.draw(screen)
+        alpha = max(alpha - 0.5, 0)
+        GAMEOVER_GROUP.draw(screen)
+        # Обновление менеджера
+        gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
         pygame.display.flip()
-        alpha = max(alpha - 0.5, 0)
         clock.tick(FPS)
 
 
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
+    # Переменные для создания красивой картинки
     help_surface_2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
     help_surface_2.blit(screen, (0, 0))
     alpha = 0
@@ -278,20 +289,20 @@ def show_in_game_menu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                title_group.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/game/' +
                                         choice(GAME_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             game_manager.process_events(event)
-        game_manager.update(delta)
+        # Создание красивой картинки
         screen.blit(help_surface_2, (0, 0))
         help_surface.fill((0, 0, 0, alpha))
         screen.blit(help_surface, (0, 0))
-        game_manager.draw_ui(screen)
-        pygame.display.flip()
         alpha = min(alpha + 20, 200)
+        # Обновление менеджера
+        game_manager.draw_ui(screen)
+        game_manager.update(delta)
+        pygame.display.flip()
         clock.tick(FPS)
 
 
@@ -323,10 +334,7 @@ def show_slides():
                             os.getcwd() + '/data/slides/' + next(SLIDES)),
                             screen.get_size())
                         [i.stop() for i in ALL_EFFECTS]
-                        try:
-                            SLIDE_EFFECTS[count].play(-1)
-                        except:
-                            pygame.mixer.music.set_volume(0.5)
+                        SLIDE_EFFECTS[count].play(-1)
                     except StopIteration:
                         pygame.mixer.music.load(
                             os.getcwd() + '/data/music/menu/' +
@@ -335,7 +343,8 @@ def show_slides():
                         pygame.mixer.music.play(fade_ms=3000)
                         pygame.mixer.music.set_endevent(MUSIC_END)
                         return 1
-            game_manager.process_events(event)
+                    except IndexError:
+                        pygame.mixer.music.set_volume(0.5)
         if count == 8:
             pygame.mixer.music.fadeout(1000)
         screen.blit(slide, (0, 0))
@@ -345,12 +354,14 @@ def show_slides():
 
 def show_load_menu(from_main=True):
     """Функция для отрисовки и взаимодействия с меню сохранения и загрузки"""
+    # Переменные для создания красивой картинки
     fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen if not from_main else pygame.transform.scale(
         MENU_BACKGROUND, (WIDTH, HEIGHT))
+    # Переменная для выбранного элемента в списке
     item_selected = None
     while True:
         delta = clock.tick(FPS) / 1000.0
@@ -359,13 +370,14 @@ def show_load_menu(from_main=True):
                 terminate()
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == LOAD_ELEMENTS['OK']:
+                        return 1
                     if event.ui_element == LOAD_ELEMENTS['TO_DELETE']:
                         if item_selected is not None:
                             delete_save(item_selected)
                         else:
                             # Если пользователь не выбрал сохранение,
                             # выведем об этом сообещние
-                            rebase_load_manager()
                             give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_LOAD']:
                         if item_selected is not None:
@@ -373,7 +385,6 @@ def show_load_menu(from_main=True):
                         else:
                             # Если пользователь не выбрал сохранение,
                             # выведем об этом сообещние
-                            rebase_load_manager()
                             give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE']:
                         if not from_main:
@@ -400,7 +411,7 @@ def show_load_menu(from_main=True):
                 if event.key == pygame.K_ESCAPE:
                     return 1
             load_manager.process_events(event)
-        load_manager.update(delta)
+        # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
             help_surface.fill((0, 0, 0, alpha_up))
@@ -412,6 +423,8 @@ def show_load_menu(from_main=True):
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
+        # Обновление менеджера
+        load_manager.update(delta)
         load_manager.draw_ui(screen)
         pygame.display.flip()
         clock.tick(fps)
@@ -429,7 +442,6 @@ class Run:
 
         # Флаги
         self.running = True
-        self.pause = True
         self.ai_detected = False
         self.defeat = False
         self.menu = False
@@ -570,7 +582,7 @@ class Run:
                             NEW_CONTACT.play()
                         self.play_new_contact = False
                         self.play_contact_lost = True
-                        self.pause = True
+                        Settings.IS_PAUSE = True
                         Settings.ALL_SPRITES.draw(screen)
 
                 # противник прячется в тумане войны
@@ -741,28 +753,30 @@ class Run:
 
 
 if __name__ == '__main__':
+    # Создадим pygame-оболочку
     pygame.init()
     pygame.mixer.init()
     size = Settings.WIDTH, Settings.HEIGHT
     screen = pygame.display.set_mode(size)
+    # Вспомогательная поверхность для отрисовки
     help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                   pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
 
-    title_group = pygame.sprite.Group()
-    Title(title_group)
+    #title_group = pygame.sprite.Group()
+    #Title(title_group)
 
-    gameover_group = pygame.sprite.Group()
-    BasesLost(gameover_group)
+    #gameover_group = pygame.sprite.Group()
+    #BasesLost(gameover_group)
 
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
     running = True
-
+    # Создадим камеру
     camera = Camera()
 
     # Основной мега-цикл
@@ -789,7 +803,6 @@ if __name__ == '__main__':
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
             game_objects = Run()
-            a = game_objects.board.board
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
@@ -800,9 +813,4 @@ if __name__ == '__main__':
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                terminate()
-        screen.fill(BLACK)
-        pygame.display.flip()
 

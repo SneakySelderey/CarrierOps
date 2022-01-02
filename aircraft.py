@@ -1,14 +1,15 @@
 import pygame
-from math import hypot, sin, cos, atan2
+from math import sin, cos, atan2
 from Settings import new_coords, ALL_SPRITES, new_image_size, \
-    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT
+    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
+    ALL_SPRITES_FOR_SURE
 import Settings
 
 
 class AircraftFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт самолета"""
     def __init__(self, destination, visibility):
-        super().__init__(ALL_SPRITES)
+        super().__init__(ALL_SPRITES, PLAYER_AIRCRAFT, ALL_SPRITES_FOR_SURE)
         player = list(PLAYER_SPRITE)[0]
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
         self.rect = self.image.get_rect(center=[player.rect.centerx,
@@ -19,17 +20,10 @@ class AircraftFriendly(pygame.sprite.Sprite):
                            destination[0] - self.pos[0])
         self.total_ticks = 0  # Общее число тиков
         self.destination = destination  # Направление движения
-        self.to_player = False  # Если самолет возвращается на авианосец
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
-
-        Settings.PLAYER_AIRCRAFT.add(self)  # Если использовать этот же класс для самолетов противника,
-        # то здесь нужно прописать условие для добавления в нужную спрайт-группу
-        Settings.ALL_SPRITES_FOR_SURE.add(self)
-
         self.radius = Settings.CELL_SIZE * 3.5
-
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
@@ -37,7 +31,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.total_ticks += 1
 
         if self.pos != self.destination and not self.stop:
-            # обновление кооординат (из полярнйо системы в декартову)
+            # Обновление кооординат (из полярнйо системы в декартову)
             self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(self.alpha)
             self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
             self.rect.center = self.pos
@@ -72,7 +66,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.alpha = atan2(player.rect.centery - self.rect.centery,
                            player.rect.centerx - self.rect.centerx)
         self.destination = player.rect.centerx, player.rect.centery
-        self.to_player = True
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
             self.delete = True
@@ -80,8 +73,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
         for ai in Settings.AI_SPRITE:
-            # dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
-            #                    ai.rect.centery - self.rect.centery)
             if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
                 self.alpha = atan2(ai.rect.centery - self.rect.centery,
                                    ai.rect.centerx - self.rect.centerx)
