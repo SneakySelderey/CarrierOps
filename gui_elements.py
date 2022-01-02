@@ -1,16 +1,9 @@
-from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, CONNECTION
+from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, get_bigger_rect
 import pygame
 import pygame_gui
 import Settings
 
 """Создание элементов интерфейса"""
-
-
-def get_bigger_rect(rect, d):
-    """Функция для получения увеличенного прямоугольника"""
-    rect.x, rect.y, rect.width, rect.height = \
-        rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
-    return rect
 
 
 class OptionList(pygame_gui.elements.UISelectionList):
@@ -22,12 +15,10 @@ class OptionList(pygame_gui.elements.UISelectionList):
         self.manager = manager
         rect = MAIN_FONT.render('LOAD_SYSTEM', True, WHITE).get_rect(
             topleft=(Settings.WIDTH * pos1, Settings.HEIGHT * pos2))
-        rect.width = Settings.WIDTH * 0.4
-        rect.height = Settings.HEIGHT * 0.4
-        data = list(CONNECTION.execute("""SELECT Saves.Title, Saves.Date, 
-PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON Saves.Path = 
-PathsOfSaves.ID""").fetchall())
-        data = ['    '.join([i[0], i[1]]) for i in data]
+        rect.width = Settings.WIDTH * 0.5
+        rect.height = Settings.HEIGHT * 0.5
+        data = get_user_data()
+        data = ['    '.join([i, str(data[i][0])]) for i in data]
         super().__init__(relative_rect=rect, manager=manager,
                          item_list=data, object_id='saves')
 
@@ -209,10 +200,10 @@ FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
                            'stable_btn')
 LOAD_LABEL = Label(36, 'SAVE AND LOAD', 0.5, 0.1, load_manager, 'settings',
                    'center')
-TO_SAVE_BUTTON = Button('SAVE', 0.15, 0.2, 15, load_manager, 'stable_btn')
-TO_LOAD_BUTTON = Button('LOAD', 0.25, 0.2, 15, load_manager, 'stable_btn')
-TO_DELETE_BUTTON = Button('DELETE', 0.35, 0.2, 15, load_manager, 'stable_btn')
-USERS_LIST = OptionList(0.1, 0.3, load_manager)
+TO_SAVE_BUTTON = Button('SAVE', 0.7, 0.35, 15, load_manager, 'stable_btn')
+TO_LOAD_BUTTON = Button('LOAD', 0.7, 0.45, 15, load_manager, 'stable_btn')
+TO_DELETE_BUTTON = Button('DELETE', 0.7, 0.55, 15, load_manager, 'stable_btn')
+USERS_LIST = OptionList(0.1, 0.25, load_manager)
 
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,

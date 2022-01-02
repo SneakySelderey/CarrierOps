@@ -4,6 +4,13 @@ import os
 import sqlite3
 
 
+def get_bigger_rect(rect, d):
+    """Функция для получения увеличенного прямоугольника"""
+    rect.x, rect.y, rect.width, rect.height = \
+        rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
+    return rect
+
+
 def new_coords(x, y):
     """Функия для пересчета координат объекта при изменении разрешения.
     Принимет координату при старом разрешении"""
@@ -15,6 +22,13 @@ def new_image_size(img):
     return pygame.transform.scale(img, (
             img.get_size()[0] * CELL_SIZE // 70,
             img.get_size()[1] * CELL_SIZE // 70))
+
+
+def get_user_data():
+    """Функция для получения информации из базы данных о сохранениях"""
+    return {i[0]: i[1:] for i in CONNECTION.execute("""SELECT Saves.Title, 
+Saves.Date, PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON 
+Saves.Path = PathsOfSaves.ID""").fetchall()}
 
 
 user32 = ctypes.windll.user32
@@ -33,7 +47,7 @@ WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize) + 8:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
@@ -43,8 +57,8 @@ IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
-USER_DATA = list(CONNECTION.execute("""SELECT Saves.Title, Saves.Date, PathsOfSaves.Path FROM 
-Saves INNER JOIN PathsOfSaves ON Saves.Path = PathsOfSaves.ID""").fetchall())
+CONNECTION.execute("PRAGMA foreign_keys = ON")
+USER_DATA = get_user_data()
 
 # Events
 MUSIC_END = pygame.USEREVENT+1
@@ -71,6 +85,7 @@ AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png')
 MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
+SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

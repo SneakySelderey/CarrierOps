@@ -13,9 +13,33 @@ from Settings import *
 import Settings
 import gui_elements
 from time import sleep
-import strgen
-from datetime import datetime
-import pickle
+
+
+def delete_save(save):
+    """Функция для удаления сохраннения из БД"""
+    CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
+    WHERE Path = "{Settings.USER_DATA[save][1]}"''')
+    CONNECTION.commit()
+    rebase_load_manager()
+
+
+def load_save(save):
+    """Функция для загрузи сохранения"""
+    # TODO: LOAD SAVE!!!
+
+
+def give_tooltip(num):
+    if num == 1:
+        pygame_gui.elements.UITooltip(
+            manager=load_manager,
+            hover_distance=(1, 1),
+            html_text="Сохранение не выбрано")
+    else:
+        pygame_gui.elements.UITooltip(
+            manager=load_manager,
+            hover_distance=(1, 1),
+            html_text="Вы не можете сохраниться, не начав игру")
+
 
 
 def rebase_elements():
@@ -45,6 +69,14 @@ def rebase_elements():
     LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
     gameover_group.update()
     title_group.update()
+
+
+def rebase_load_manager():
+    """Функция для обновления элементов меню загрузки"""
+    global LOAD_ELEMENTS, LABELS
+    load_manager.clear_and_reset()
+    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
+    LABELS = [i.get_same() for i in LABELS]
 
 
 def terminate():
@@ -88,7 +120,7 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface, screen, game_objects
+    global WIDTH, HEIGHT, help_surface, screen
     fps = 240
     alpha_up = 0
     alpha_down = 255
@@ -305,7 +337,7 @@ def show_load_menu(from_main=True):
     fps = 240
     alpha_up = 0
     alpha_down = 255
-    background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen if not from_main else pygame.transform.scale(
         MENU_BACKGROUND, (WIDTH, HEIGHT))
     item_selected = None
@@ -318,30 +350,39 @@ def show_load_menu(from_main=True):
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == LOAD_ELEMENTS['TO_DELETE']:
                         if item_selected is not None:
-                            path = [i for i in Settings.USER_DATA if
-                                    i[0] == item_selected][0][-1]
-                            CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
-WHERE Path = "{path}"''')
-                            CONNECTION.commit()
-                            LOAD_ELEMENTS['LIST'] = LOAD_ELEMENTS['LIST'].get_same()
+                            delete_save(item_selected)
+                        else:
+                            # Если пользователь не выбрал сохранение,
+                            # выведем об этом сообещние
+                            rebase_load_manager()
+                            give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_LOAD']:
-                        pass
+                        if item_selected is not None:
+                            load_save(item_selected)
+                        else:
+                            # Если пользователь не выбрал сохранение,
+                            # выведем об этом сообещние
+                            rebase_load_manager()
+                            give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE']:
                         if not from_main:
                             pass  # TODO
                         else:
-                            message = pygame_gui.windows.UIMessageWindow(
-                                manager=load_manager,
-                                html_message='Вы не можете сохранить игру, '
-                                             'не начав ее',
-                                rect=pygame.Rect(Settings.WIDTH // 2 - 300,
-                                                 Settings.HEIGHT // 2 - 200,
-                                                 600, 400),
-                                window_title='WARNING')
+                            rebase_load_manager()
+                if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
+                    if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and from_main:
+                        # Выведем сообщение, если пользователь решил
+                        # сохраниться, не начав игру
+                        give_tooltip(2)
+                if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+                    rebase_load_manager()
+
                 if event.user_type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                    # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
                 if event.user_type == pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
-                    pass  # TODO
+                    # Загрузка сохранения
+                    load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1

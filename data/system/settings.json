@@ -157,7 +157,7 @@
              "hovered_border": "#FFFFFF",
              "disabled_border": "#00000000",
              "selected_border": "#FFFFFF",
-             "active_border":"#FFFFFF"
+             "active_border":"#8080B0"
          },
          "font":
          {
@@ -213,5 +213,13 @@
          {
             "normal_bg": "#FFFFFF"
          }
-     }
+     },
+  "tool_tip.text_box":
+  {"colours":
+         {
+             "dark_bg":"#00000000",
+             "normal_border": "#FFFFFF",
+             "normal_text": "#FFFFFF"
+         }
+  }
 }
