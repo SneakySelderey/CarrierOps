@@ -1,6 +1,14 @@
 import pygame
 import ctypes
 import os
+import sqlite3
+
+
+def get_bigger_rect(rect, d):
+    """Функция для получения увеличенного прямоугольника"""
+    rect.x, rect.y, rect.width, rect.height = \
+        rect.x - d, rect.y - d, rect.width + d * 2, rect.height + d * 2
+    return rect
 
 
 def new_coords(x, y):
@@ -14,6 +22,13 @@ def new_image_size(img):
     return pygame.transform.scale(img, (
             img.get_size()[0] * CELL_SIZE // 70,
             img.get_size()[1] * CELL_SIZE // 70))
+
+
+def get_user_data():
+    """Функция для получения информации из базы данных о сохранениях"""
+    return {i[0]: i[1:] for i in CONNECTION.execute("""SELECT Saves.Title, 
+Saves.Date, PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON 
+Saves.Path = PathsOfSaves.ID""").fetchall()}
 
 
 user32 = ctypes.windll.user32
@@ -48,6 +63,10 @@ CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
 pygame.display.set_mode((WIDTH, HEIGHT))
 
+CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
+CONNECTION.execute("PRAGMA foreign_keys = ON")
+USER_DATA = get_user_data()
+
 # Events
 MUSIC_END = pygame.USEREVENT+1
 
@@ -73,6 +92,7 @@ AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png')
 MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
+SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

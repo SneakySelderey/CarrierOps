@@ -138,7 +138,7 @@
              "active_bg": "#A9A9A9"
          }
      },
-  "fullscreen_btn":
+  "stable_btn":
   {
          "colours":
          {
@@ -157,7 +157,7 @@
              "hovered_border": "#FFFFFF",
              "disabled_border": "#00000000",
              "selected_border": "#FFFFFF",
-             "active_border":"#FFFFFF"
+             "active_border":"#8080B0"
          },
          "font":
          {
@@ -166,6 +166,60 @@
              "bold":  0,
              "italic":  0,
              "regular_path":  "data/font/Teletactile.ttf"
+         }
+  },
+  "saves":
+     {
+         "colours":
+         {
+             "dark_bg":"#00000000",
+             "normal_border": "#FFFFFF"
+         },
+
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": "10",
+             "border_width": "1",
+             "shadow_width": "15",
+             "list_item_height": "80"
+         }
+     },
+  "vertical_scroll_bar":
+     {
+         "colours":
+         {
+             "normal_bg": "#FFFFFF",
+             "hovered_bg": "#35393e",
+             "disabled_bg": "#25292e",
+             "selected_bg": "#FFFFFF",
+             "active_bg": "#FFFFFF",
+             "dark_bg": "#00000000",
+             "normal_text": "#c5cbd8",
+             "hovered_text": "#FFFFFF",
+             "selected_text": "#FFFFFF",
+             "disabled_text": "#6d736f"
+         },
+         "misc":
+         {
+            "shape": "rectangle",
+            "border_width": "0",
+            "enable_arrow_buttons": "0"
+         }
+     },
+     "vertical_scroll_bar.#sliding_button":
+     {
+         "colours":
+         {
+            "normal_bg": "#FFFFFF"
+         }
+     },
+  "tool_tip.text_box":
+  {"colours":
+         {
+             "dark_bg":"#00000000",
+             "normal_border": "#FFFFFF",
+             "normal_text": "#FFFFFF"
          }
   }
 }
