@@ -59,6 +59,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.rect = rect
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
+        self.mask = pygame.mask.from_surface(self.image)
         if not self.activated:
             try:
                 x, y = new_coords(self.activation[0] - self.pos[0],

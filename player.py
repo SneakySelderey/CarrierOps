@@ -27,3 +27,4 @@ class Player(pygame.sprite.Sprite):
         self.image = new_image_size(PLAYER_IMAGE)
         self.rect = self.image.get_rect(
             topleft=new_coords(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.image)

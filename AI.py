@@ -24,9 +24,8 @@ class AI(pygame.sprite.Sprite):
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
-        print(self.rect)
         self.image = new_image_size(AI_IMAGE)
         self.rect = self.image.get_rect(topleft=new_coords(*self.rect.topleft))
-        print(self.rect)
+        self.mask = pygame.mask.from_surface(self.image)
 
 
