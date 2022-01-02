@@ -20,6 +20,7 @@ class Base(pygame.sprite.Sprite):
         self.visibility = visibility
 
         Settings.BASES_SPRITES.add(self)
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
 
         self.mask = pygame.mask.from_surface(self.image)
 

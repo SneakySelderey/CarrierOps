@@ -34,6 +34,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
         Settings.PLAYER_MISSILES.add(self)  # Если использовать этот же класс для ракет противника,
         # то здесь нужно прописать условие для добавления в нужную спрайт-группу
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
 
         self.mask = pygame.mask.from_surface(self.image)
 

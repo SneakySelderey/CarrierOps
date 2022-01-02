@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
         Settings.PLAYER_SPRITE.add(self)
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
         self.visibility = visibility
         self.mask = pygame.mask.from_surface(self.image)
 

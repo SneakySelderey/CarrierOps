@@ -23,6 +23,7 @@ pygame.mixer.init()
 
 # Константы
 ALL_SPRITES = pygame.sprite.Group()
+ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
 AI_SPRITE = pygame.sprite.Group()

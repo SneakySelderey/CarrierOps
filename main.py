@@ -1,7 +1,6 @@
 from random import choice
 import sys
 import random
-from math import hypot
 
 import pygame.sprite
 
@@ -11,6 +10,7 @@ from AI import AI
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
+from camera import Camera
 from Settings import *
 import Settings
 import gui_elements
@@ -45,6 +45,7 @@ def rebase_elements():
 
 
 def clear_sprite_groups():
+    Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.ALL_SPRITES.empty()
     Settings.PLAYER_SPRITE.empty()
     Settings.AI_SPRITE.empty()
@@ -403,6 +404,7 @@ class Run:
                     if missile.total_ticks >= 10:
                         self.friendly_missiles.remove(missile)
                         Settings.ALL_SPRITES.remove(missile)
+                        Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                     # отрисовка радиуса обнаружения ракеты
                     if not missile.activated:
                         pygame.draw.line(screen, BLUE,
@@ -426,6 +428,7 @@ class Run:
                     if aircraft.delete:
                         self.friendly_aircraft.remove(aircraft)
                         Settings.ALL_SPRITES.remove(aircraft)
+                        Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                     # отрисовка радиуса обнаружения самолета
                     pygame.draw.line(screen, BLUE,
                                      (air_x, air_y),
@@ -504,9 +507,36 @@ class Run:
                         self.pause = not self.pause
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                    if event.key == pygame.K_UP:
+                        camera.dy += 10
+                    if event.key == pygame.K_DOWN:
+                        camera.dy -= 10
+                    if event.key == pygame.K_LEFT:
+                        camera.dx += 10
+                    if event.key == pygame.K_RIGHT:
+                        camera.dx -= 10
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_UP:
+                        camera.dy = 0
+                    if event.key == pygame.K_DOWN:
+                        camera.dy = 0
+                    if event.key == pygame.K_LEFT:
+                        camera.dx = 0
+                    if event.key == pygame.K_RIGHT:
+                        camera.dx = 0
                 if event.type == MUSIC_END:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/' + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
+
+            # обновляем положение всех спрайтов
+            for sprite in self.list_all_sprites:
+                if type(sprite) == list:
+                    for i in sprite:
+                        camera.apply(i)
+                else:
+                    camera.apply(sprite)
+            self.board.top += camera.dy
+            self.board.left += camera.dx
 
             screen.fill(GRAY5)
             self.board.update()
@@ -580,6 +610,8 @@ if __name__ == '__main__':
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
     running = True
+
+    camera = Camera()
 
     # Основной мега-цикл
     while running:
