@@ -1,10 +1,7 @@
 from random import choice
-import pygame_gui
 import sys
 import random
-
 import pygame.sprite
-
 from board import Board
 from player import Player
 from AI import AI
@@ -14,8 +11,6 @@ from aircraft import AircraftFriendly
 from camera import Camera
 from Settings import *
 import Settings
-import gui_elements
-from time import sleep
 
 
 def delete_save(save):
@@ -193,7 +188,7 @@ def show_setting_screen(flag=True):
                         # Если игра уже начата, обновим координаты всех
                         # объектов
                         if game_objects is not None:
-                            [i.new_position() for i in ALL_SPRITES]
+                            [i.new_position() for i in ALL_SPRITES_FOR_SURE]
                             game_objects.destination_player = new_coords(
                                 *game_objects.destination_player)
                             game_objects.cell_size = Settings.CELL_SIZE
@@ -239,7 +234,7 @@ def show_gameover_screen():
     screen.fill(BLACK)
     GAMEOVER_GROUP.draw(screen)
     pygame.display.flip()
-    sleep(0.5)
+    clock.tick(5000)
     while True:
         delta = clock.tick(FPS) / 1000.0
         for event in pygame.event.get():
@@ -764,12 +759,6 @@ if __name__ == '__main__':
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
-
-    #title_group = pygame.sprite.Group()
-    #Title(title_group)
-
-    #gameover_group = pygame.sprite.Group()
-    #BasesLost(gameover_group)
 
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
