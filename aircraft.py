@@ -80,9 +80,9 @@ class AircraftFriendly(pygame.sprite.Sprite):
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
         for ai in Settings.AI_SPRITE:
-            dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
-                                ai.rect.centery - self.rect.centery)
-            if dist_to_ai <= Settings.CELL_SIZE * 3.5:
+            # dist_to_ai = hypot(ai.rect.centerx - self.rect.centerx,
+            #                    ai.rect.centery - self.rect.centery)
+            if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
                 self.alpha = atan2(ai.rect.centery - self.rect.centery,
                                    ai.rect.centerx - self.rect.centerx)
                 self.stop = False

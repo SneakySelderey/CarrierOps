@@ -98,9 +98,10 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ticks2 += 1
         try:
             for ai in Settings.AI_SPRITE:
-                if hypot(self.rect.centerx - ai.rect.centerx,
-                         self.rect.centery - ai.rect.centery) <= \
-                        Settings.CELL_SIZE * 2:
+                # if hypot(self.rect.centerx - ai.rect.centerx,
+                #          self.rect.centery - ai.rect.centery) <= \
+                #         Settings.CELL_SIZE * 2:
+                if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
                     self.alpha = pygame.math.Vector2(
                         (ai.rect.centerx - self.rect.centerx,
                          ai.rect.centery - self.rect.centery)).normalize()
