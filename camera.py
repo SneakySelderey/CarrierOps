@@ -20,4 +20,4 @@ class Camera:
 
     def apply_missiles(self, obj):
         obj.pos.x += self.dx
-        obj.pos.y += self.dx
+        obj.pos.y += self.dy
