@@ -640,7 +640,7 @@ class Run:
                         self.missile_launch(event.pos)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        self.pause = not self.pause
+                        Settings.IS_PAUSE = not Settings.IS_PAUSE
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
                     if event.key == pygame.K_UP:
@@ -692,18 +692,18 @@ class Run:
             self.board.update()
             self.board.render(screen)
             Settings.ALL_SPRITES.draw(screen)
-            goal = self.move(self.destination_player, self.player, screen)
+            self.move(self.destination_player, self.player, screen)
             self.destination_ai()
             self.fog_of_war()
             help_surface.fill((0, 0, 0, alpha))
             help_surface.fill((0, 0, 0, alpha_menu))
             screen.blit(help_surface, (0, 0))
 
-            if not (self.pause or self.defeat or self.menu):
+            if not (Settings.IS_PAUSE or self.defeat or self.menu):
                 Settings.ALL_SPRITES.update()
                 if not self.ai_detected:
                     self.ai.update()
-            if self.pause:
+            if Settings.IS_PAUSE:
                 text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                 screen.blit(text_pause, text_pause.get_rect(
                     center=(WIDTH // 2, HEIGHT // 2)))

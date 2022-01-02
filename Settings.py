@@ -62,6 +62,7 @@ WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
 CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
+IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
@@ -108,7 +109,8 @@ TALKING = pygame.mixer.Sound('data/sound/talking.wav')
 FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
 MORSE = pygame.mixer.Sound('data/sound/morse.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
+               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')

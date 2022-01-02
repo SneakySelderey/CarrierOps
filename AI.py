@@ -1,13 +1,13 @@
 import pygame
 from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE, AI_SPRITE
+from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE, AI_SPRITE, ALL_SPRITES_FOR_SURE
 import Settings
 
 
 class AI(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт ИИ"""
     def __init__(self, visibility):
-        super().__init__(ALL_SPRITES, AI_SPRITE)
+        super().__init__(ALL_SPRITES, AI_SPRITE, ALL_SPRITES_FOR_SURE)
         self.image = new_image_size(AI_IMAGE)
         self.rect = self.image.get_rect()
         self.rect.center = [Settings.WIDTH, randint(0, Settings.HEIGHT)]
@@ -15,8 +15,6 @@ class AI(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
-        Settings.AI_SPRITE.add(self)
-        Settings.ALL_SPRITES_FOR_SURE.add(self)
         self.visibility = visibility
         self.mask = pygame.mask.from_surface(self.image)
 
