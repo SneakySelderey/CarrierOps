@@ -10,7 +10,7 @@ class Board:
         self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
-        self.board = [[[0]] * height for _ in range(width)]
+        self.board = [[0] * height for _ in range(width)]
         self.bases = []
         self.left = 20
         self.top = 20
@@ -24,8 +24,8 @@ class Board:
 
     def add_base(self, x, y):
         """Функция для добавления базы на поле"""
-        base = Base(x, y, 'neutral', True, self.cell_size)
-        self.board[x][y][0] = base
+        base = Base(x, y, 'neutral', True, self.cell_size, self)
+        self.board[x][y] = base
         self.bases.append(base)
 
     def render(self, screen):

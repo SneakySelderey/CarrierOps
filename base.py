@@ -8,15 +8,17 @@ class Base(pygame.sprite.Sprite):
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
               'hostile': BASE_HOSTILE}
 
-    def __init__(self, x, y, state, visibility, cell_size):
+    def __init__(self, x, y, state, visibility, cell_size, parent):
         super().__init__(ALL_SPRITES)
         self.x, self.y = x, y
         self.size = cell_size
+        self.parent = parent
         self.image = pygame.transform.scale(Base.Images[state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.state = state
         self.rect = self.image.get_rect()
-        self.rect.topleft = [x * cell_size, y * cell_size]
+        self.rect.topleft = [x * cell_size + parent.left,
+                             y * cell_size + parent.top]
         self.visibility = visibility
 
         Settings.BASES_SPRITES.add(self)
@@ -29,18 +31,23 @@ class Base(pygame.sprite.Sprite):
         base_grid = self.x, self.y
         for player in Settings.PLAYER_SPRITE:
             if pygame.sprite.collide_mask(self, player):
-                self.image = pygame.transform.scale(Base.Images['friendly'], (Settings.CELL_SIZE, Settings.CELL_SIZE))
+                self.state = 'friendly'
                 if base_grid in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.remove(base_grid)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
         for ai in Settings.AI_SPRITE:
-            if pygame.sprite.collide_mask(self, ai) and not pygame.sprite.collide_mask(self, player):
-                self.image = pygame.transform.scale(Base.Images['hostile'], (Settings.CELL_SIZE, Settings.CELL_SIZE))
+            if pygame.sprite.collide_mask(self, ai) and not pygame.sprite.collide_mask(self, ai):
+                self.state = 'hostile'
                 if base_grid in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.remove(base_grid)
                 if base_grid not in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.append(base_grid)
+        self.image = pygame.transform.scale(Base.Images[self.state], (
+            Settings.CELL_SIZE, Settings.CELL_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
+                             self.y * Settings.CELL_SIZE + self.parent.top]
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""

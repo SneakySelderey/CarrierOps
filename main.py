@@ -495,6 +495,7 @@ class Run:
                 camera.apply(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
+        self.destination_player = list(self.destination_player)
         self.destination_player[0] += camera.dx
         self.destination_player[1] += camera.dy
 
