@@ -407,6 +407,9 @@ class Run:
                         Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                     # отрисовка радиуса обнаружения ракеты
                     if not missile.activated:
+                        missile.activation = list(missile.activation)
+                        missile.activation[0] += camera.dx
+                        missile.activation[1] += camera.dy
                         pygame.draw.line(screen, BLUE,
                                          (missile_x, missile_y),
                                          (missile.activation[0],
@@ -430,6 +433,9 @@ class Run:
                         Settings.ALL_SPRITES.remove(aircraft)
                         Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                     # отрисовка радиуса обнаружения самолета
+                    aircraft.destination = list(aircraft.destination)
+                    aircraft.destination[0] += camera.dx
+                    aircraft.destination[1] += camera.dy
                     pygame.draw.line(screen, BLUE,
                                      (air_x, air_y),
                                      (aircraft.destination[0],
@@ -490,9 +496,13 @@ class Run:
         for sprite in self.list_all_sprites:
             if type(sprite) == list:
                 for i in sprite:
-                    camera.apply(i)
+                    if i in (Settings.PLAYER_AIRCRAFT or Settings.PLAYER_MISSILES or
+                             Settings.AI_AIRCRAFT or Settings.AI_MISSILES):
+                        camera.apply_pos(i)
+                    else:
+                        camera.apply_rect(i)
             else:
-                camera.apply(sprite)
+                camera.apply_rect(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
         self.destination_player[0] += camera.dx

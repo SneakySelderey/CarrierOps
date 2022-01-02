@@ -22,6 +22,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.to_player = False  # Если самолет возвращается на авианосец
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
+        self.play_sound = True
 
         Settings.PLAYER_AIRCRAFT.add(self)  # Если использовать этот же класс для самолетов противника,
         # то здесь нужно прописать условие для добавления в нужную спрайт-группу
@@ -64,6 +65,9 @@ class AircraftFriendly(pygame.sprite.Sprite):
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""
+        if self.play_sound:
+            LANDING.play()
+            self.play_sound = False
         player = list(PLAYER_SPRITE)[0]
         self.alpha = atan2(player.rect.centery - self.rect.centery,
                            player.rect.centerx - self.rect.centerx)
@@ -71,7 +75,6 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.to_player = True
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
-            LANDING.play()
             self.delete = True
 
     def aircraft_tracking(self):
