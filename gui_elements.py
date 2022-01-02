@@ -1,4 +1,5 @@
-from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, get_bigger_rect
+from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, \
+    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP
 import pygame
 import pygame_gui
 import Settings
@@ -153,6 +154,41 @@ class Button(pygame_gui.elements.UIButton):
         return Button(self.title, pos1, pos2, self.d, manager, self.obj_id)
 
 
+class Title(pygame.sprite.Sprite):
+    """Класс с названием игры"""
+    def __init__(self):
+        super().__init__(TITLE_GROUP)
+        txt = MAIN_FONT.render('CARRIER OPERATIONS', True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
+        self.rect.centerx, self.rect.centery = \
+            Settings.WIDTH // 2, Settings.HEIGHT // 5
+
+    def update(self, pos=(-1, -1)):
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
+                                               Settings.HEIGHT // 5
+        # сюда можно впихнуть пасхалку
+        if self.rect.collidepoint(pos[0], pos[1]):
+            pass
+
+
+class BasesLost(pygame.sprite.Sprite):
+    """Класс с надписью о том, что все базы захвачены противником"""
+    def __init__(self):
+        super().__init__(GAMEOVER_GROUP)
+        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES", True, WHITE)
+        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
+        self.rect = txt.get_rect()
+        self.image.blit(txt, self.rect)
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
+            0.375 * Settings.HEIGHT)
+
+    def update(self, *pos):
+        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
+            0.375 * Settings.HEIGHT)
+
+
 # Создание менеджеров
 menu_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
                                     'data/system/settings.json')
@@ -204,6 +240,7 @@ TO_SAVE_BUTTON = Button('SAVE', 0.7, 0.35, 15, load_manager, 'stable_btn')
 TO_LOAD_BUTTON = Button('LOAD', 0.7, 0.45, 15, load_manager, 'stable_btn')
 TO_DELETE_BUTTON = Button('DELETE', 0.7, 0.55, 15, load_manager, 'stable_btn')
 USERS_LIST = OptionList(0.1, 0.25, load_manager)
+OK_BUTTON_LOAD = Button('OK', 0.5, 0.9, 10, load_manager)
 
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
@@ -218,39 +255,7 @@ SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
                      "MUSIC": MUSIC_BAR, "EFFECTS": EFFECT_BAR,
                      'FULLSCREEN': FULLSCREEN_BUTTON}
 LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
-                 'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON}
-
-
-class Title(pygame.sprite.Sprite):
-    """Класс с названием игры"""
-    def __init__(self, group):
-        super().__init__(group)
-        txt = MAIN_FONT.render('CARRIER OPERATIONS', True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = \
-            Settings.WIDTH // 2, Settings.HEIGHT // 5
-
-    def update(self, pos=(-1, -1)):
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
-                                               Settings.HEIGHT // 5
-        # сюда можно впихнуть пасхалку
-        if self.rect.collidepoint(pos[0], pos[1]):
-            pass
-
-
-class BasesLost(pygame.sprite.Sprite):
-    """Класс с надписью о том, что все базы захвачены противником"""
-    def __init__(self, group):
-        super().__init__(group)
-        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES", True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
-            0.375 * Settings.HEIGHT)
-
-    def update(self, *pos):
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
-            0.375 * Settings.HEIGHT)
+                 'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON,
+                 'OK': OK_BUTTON_LOAD}
+BASES_LOST = BasesLost()
+TITLE = Title()

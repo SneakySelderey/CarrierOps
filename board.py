@@ -1,5 +1,5 @@
 import pygame
-from Settings import DARK_RED, ALL_SPRITES
+from Settings import DARK_RED
 import Settings
 from base import Base
 
@@ -30,12 +30,11 @@ class Board:
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
-        cell = Settings.CELL_SIZE
-        self.cell_size = cell
+        self.cell_size = Settings.CELL_SIZE
         [pygame.draw.rect(screen, DARK_RED, (
-            x * cell + self.left,
-            y * cell + self.top, cell,
-            cell), 1) for y in range(self.height)
+            x * self.cell_size + self.left,
+            y * self.cell_size + self.top, self.cell_size,
+            self.cell_size), 1) for y in range(self.height)
          for x in range(self.width)]
 
     def update(self):
@@ -44,9 +43,8 @@ class Board:
 
     def get_cell(self, mouse_pos):
         """Функция для определения ячейки, на которую нажал пользователь"""
-        x, y = mouse_pos
-        x = (x - self.left) // self.cell_size
-        y = (y - self.top) // self.cell_size
+        x = (mouse_pos[0] - self.left) // self.cell_size
+        y = (mouse_pos[1] - self.top) // self.cell_size
         if not 0 <= x <= self.width or not 0 <= y <= self.height:
             return
         return x, y

@@ -1,7 +1,7 @@
 import pygame
-from math import hypot
 from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
-    MISSILE_FRIENDLY, PLAYER_SPRITE, MISSILE_SPEED
+    MISSILE_FRIENDLY, PLAYER_SPRITE, MISSILE_SPEED, PLAYER_MISSILES, \
+    ALL_SPRITES_FOR_SURE
 import Settings
 
 
@@ -9,11 +9,11 @@ class MissileFriendly(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
     def __init__(self, activation, visibility):
-        super().__init__(ALL_SPRITES)
+        super().__init__(ALL_SPRITES, PLAYER_MISSILES, ALL_SPRITES_FOR_SURE)
         player = list(PLAYER_SPRITE)[0]
         self.image = new_image_size(MISSILE_FRIENDLY)
-        self.rect = self.image.get_rect()
-        self.rect.center = [player.rect.centerx, player.rect.centery]
+        self.rect = self.image.get_rect(center=[player.rect.centerx,
+                                                player.rect.centery])
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
         self.alpha = pygame.math.Vector2((
@@ -31,11 +31,6 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ticks = 10
         self.ticks2 = 0
         self.total_ticks = 0
-
-        Settings.PLAYER_MISSILES.add(self)  # Если использовать этот же класс для ракет противника,
-        # то здесь нужно прописать условие для добавления в нужную спрайт-группу
-        Settings.ALL_SPRITES_FOR_SURE.add(self)
-
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
@@ -98,9 +93,6 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.ticks2 += 1
         try:
             for ai in Settings.AI_SPRITE:
-                # if hypot(self.rect.centerx - ai.rect.centerx,
-                #          self.rect.centery - ai.rect.centery) <= \
-                #         Settings.CELL_SIZE * 2:
                 if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
                     self.alpha = pygame.math.Vector2(
                         (ai.rect.centerx - self.rect.centerx,

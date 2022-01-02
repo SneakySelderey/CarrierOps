@@ -1,22 +1,19 @@
 import pygame
 from random import randint
 from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
-    PLAYER_SPRITE
+    PLAYER_SPRITE, ALL_SPRITES_FOR_SURE
 import Settings
 
 
 class Player(pygame.sprite.Sprite):
     """Класс, определяющий параметры и спрайт игрока"""
     def __init__(self, visibility):
-        super().__init__(ALL_SPRITES, PLAYER_SPRITE)
+        super().__init__(ALL_SPRITES, PLAYER_SPRITE, ALL_SPRITES_FOR_SURE)
         self.image = new_image_size(PLAYER_IMAGE)
-        self.rect = self.image.get_rect()
-        self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
-        self.speedx = 0
-        self.speedy = 0
+        self.rect = self.image.get_rect(center=[
+            40, randint(40, Settings.HEIGHT - 40)])
+        self.speedx = self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
-        Settings.PLAYER_SPRITE.add(self)
-        Settings.ALL_SPRITES_FOR_SURE.add(self)
         self.visibility = visibility
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -28,6 +25,5 @@ class Player(pygame.sprite.Sprite):
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(PLAYER_IMAGE)
-        rect = self.image.get_rect()
-        rect.topleft = new_coords(self.rect.x, self.rect.y)
-        self.rect = rect
+        self.rect = self.image.get_rect(
+            topleft=new_coords(self.rect.x, self.rect.y))

@@ -41,6 +41,8 @@ ALL_SPRITES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
+TITLE_GROUP = pygame.sprite.Group()
+GAMEOVER_GROUP = pygame.sprite.Group()
 AI_SPRITE = pygame.sprite.Group()
 PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()
@@ -55,13 +57,14 @@ WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+8:]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+3:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
 CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
+IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
 
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
@@ -108,7 +111,8 @@ TALKING = pygame.mixer.Sound('data/sound/talking.wav')
 FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
 MORSE = pygame.mixer.Sound('data/sound/morse.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
+               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
