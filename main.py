@@ -108,7 +108,7 @@ def show_menu_screen():
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     alpha = 130
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -134,21 +134,19 @@ def show_menu_screen():
         menu_manager.update(delta)
         menu_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     global WIDTH, HEIGHT, help_surface, screen
     # Переменные для красивой картинки и эффекта затемнения
-    fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen if not flag else pygame.transform.scale(
         MENU_BACKGROUND, (WIDTH, HEIGHT))
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -224,7 +222,6 @@ def show_setting_screen(flag=True):
         settings_manager.update(delta)
         settings_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(fps)
 
 
 def show_gameover_screen():
@@ -237,7 +234,7 @@ def show_gameover_screen():
     pygame.display.flip()
     clock.tick(5000)
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -262,17 +259,16 @@ def show_gameover_screen():
         gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
     # Переменные для создания красивой картинки
     help_surface_2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    help_surface_2.blit(screen, (0, 0))
+    help_surface_2.blit(help_surface, (0, 0))
     alpha = 0
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -299,7 +295,6 @@ def show_in_game_menu():
         game_manager.draw_ui(screen)
         game_manager.update(delta)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_slides():
@@ -351,7 +346,6 @@ def show_slides():
 def show_load_menu(from_main=True):
     """Функция для отрисовки и взаимодействия с меню сохранения и загрузки"""
     # Переменные для создания красивой картинки
-    fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
@@ -360,7 +354,7 @@ def show_load_menu(from_main=True):
     # Переменная для выбранного элемента в списке
     item_selected = None
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -423,7 +417,6 @@ def show_load_menu(from_main=True):
         load_manager.update(delta)
         load_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(fps)
 
 
 class Run:
@@ -633,13 +626,7 @@ class Run:
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
-        alpha_menu = 0
         arrow_pressed = False
-        HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
-            relative_rect=pygame.Rect(10, 10, 200, 20),
-            manager=campaign_manager,
-
-        )
         while self.running:
             #delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -710,9 +697,8 @@ class Run:
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()
             self.fog_of_war()
-            help_surface.fill((0, 0, 0, alpha))
-            help_surface.fill((0, 0, 0, alpha_menu))
-            screen.blit(help_surface, (0, 0))
+
+            help_surface.blit(screen, (0, 0))
 
             if not (Settings.IS_PAUSE or self.defeat or self.menu):
                 Settings.ALL_SPRITES.update()
@@ -732,16 +718,12 @@ class Run:
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
                     show_load_menu(False)
-                    alpha_menu = 200
                 if result == 4:  # Если нажал на SETTINGS
                     show_setting_screen(False)
-                    alpha_menu = 200
             if alpha == 255:
                 self.running = False
             if self.defeat:
                 alpha = min(alpha + 10, 255)
-            if alpha_menu != 0:
-                alpha_menu = max(alpha_menu - 20, 0)
 
             #campaign_manager.update(delta)
             #campaign_manager.draw_ui(screen)
