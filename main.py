@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand
+from map_solomon import SolomonLand, LandCheck
 from Settings import *
 import Settings
 
@@ -444,6 +444,7 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
+        self.land_check = LandCheck(True)
         self.solomon_land = SolomonLand(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
@@ -458,7 +459,7 @@ class Run:
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
                                  self.hostile_missiles, self.friendly_aircraft,
-                                 self.solomon_land]
+                                 self.solomon_land, self.land_check]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -476,6 +477,14 @@ class Run:
         """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
+
+        land = list(Settings.BACKGROUND_MAP)[1]
+        self.land_check.rect.center = destination
+        if pygame.sprite.collide_mask(self.land_check, land):
+            game_obj.speedx = 0
+            game_obj.speedy = 0
+            return [True, True]
+
         game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
         stop_x = game_obj.speedx == 0
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
@@ -645,6 +654,8 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = list(event.pos)
+                        land = list(Settings.BACKGROUND_MAP)[1]
+                        land.mask = pygame.mask.from_surface(land.image)
                     if event.button == 2:
                         self.aircraft_launch(event.pos)
                     if event.button == 3:

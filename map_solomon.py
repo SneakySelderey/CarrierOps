@@ -16,7 +16,18 @@ class SolomonLand(pygame.sprite.Sprite):
 
     def update(self):
         """Обновление позиции карты"""
-        pass
+
+
+class LandCheck(pygame.sprite.Sprite):
+    def __init__(self, visibility):
+        super().__init__()
+        self.image = Settings.new_image_size(Settings.AI_HIDDEN)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+        self.visibility = visibility
+        self.mask = pygame.mask.from_surface(self.image)
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
+        Settings.BACKGROUND_MAP.add(self)
 
 
 # class SolomonWater(pygame.sprite.Sprite):
