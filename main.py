@@ -36,27 +36,23 @@ def give_tooltip(num):
     """Функция для создания подсказки. Принимает номер подсказки"""
     if num == 1:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Сохранение не выбрано")
     elif num == 2:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
 
 
 def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
-    global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, \
-        GAMEOVER_ELEMENTS, LABELS, LOAD_ELEMENTS
-    menu_manager.clear_and_reset()
-    settings_manager.clear_and_reset()
-    gameover_manager.clear_and_reset()
-    game_manager.clear_and_reset()
-    load_manager.clear_and_reset()
-    LABELS = [i.get_same() for i in LABELS]
-    MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
+    global SETTINGS_ELEMENTS, LOAD_ELEMENTS
+    user_data_manager.clear_and_reset()
+    bars_manager.clear_and_reset()
+    [label.update_element() for label in LABELS]
+    [element.update_element() for element in MENU_ELEMENTS.values()]
     for i in SETTINGS_ELEMENTS:
         if i == 'MUSIC':
             SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
@@ -65,22 +61,31 @@ def rebase_elements():
             SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
                 rect=LABELS[3].rect)
         else:
-            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
-    IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in
-                        IN_GAME_ELEMENTS}
-    GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
-                         GAMEOVER_ELEMENTS}
-    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
+            try:
+                SETTINGS_ELEMENTS[i].update_element()
+            except AttributeError:
+                SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
+    [element.update_element() for element in IN_GAME_ELEMENTS.values()]
+    [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
+    for i in LOAD_ELEMENTS:
+        try:
+            LOAD_ELEMENTS[i].update_element()
+        except AttributeError:
+            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
     GAMEOVER_GROUP.update()
     TITLE_GROUP.update()
 
 
 def rebase_load_manager():
     """Функция для обновления элементов меню загрузки"""
-    global LOAD_ELEMENTS, LABELS
-    load_manager.clear_and_reset()
-    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
-    LABELS = [i.get_same() for i in LABELS]
+    global LOAD_ELEMENTS
+    user_data_manager.clear_and_reset()
+    for i in LOAD_ELEMENTS:
+        try:
+            LOAD_ELEMENTS[i].update_element()
+        except AttributeError:
+            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
+    [label.update_element() for label in LABELS]
 
 
 def clear_sprite_groups():
@@ -206,6 +211,7 @@ def show_setting_screen(flag=True):
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
+            bars_manager.process_events(event)
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -221,6 +227,8 @@ def show_setting_screen(flag=True):
         # Обновление менеджера
         settings_manager.update(delta)
         settings_manager.draw_ui(screen)
+        bars_manager.update(delta)
+        bars_manager.draw_ui(screen)
         pygame.display.flip()
 
 
@@ -401,6 +409,7 @@ def show_load_menu(from_main=True):
                 if event.key == pygame.K_ESCAPE:
                     return 1
             load_manager.process_events(event)
+            user_data_manager.process_events(event)
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -416,6 +425,8 @@ def show_load_menu(from_main=True):
         # Обновление менеджера
         load_manager.update(delta)
         load_manager.draw_ui(screen)
+        user_data_manager.update(delta)
+        user_data_manager.draw_ui(screen)
         pygame.display.flip()
 
 
@@ -695,24 +706,6 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
-            screen.fill(GRAY5)
-            self.board.update()
-            self.board.render(screen)
-            Settings.ALL_SPRITES.draw(screen)
-            self.move(self.destination_player, self.player, screen)
-            self.destination_ai()
-            self.fog_of_war()
-
-            help_surface.blit(screen, (0, 0))
-
-            if not (Settings.IS_PAUSE or self.defeat or self.menu):
-                Settings.ALL_SPRITES.update()
-                if not self.ai_detected:
-                    self.ai.update()
-            if Settings.IS_PAUSE:
-                text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
-                screen.blit(text_pause, text_pause.get_rect(
-                    center=(WIDTH // 2, HEIGHT // 2)))
             if self.menu:
                 # Получим код возврата от игрового меню
                 result = show_in_game_menu()
@@ -722,18 +715,40 @@ class Run:
                     self.running = False
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
+                    alpha_menu = True
                     show_load_menu(False)
                 if result == 4:  # Если нажал на SETTINGS
+                    alpha_menu = True
                     show_setting_screen(False)
-            if alpha == 255:
-                self.running = False
-            if self.defeat:
-                alpha = min(alpha + 10, 255)
+            else:
+                screen.fill(GRAY5)
+                self.board.update()
+                self.board.render(screen)
+                Settings.ALL_SPRITES.draw(screen)
+                self.move(self.destination_player, self.player, screen)
+                self.destination_ai()
+                self.fog_of_war()
 
-            campaign_manager.update(delta)
-            campaign_manager.draw_ui(screen)
+                help_surface.blit(screen, (0, 0))
 
-            pygame.display.flip()
+                if not (Settings.IS_PAUSE or self.defeat or self.menu):
+                    Settings.ALL_SPRITES.update()
+                    if not self.ai_detected:
+                        self.ai.update()
+                if Settings.IS_PAUSE:
+                    text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
+                    screen.blit(text_pause, text_pause.get_rect(
+                        center=(WIDTH // 2, HEIGHT // 2)))
+
+                if alpha == 255:
+                    self.running = False
+                if self.defeat:
+                    alpha = min(alpha + 10, 255)
+
+                campaign_manager.update(delta)
+                campaign_manager.draw_ui(screen)
+
+                pygame.display.flip()
 
         # После поражения
         while alpha > 0:
