@@ -479,11 +479,14 @@ class Run:
         center = game_obj.rect.center
 
         land = list(Settings.BACKGROUND_MAP)[1]
-        self.land_check.rect.center = destination
-        if pygame.sprite.collide_mask(self.land_check, land):
-            game_obj.speedx = 0
-            game_obj.speedy = 0
-            return [True, True]
+        self.land_check.rect.center = center
+        if pygame.sprite.collide_mask(game_obj, land):
+            N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
+            for i in N:
+                game_obj.rect.center = game_obj.rect.center[0] + i[0], \
+                                              game_obj.rect.center[1] + i[1]
+                if not pygame.sprite.collide_mask(game_obj, land):
+                    break
 
         game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
         stop_x = game_obj.speedx == 0
@@ -710,7 +713,7 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
-            screen.fill(GRAY5)
+            screen.fill(DEEPSKYBLUE4)
             self.board.update()
             self.board.render(screen)
             Settings.ALL_SPRITES.draw(screen)

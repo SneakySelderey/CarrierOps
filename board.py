@@ -31,7 +31,7 @@ class Board:
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
         self.cell_size = Settings.CELL_SIZE
-        [pygame.draw.rect(screen, DARK_RED, (
+        [pygame.draw.rect(screen, Settings.GREY, (
             x * self.cell_size + self.left,
             y * self.cell_size + self.top, self.cell_size,
             self.cell_size), 1) for y in range(self.height)
