@@ -658,9 +658,11 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = list(event.pos)
-                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT:
+                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
+                            Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
                         Settings.NUM_OF_AIRCRAFT -= 1
+                        Settings.OIL_VOLUME -= 1
                     if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
