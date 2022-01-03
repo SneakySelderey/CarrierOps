@@ -639,7 +639,7 @@ class Run:
         alpha = 0
         arrow_pressed = False
         HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
-            relative_rect=pygame.Rect(10, 10, 200, 40),
+            relative_rect=pygame.Rect(10, 13, 200, 40),
             manager=campaign_manager,
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
@@ -715,16 +715,15 @@ class Run:
                     self.running = False
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
-                    alpha_menu = True
                     show_load_menu(False)
                 if result == 4:  # Если нажал на SETTINGS
-                    alpha_menu = True
                     show_setting_screen(False)
             else:
                 screen.fill(GRAY5)
                 self.board.update()
                 self.board.render(screen)
                 Settings.ALL_SPRITES.draw(screen)
+                Settings.ICONS_GROUP.draw(screen)
                 self.move(self.destination_player, self.player, screen)
                 self.destination_ai()
                 self.fog_of_war()

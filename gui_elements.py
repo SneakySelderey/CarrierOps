@@ -1,5 +1,6 @@
 from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, \
-    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP
+    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP, ICONS_GROUP, PLANE_ICON, \
+    MISSILE_ICON, OIL_ICON, GEAR_ICON
 import pygame
 import pygame_gui
 import Settings
@@ -202,6 +203,22 @@ class BasesLost(pygame.sprite.Sprite):
             0.375 * Settings.HEIGHT)
 
 
+class Icon(pygame.sprite.Sprite):
+    """Класс для иконок ресурсов"""
+    def __init__(self, image, pos):
+        """Инициализация. Принимает изрбражениеи его положение на экране"""
+        super().__init__(ICONS_GROUP)
+        self.image = image
+        self.rect = self.image.get_rect(center=(
+            Settings.WIDTH * pos[0], Settings.HEIGHT * pos[1]))
+        self.pos = pos
+
+    def update(self):
+        """ункция обновления положения иконки"""
+        self.rect.center = (Settings.WIDTH * self.pos[0],
+                            Settings.HEIGHT * self.pos[1])
+
+
 # Создание менеджеров
 menu_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
@@ -286,3 +303,7 @@ LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
                  'OK': OK_BUTTON_LOAD}
 BASES_LOST = BasesLost()
 TITLE = Title()
+AIRCRAFT = Icon(PLANE_ICON, (0.2, 0.04))
+MISSILES = Icon(MISSILE_ICON, (0.3, 0.04))
+GEARS = Icon(GEAR_ICON, (0.4, 0.04))
+OIL = Icon(OIL_ICON, (0.5, 0.04))

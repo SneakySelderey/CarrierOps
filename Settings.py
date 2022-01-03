@@ -48,16 +48,21 @@ PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()
 AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
+ICONS_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
 MISSILE_SPEED = 2
+NUM_OF_MISSILES = 5
+NUM_OF_AIRCRAFT = 3
+OIL_VOLUME = 100
+NUM_OF_REPAIR_PARTS = 0
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+5:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
@@ -67,6 +72,7 @@ IS_FULLSCREEN = False
 IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
 
+# Подлючение к БД
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
 CONNECTION.execute("PRAGMA foreign_keys = ON")
 USER_DATA = get_user_data()

@@ -226,7 +226,7 @@
      {
          "colours":
          {
-             "normal_text": "#c5cbd8",
+             "normal_text": "#FFFFFF",
              "normal_border": "#DDDDDD",
              "filled_bar": "#f4251b,#A4150b,180",
              "unfilled_bar": "#CCCCCC"
