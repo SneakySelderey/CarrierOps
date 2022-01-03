@@ -706,24 +706,6 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
-            screen.fill(GRAY5)
-            self.board.update()
-            self.board.render(screen)
-            Settings.ALL_SPRITES.draw(screen)
-            self.move(self.destination_player, self.player, screen)
-            self.destination_ai()
-            self.fog_of_war()
-
-            help_surface.blit(screen, (0, 0))
-
-            if not (Settings.IS_PAUSE or self.defeat or self.menu):
-                Settings.ALL_SPRITES.update()
-                if not self.ai_detected:
-                    self.ai.update()
-            if Settings.IS_PAUSE:
-                text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
-                screen.blit(text_pause, text_pause.get_rect(
-                    center=(WIDTH // 2, HEIGHT // 2)))
             if self.menu:
                 # Получим код возврата от игрового меню
                 result = show_in_game_menu()
@@ -733,18 +715,40 @@ class Run:
                     self.running = False
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
+                    alpha_menu = True
                     show_load_menu(False)
                 if result == 4:  # Если нажал на SETTINGS
+                    alpha_menu = True
                     show_setting_screen(False)
-            if alpha == 255:
-                self.running = False
-            if self.defeat:
-                alpha = min(alpha + 10, 255)
+            else:
+                screen.fill(GRAY5)
+                self.board.update()
+                self.board.render(screen)
+                Settings.ALL_SPRITES.draw(screen)
+                self.move(self.destination_player, self.player, screen)
+                self.destination_ai()
+                self.fog_of_war()
 
-            campaign_manager.update(delta)
-            campaign_manager.draw_ui(screen)
+                help_surface.blit(screen, (0, 0))
 
-            pygame.display.flip()
+                if not (Settings.IS_PAUSE or self.defeat or self.menu):
+                    Settings.ALL_SPRITES.update()
+                    if not self.ai_detected:
+                        self.ai.update()
+                if Settings.IS_PAUSE:
+                    text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
+                    screen.blit(text_pause, text_pause.get_rect(
+                        center=(WIDTH // 2, HEIGHT // 2)))
+
+                if alpha == 255:
+                    self.running = False
+                if self.defeat:
+                    alpha = min(alpha + 10, 255)
+
+                campaign_manager.update(delta)
+                campaign_manager.draw_ui(screen)
+
+                pygame.display.flip()
 
         # После поражения
         while alpha > 0:
