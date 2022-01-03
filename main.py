@@ -430,8 +430,8 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
         self.cell_size = Settings.CELL_SIZE
-        self.cells_x = Settings.WIDTH // self.cell_size
-        self.cells_y = Settings.HEIGHT // self.cell_size
+        self.cells_x = Settings.WIDTH * 2 // self.cell_size + 1
+        self.cells_y = Settings.HEIGHT * 2 // self.cell_size + 1
 
         self.board = Board(self.cells_x, self.cells_y)
         self.board.set_view(0, 0, self.cell_size)
@@ -444,6 +444,7 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
+        self.solomon_land = SolomonLand(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
         self.ai = AI(False)
@@ -454,7 +455,6 @@ class Run:
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
-        self.solomon_land = SolomonLand(True)
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
                                  self.hostile_missiles, self.friendly_aircraft,
