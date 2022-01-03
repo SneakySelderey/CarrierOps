@@ -31,7 +31,7 @@ class OptionList(pygame_gui.elements.UISelectionList):
 
 class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
     """Класс горизонтального ползунка"""
-    def __init__(self, start, end, default, rect, pos_w, d, manager,
+    def __init__(self, default, rect, pos_w, d, manager,
                  relative_to_label):
         if relative_to_label == 'right':
             slider_rect = pygame.Rect(rect.topright[0] + d,
@@ -41,9 +41,8 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
             slider_rect = pygame.Rect(rect.topleft[0] - d,
                                       rect.topleft[1], Settings.WIDTH * pos_w,
                                       rect.height)
-        super().__init__(value_range=(start, end), start_value=default,
+        super().__init__(value_range=(0, 100), start_value=default,
                          manager=manager, relative_rect=slider_rect)
-        self.v_range = range(start, end + 1)
         self.default = default
         self.pos_w = pos_w
         self.d = d
@@ -51,13 +50,11 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
         self.label_rect = rect
         self.manager = manager
 
-    def get_same(self, manager=None, rect=None):
+    def get_same(self, rect=None):
         """Функция для получения идентичного ползунка"""
-        manager = self.manager if manager is None else manager
         rect = self.label_rect if rect is None else rect
-        return HorizontalSlider(self.v_range[0], self.v_range[-1],
-                                self.default, rect, self.pos_w,
-                                self.d, manager, self.relative_to_label)
+        return HorizontalSlider(self.get_current_value(), rect, self.pos_w,
+                                self.d, self.manager, self.relative_to_label)
 
 
 class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
@@ -80,11 +77,10 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
                          starting_option=start,
                          relative_rect=max_scr_rect)
 
-    def get_same(self, manager=None):
-        """Функция для полученяи идентичногго выпадающего спсика"""
-        manager = self.manager if manager is None else manager
-        return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager,
-                               f'{Settings.WIDTH}X{Settings.HEIGHT}')
+    def update_element(self):
+        """"Функция для обновления выпадающего меню"""
+        self.set_relative_position((Settings.WIDTH * self.pos[0],
+                                   Settings.HEIGHT * self.pos[1]))
 
 
 class Label(pygame_gui.elements.UILabel):
@@ -119,11 +115,21 @@ class Label(pygame_gui.elements.UILabel):
             super().__init__(text=title, relative_rect=rect, manager=manager,
                              object_id=obj_id)
 
-    def get_same(self, manager=None):
-        """Функция для получения идентичной метки"""
-        manager = self.manager if manager is None else manager
-        return Label(self.font_size, self.title, self.pos[0], self.pos[1],
-                     manager, self.obj_id, self.place)
+    def update_element(self):
+        """Функция для обновления положения метки"""
+        rect = self.rect
+        pos = Settings.WIDTH * self.pos[0], Settings.HEIGHT * self.pos[1]
+        if self.place == 'center':
+            rect.center = pos
+        elif self.place == 'topleft':
+            rect.topleft = pos
+        elif self.place == 'topright':
+            rect.topright = pos
+        elif self.place == 'bottomleft':
+            rect.bottomleft = pos
+        else:
+            rect.bottomright = pos
+        self.set_relative_position(rect.topleft)
 
 
 class Button(pygame_gui.elements.UIButton):
@@ -145,6 +151,13 @@ class Button(pygame_gui.elements.UIButton):
         else:
             super().__init__(relative_rect=rect, text=title, manager=manager,
                              object_id=obj_id)
+
+    def update_element(self, pos=None):
+        """Функция для обновления положения кнопки"""
+        rect = self.rect
+        pos1, pos2 = self.pos[0], self.pos[1] if pos is None else pos
+        rect.center = Settings.WIDTH * pos1, Settings.HEIGHT * pos2
+        self.set_relative_position(rect.topleft)
 
     def get_same(self, manager=None, pos1=None, pos2=None):
         """Функция для получения идентичной кнопки"""
@@ -205,6 +218,12 @@ settings_manager = pygame_gui.UIManager(
 load_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+user_data_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+bars_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 campaign_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
@@ -234,10 +253,10 @@ EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
 
 OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
 DROP_DOWN_MENU = WindowSizesMenu(0.61, 0.43, 15, settings_manager)
-MUSIC_BAR = HorizontalSlider(0, 100, 20, MUSIC_LABEL.rect, 0.16, 40,
-                             settings_manager, 'right')
-EFFECT_BAR = HorizontalSlider(0, 100, 100, EFFECTS_LABEL.rect, 0.16, 30,
-                              settings_manager, 'right')
+MUSIC_BAR = HorizontalSlider(20, MUSIC_LABEL.rect, 0.16, 40,
+                             bars_manager, 'right')
+EFFECT_BAR = HorizontalSlider(100, EFFECTS_LABEL.rect, 0.16, 30,
+                              bars_manager, 'right')
 FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')
 FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
@@ -247,7 +266,7 @@ LOAD_LABEL = Label(36, 'SAVE AND LOAD', 0.5, 0.1, load_manager, 'settings',
 TO_SAVE_BUTTON = Button('SAVE', 0.7, 0.35, 15, load_manager, 'stable_btn')
 TO_LOAD_BUTTON = Button('LOAD', 0.7, 0.45, 15, load_manager, 'stable_btn')
 TO_DELETE_BUTTON = Button('DELETE', 0.7, 0.55, 15, load_manager, 'stable_btn')
-USERS_LIST = OptionList(0.1, 0.25, load_manager)
+USERS_LIST = OptionList(0.1, 0.25, user_data_manager)
 OK_BUTTON_LOAD = Button('OK', 0.5, 0.9, 10, load_manager)
 
 # Создание групп с элементами
