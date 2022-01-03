@@ -68,6 +68,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = player.rect.centerx, player.rect.centery
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
+            Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
 
     def aircraft_tracking(self):

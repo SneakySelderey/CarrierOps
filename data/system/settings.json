@@ -239,5 +239,25 @@
              "italic":  0,
              "regular_path":  "data/font/Teletactile.ttf"
          }
+     },
+  "caption":
+     {
+         "colours":
+         {
+             "dark_bg": "#00000000",
+             "normal_text":"#FFFFFF"
+         },
+         "font":
+         {
+             "name":  "Teletacticle",
+             "size":  18,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         },
+         "misc":
+         {
+             "text_horiz_alignment": "left"
+         }
      }
 }

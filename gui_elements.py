@@ -219,6 +219,36 @@ class Icon(pygame.sprite.Sprite):
                             Settings.HEIGHT * self.pos[1])
 
 
+class IconText(pygame_gui.elements.UILabel):
+    """Класс для подписи к иконке"""
+    def __init__(self, icon, txt):
+        """Инициализация. Принимает иконку, рядом с котрой должна быть
+        подпись и текст"""
+        self.pos = Settings.WIDTH / (icon.rect.topright[0] + 10), \
+                   Settings.HEIGHT / (icon.rect.topright[1] + 15)
+        txt = txt if icon != OIL else f'{txt}/100'
+        text = pygame.font.Font('data/font/Teletactile.ttf', 18).render(
+            str(txt), True, WHITE)
+        rect = text.get_rect(topleft=(icon.rect.topright[0] + 10,
+                                      icon.rect.topright[1] + 12))
+        self.ico = icon
+        super().__init__(manager=campaign_manager, relative_rect=rect,
+                         text=str(txt), object_id='caption')
+
+    def update_element(self):
+        """Функция для обновления положения подписи"""
+        self.set_relative_position((Settings.WIDTH * self.pos[0],
+                                    Settings.HEIGHT * self.pos[1]))
+
+    def update_text(self):
+        """Функция для обновления текста подписи"""
+        text = Settings.NUM_OF_AIRCRAFT if self.ico == AIRCRAFT else \
+            Settings.NUM_OF_MISSILES if self.ico == MISSILES else \
+            Settings.NUM_OF_REPAIR_PARTS if self.ico == GEARS else \
+            f'{Settings.OIL_VOLUME}/100'
+        self.set_text(str(text))
+
+
 # Создание менеджеров
 menu_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
@@ -304,6 +334,11 @@ LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
 BASES_LOST = BasesLost()
 TITLE = Title()
 AIRCRAFT = Icon(PLANE_ICON, (0.2, 0.04))
-MISSILES = Icon(MISSILE_ICON, (0.3, 0.04))
-GEARS = Icon(GEAR_ICON, (0.4, 0.04))
-OIL = Icon(OIL_ICON, (0.5, 0.04))
+MISSILES = Icon(MISSILE_ICON, (0.27, 0.04))
+GEARS = Icon(GEAR_ICON, (0.34, 0.04))
+OIL = Icon(OIL_ICON, (0.41, 0.04))
+AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT)
+MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES)
+GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS)
+OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME)
+CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, GEARS_CAPTION, OIL_CAPTION]

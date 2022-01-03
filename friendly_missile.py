@@ -16,21 +16,24 @@ class MissileFriendly(pygame.sprite.Sprite):
                                                 player.rect.centery])
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
-        self.alpha = pygame.math.Vector2((
-            activation[0] - player.rect.centerx,
-            activation[1] - player.rect.centery)).normalize()
-        self.visibility = visibility
-        self.radius = Settings.CELL_SIZE * 2
+        # Таймеры
+        self.ticks = 10
+        self.ticks2 = 0
+        self.total_ticks = 0
+        try:
+            self.alpha = pygame.math.Vector2((
+                activation[0] - player.rect.centerx,
+                activation[1] - player.rect.centery)).normalize()
+            self.visibility = visibility
+            self.radius = Settings.CELL_SIZE * 2
+        except ValueError:
+            self.total_ticks = 10
+            self.alpha = pygame.math.Vector2(0, 0)
 
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
         self.activation = activation
-
-        # Таймеры
-        self.ticks = 10
-        self.ticks2 = 0
-        self.total_ticks = 0
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):

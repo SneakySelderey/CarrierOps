@@ -57,6 +57,7 @@ NUM_OF_MISSILES = 5
 NUM_OF_AIRCRAFT = 3
 OIL_VOLUME = 100
 NUM_OF_REPAIR_PARTS = 0
+FUEL_CONSUMPTION_SPEED = 1000
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
@@ -78,7 +79,8 @@ CONNECTION.execute("PRAGMA foreign_keys = ON")
 USER_DATA = get_user_data()
 
 # Events
-MUSIC_END = pygame.USEREVENT+1
+MUSIC_END = pygame.USEREVENT + 1
+FUEL_CONSUMPTION = pygame.USEREVENT + 2
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -104,13 +106,13 @@ GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
 PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
-                                    (50, 50))
+                                    (40, 40))
 MISSILE_ICON = pygame.transform.scale(pygame.image.load(
-    'data/img/missile.png'), (50, 50))
+    'data/img/missile.png'), (40, 40))
 GEAR_ICON = pygame.transform.scale(pygame.image.load('data/img/gear.png'),
-                                   (50, 50))
+                                   (40, 40))
 OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
-                                   (50, 50))
+                                   (40, 40))
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

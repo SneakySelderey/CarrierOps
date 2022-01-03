@@ -21,8 +21,9 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         """Обновление позиции игрока"""
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+        if Settings.OIL_VOLUME:
+            self.rect.x += self.speedx
+            self.rect.y += self.speedy
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""

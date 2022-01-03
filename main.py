@@ -478,6 +478,7 @@ class Run:
         """Движание игрока или ИИ"""
         dx, dy = destination
         center = game_obj.rect.center
+        prev_speed = game_obj.speedx, game_obj.speedy
         game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
         stop_x = game_obj.speedx == 0
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
@@ -486,7 +487,12 @@ class Run:
             pygame.draw.circle(
                 screen, BLUE, (destination[0], destination[1]),
                 Settings.CELL_SIZE // 7)
-        return [stop_x, stop_y]
+        if screen is not None:
+            if stop_x and stop_y and (prev_speed[0] or prev_speed[1]):
+                pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+            elif not (stop_x and stop_y) and not \
+                    (prev_speed[0] or prev_speed[1]):
+                pygame.time.set_timer(FUEL_CONSUMPTION, FUEL_CONSUMPTION_SPEED)
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -639,10 +645,11 @@ class Run:
         alpha = 0
         arrow_pressed = False
         HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
-            relative_rect=pygame.Rect(10, 13, 200, 40),
+            relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
+        pygame.time.set_timer(FUEL_CONSUMPTION, FUEL_CONSUMPTION_SPEED)
         while self.running:
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -651,10 +658,12 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = list(event.pos)
-                    if event.button == 2:
+                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT:
                         self.aircraft_launch(event.pos)
-                    if event.button == 3:
+                        Settings.NUM_OF_AIRCRAFT -= 1
+                    if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
+                        Settings.NUM_OF_MISSILES -= 1
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
@@ -690,6 +699,8 @@ class Run:
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
+                if event.type == FUEL_CONSUMPTION:
+                    Settings.OIL_VOLUME -= 1
 
             self.camera_update()
 
@@ -722,6 +733,7 @@ class Run:
                 screen.fill(GRAY5)
                 self.board.update()
                 self.board.render(screen)
+                [capt.update_text() for capt in CAPTIONS]
                 Settings.ALL_SPRITES.draw(screen)
                 Settings.ICONS_GROUP.draw(screen)
                 self.move(self.destination_player, self.player, screen)
@@ -775,7 +787,7 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, True
+        False, False, True, False, False, False
     running = True
     # Создадим камеру
     camera = Camera()
