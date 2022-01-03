@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from solomon_land import SolomonLand
+from map_solomon import SolomonLand
 from Settings import *
 import Settings
 
@@ -455,9 +455,10 @@ class Run:
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.solomon_land = SolomonLand(True)
-        self.list_all_sprites = [self.solomon_land, self.player, self.ai, self.board.bases,
+        self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
-                                 self.hostile_missiles, self.friendly_aircraft]
+                                 self.hostile_missiles, self.friendly_aircraft,
+                                 self.solomon_land]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -636,6 +637,7 @@ class Run:
         alpha = 0
         alpha_menu = 0
         arrow_pressed = False
+        # water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH, Settings.HEIGHT))
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

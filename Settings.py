@@ -48,6 +48,7 @@ PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()
 AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
+BACKGROUND_MAP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
