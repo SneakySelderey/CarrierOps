@@ -36,12 +36,12 @@ def give_tooltip(num):
     """Функция для создания подсказки. Принимает номер подсказки"""
     if num == 1:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Сохранение не выбрано")
     elif num == 2:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
 
