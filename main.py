@@ -700,7 +700,7 @@ class Run:
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
                 if event.type == FUEL_CONSUMPTION:
-                    Settings.OIL_VOLUME -= 1
+                    Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
             self.camera_update()
 
