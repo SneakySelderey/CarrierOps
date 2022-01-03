@@ -97,6 +97,8 @@ MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
+SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png')
+SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
