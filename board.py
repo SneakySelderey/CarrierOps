@@ -2,6 +2,7 @@ import pygame
 from Settings import DARK_RED
 import Settings
 from base import Base
+import random
 
 
 class Board:
@@ -25,6 +26,12 @@ class Board:
     def add_base(self, x, y):
         """Функция для добавления базы на поле"""
         base = Base(x, y, 'neutral', True, self.cell_size, self)
+        land = list(Settings.BACKGROUND_MAP)[1]
+        while pygame.sprite.collide_mask(base, land):
+            a = Settings.WIDTH * 2 // self.cell_size + 1
+            b = Settings.HEIGHT * 2 // self.cell_size + 1
+            base.rect.center = random.randint(0, a) * Settings.CELL_SIZE, \
+                               random.randint(0, b) * Settings.CELL_SIZE
         self.board[x][y] = base
         self.bases.append(base)
 

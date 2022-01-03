@@ -430,8 +430,8 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
     def __init__(self):
         self.cell_size = Settings.CELL_SIZE
-        self.cells_x = Settings.WIDTH * 2 // self.cell_size + 1
-        self.cells_y = Settings.HEIGHT * 2 // self.cell_size + 1
+        self.cells_x = Settings.WIDTH * 2 // self.cell_size
+        self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
         self.board = Board(self.cells_x, self.cells_y)
         self.board.set_view(0, 0, self.cell_size)
