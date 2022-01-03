@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randint
 import sys
 import random
 import pygame.sprite
@@ -192,11 +192,12 @@ def show_setting_screen(flag=True):
                         # Если игра уже начата, обновим координаты всех
                         # объектов
                         if game_objects is not None:
+                            [base.new_position() for base in Settings.BASES_SPRITES]
                             [i.new_position() for i in ALL_SPRITES_FOR_SURE]
                             game_objects.destination_player = new_coords(
                                 *game_objects.destination_player)
                             game_objects.cell_size = Settings.CELL_SIZE
-                            ALL_SPRITES.update()
+                            ALL_SPRITES_FOR_SURE.update()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -452,14 +453,14 @@ class Run:
         self.destination_player = list(self.player.rect.center)
         self.ai = AI(False)
         for i in range(10):
-            x = random.randint(0, self.cells_x - 1)
-            y = random.randint(0, self.cells_y - 1)
+            x = randint(0, self.cells_x - 1)
+            y = randint(0, self.cells_y - 1)
             self.board.add_base(x, y)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
-                                 self.friendly_missiles,
+                                 self.friendly_missiles, [base.ico for base in self.board.bases],
                                  self.hostile_missiles, self.friendly_aircraft]
 
     def missile_launch(self, destination):
@@ -649,7 +650,7 @@ class Run:
             manager=campaign_manager,
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
-        pygame.time.set_timer(FUEL_CONSUMPTION, FUEL_CONSUMPTION_SPEED)
+        pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         while self.running:
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -701,7 +702,7 @@ class Run:
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
-                if event.type == FUEL_CONSUMPTION:
+                if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
             self.camera_update()

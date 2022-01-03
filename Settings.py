@@ -2,6 +2,19 @@ import pygame
 import ctypes
 import os
 import sqlite3
+from random import random
+
+
+def random_resource_type():
+    """Функция дял случайного выбора типа базы в зависимости от соотношения"""
+    n = random()
+    if 0 <= n < BASES_RATIO_R_A_M_O[0]:
+        return 'repair'
+    if BASES_RATIO_R_A_M_O[0] <= n < sum(BASES_RATIO_R_A_M_O[:2]):
+        return 'aircraft'
+    if sum(BASES_RATIO_R_A_M_O[:2]) <= n < sum(BASES_RATIO_R_A_M_O[:3]):
+        return 'missile'
+    return 'oil'
 
 
 def get_bigger_rect(rect, d):
@@ -58,7 +71,7 @@ NUM_OF_AIRCRAFT = 3
 OIL_VOLUME = 100
 NUM_OF_REPAIR_PARTS = 0
 FUEL_CONSUMPTION_SPEED = 1000
-FUEL_BASES, MISSILE_BASES, AIRCRAFT_BASES, REPAIR_BASES = 0.4, 0.3, 0.2, 0.1
+BASES_RATIO_R_A_M_O = 0.2, 0.2, 0.25, 0.35
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),

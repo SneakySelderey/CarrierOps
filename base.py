@@ -1,5 +1,7 @@
 import pygame
-from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE
+from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, \
+    BASES_SPRITES, ALL_SPRITES_FOR_SURE, random_resource_type, OIL_ICON, \
+    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, new_coords
 import Settings
 
 
@@ -7,6 +9,8 @@ class Base(pygame.sprite.Sprite):
     """Класс, определяющий спрайт и местоположение базы-острова"""
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
               'hostile': BASE_HOSTILE}
+    ResourceType = {'oil': OIL_ICON, 'repair': GEAR_ICON,
+                    'missile': MISSILE_ICON, 'aircraft': PLANE_ICON}
 
     def __init__(self, x, y, state, visibility, cell_size, parent):
         super().__init__(ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE)
@@ -19,8 +23,10 @@ class Base(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [x * cell_size + parent.left,
                              y * cell_size + parent.top]
+        self.resource_type = random_resource_type()
         self.visibility = visibility
         self.mask = pygame.mask.from_surface(self.image)
+        self.ico = BaseIcon(self)
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -52,3 +58,25 @@ class Base(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.mask = pygame.mask.from_surface(self.image)
+
+
+class BaseIcon(pygame.sprite.Sprite):
+    """Класс для иконки ресурса рядом с базой"""
+    def __init__(self, base):
+        """Инициализация. Принимает базу"""
+        super().__init__(ALL_SPRITES, ALL_SPRITES_FOR_SURE)
+        self.resource = base.resource_type
+        self.image = new_image_size(Base.ResourceType[self.resource])
+        self.rect = self.image.get_rect(bottomleft=base.rect.topright)
+        self.parent = base
+        self.visibility = True
+
+    def update(self):
+        """Обновления положения"""
+        self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
+
+    def new_position(self):
+        """обновление положеняи при изменении разрешения"""
+        self.image = new_image_size(Base.ResourceType[self.resource])
+        self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
+
