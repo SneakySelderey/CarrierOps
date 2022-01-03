@@ -28,8 +28,8 @@ class Board:
         base = Base(x, y, 'neutral', True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[1]
         while pygame.sprite.collide_mask(base, land):
-            a = Settings.WIDTH * 2 // self.cell_size + 1
-            b = Settings.HEIGHT * 2 // self.cell_size + 1
+            a = Settings.WIDTH * 2 // Settings.CELL_SIZE
+            b = Settings.HEIGHT * 2 // Settings.CELL_SIZE
             base.rect.center = random.randint(0, a) * Settings.CELL_SIZE, \
                                random.randint(0, b) * Settings.CELL_SIZE
         self.board[x][y] = base

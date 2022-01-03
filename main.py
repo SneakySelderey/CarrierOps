@@ -723,6 +723,7 @@ class Run:
             help_surface.fill((0, 0, 0, alpha))
             help_surface.fill((0, 0, 0, alpha_menu))
             screen.blit(help_surface, (0, 0))
+            Settings.BASES_SPRITES.update()
 
             if not (Settings.IS_PAUSE or self.defeat or self.menu):
                 Settings.ALL_SPRITES.update()
@@ -794,6 +795,7 @@ if __name__ == '__main__':
             slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            Settings.IS_PAUSE = True
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             clear_sprite_groups()

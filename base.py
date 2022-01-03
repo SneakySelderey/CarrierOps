@@ -1,5 +1,6 @@
 import pygame
-from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE
+from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, \
+    BASES_SPRITES, ALL_SPRITES_FOR_SURE
 import Settings
 
 
@@ -9,7 +10,7 @@ class Base(pygame.sprite.Sprite):
               'hostile': BASE_HOSTILE}
 
     def __init__(self, x, y, state, visibility, cell_size, parent):
-        super().__init__(ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE)
+        super().__init__(ALL_SPRITES_FOR_SURE, ALL_SPRITES, BASES_SPRITES)
         self.x, self.y = x, y
         self.size = cell_size
         self.parent = parent
