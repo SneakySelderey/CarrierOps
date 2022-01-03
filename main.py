@@ -627,8 +627,13 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
+        HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
+            relative_rect=pygame.Rect(10, 10, 200, 40),
+            manager=campaign_manager,
+            sprite_to_monitor=list(PLAYER_SPRITE)[0]
+        )
         while self.running:
-            #delta = clock.tick(FPS) / 1000.0
+            delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
@@ -725,10 +730,9 @@ class Run:
             if self.defeat:
                 alpha = min(alpha + 10, 255)
 
-            #campaign_manager.update(delta)
-            #campaign_manager.draw_ui(screen)
+            campaign_manager.update(delta)
+            campaign_manager.draw_ui(screen)
 
-            clock.tick(FPS)
             pygame.display.flip()
 
         # После поражения

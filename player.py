@@ -15,6 +15,8 @@ class Player(pygame.sprite.Sprite):
         self.speedx = self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
         self.visibility = visibility
+        self.health_capacity = 100
+        self.current_health = 100
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
