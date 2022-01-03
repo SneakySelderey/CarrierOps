@@ -94,6 +94,7 @@ def clear_sprite_groups():
     Settings.PLAYER_AIRCRAFT.empty()
     Settings.AI_MISSILES.empty()
     Settings.AI_AIRCRAFT.empty()
+    Settings.BACKGROUND_MAP.empty()
 
 
 def terminate():
