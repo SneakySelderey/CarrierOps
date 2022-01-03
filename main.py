@@ -11,6 +11,7 @@ from aircraft import AircraftFriendly
 from camera import Camera
 from Settings import *
 import Settings
+import pygame_gui
 
 
 def delete_save(save):
@@ -634,7 +635,13 @@ class Run:
         alpha = 0
         alpha_menu = 0
         arrow_pressed = False
+        HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
+            relative_rect=pygame.Rect(10, 10, 200, 20),
+            manager=campaign_manager,
+
+        )
         while self.running:
+            #delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
@@ -679,6 +686,7 @@ class Run:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/'
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
+                campaign_manager.process_events(event)
 
             self.camera_update()
 
@@ -734,6 +742,10 @@ class Run:
                 alpha = min(alpha + 10, 255)
             if alpha_menu != 0:
                 alpha_menu = max(alpha_menu - 20, 0)
+
+            #campaign_manager.update(delta)
+            #campaign_manager.draw_ui(screen)
+
             clock.tick(FPS)
             pygame.display.flip()
 

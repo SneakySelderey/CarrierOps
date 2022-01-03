@@ -190,16 +190,24 @@ class BasesLost(pygame.sprite.Sprite):
 
 
 # Создание менеджеров
-menu_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
-gameover_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                        'data/system/settings.json')
-game_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
-settings_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                        'data/system/settings.json')
-load_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
+menu_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+gameover_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+game_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+settings_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+load_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+campaign_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 
 # Создание элементов интерфейса
 QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
