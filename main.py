@@ -1,10 +1,7 @@
 from random import choice, randint
 import sys
-import random
 import pygame.sprite
 from board import Board
-from player import Player
-from AI import AI
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
@@ -12,6 +9,20 @@ from camera import Camera
 from Settings import *
 import Settings
 import pygame_gui
+from player import Player
+from AI import AI
+
+
+def update_objects():
+    """Функция для обновления координат игровых объектов при изменении
+    разрешения"""
+    [carrier.new_position(game_objects.board.cell_size,
+                          game_objects.board.top, game_objects.board.left)
+     for carrier in Settings.CARRIER_GROP]
+    [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
+     obj not in Settings.CARRIER_GROP]
+    game_objects.cell_size = Settings.CELL_SIZE
+    ALL_SPRITES_FOR_SURE.update()
 
 
 def delete_save(save):
@@ -192,12 +203,7 @@ def show_setting_screen(flag=True):
                         # Если игра уже начата, обновим координаты всех
                         # объектов
                         if game_objects is not None:
-                            [base.new_position() for base in Settings.BASES_SPRITES]
-                            [i.new_position() for i in ALL_SPRITES_FOR_SURE]
-                            game_objects.destination_player = new_coords(
-                                *game_objects.destination_player)
-                            game_objects.cell_size = Settings.CELL_SIZE
-                            ALL_SPRITES_FOR_SURE.update()
+                            update_objects()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -392,18 +398,18 @@ def show_load_menu(from_main=True):
                             rebase_load_manager()
                 if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and \
-                            from_main:
+                        from_main:
                         # Выведем сообщение, если пользователь решил
                         # сохраниться, не начав игру
                         give_tooltip(2)
                 if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
                     rebase_load_manager()
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                    pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
                     # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                    pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
@@ -433,6 +439,7 @@ def show_load_menu(from_main=True):
 
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
+
     def __init__(self):
         self.cell_size = Settings.CELL_SIZE
         self.cells_x = Settings.WIDTH // self.cell_size
@@ -449,9 +456,8 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
-        self.player = Player(True)
-        self.destination_player = list(self.player.rect.center)
-        self.ai = AI(False)
+        self.player = Player()
+        self.ai = AI()
         for i in range(10):
             x = randint(0, self.cells_x - 1)
             y = randint(0, self.cells_y - 1)
@@ -477,26 +483,6 @@ class Run:
             destination, True))
         TAKEOFF.play()
 
-    def move(self, destination, game_obj, screen=None):
-        """Движание игрока или ИИ"""
-        dx, dy = destination
-        center = game_obj.rect.center
-        prev_speed = game_obj.speedx, game_obj.speedy
-        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
-        stop_x = game_obj.speedx == 0
-        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
-        stop_y = game_obj.speedy == 0
-        if screen is not None and list(self.player.rect.center) != destination:
-            pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]),
-                Settings.CELL_SIZE // 7)
-        if screen is not None:
-            if stop_x and stop_y and (prev_speed[0] or prev_speed[1]):
-                pygame.time.set_timer(FUEL_CONSUMPTION, 0)
-            elif not (stop_x and stop_y) and not \
-                    (prev_speed[0] or prev_speed[1]):
-                pygame.time.set_timer(FUEL_CONSUMPTION, FUEL_CONSUMPTION_SPEED)
-
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
         distance = []
@@ -504,13 +490,13 @@ class Run:
         ai_pos_y = self.ai.rect.centery // self.cell_size
         for base in self.board.bases:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if (base.x, base.y) not in Settings.HOSTILE_BASES:
+            if base.start_of_capture != 2:
                 distance.append(
                     (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            self.move(distance[idx][1], self.ai)
+            self.ai.new_destination(distance[idx][1])
         except ValueError:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
@@ -579,9 +565,11 @@ class Run:
 
                 # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
                 # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-                if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or missile_tracking or air_tracking:
+                if pygame.sprite.collide_circle_ratio(0.5)(player,
+                                                           ai) or missile_tracking or air_tracking:
                     self.ai.visibility = True
-                    pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
+                    pygame.draw.circle(screen, RED, (ai_x, ai_y),
+                                       Settings.CELL_SIZE * 4, 1)
                     self.ai_detected = True
                     self.play_contact_lost = True
                     if self.play_new_contact:
@@ -595,8 +583,9 @@ class Run:
                         Settings.ALL_SPRITES.draw(screen)
 
                 # противник прячется в тумане войны
-                elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) and not missile_tracking and \
-                        not air_tracking:
+                elif not pygame.sprite.collide_circle_ratio(0.5)(player,
+                                                                 ai) and not missile_tracking and \
+                    not air_tracking:
                     self.ai.visibility = False
                     self.ai_detected = False
                     self.play_new_contact = True
@@ -631,17 +620,24 @@ class Run:
                 for i in sprite:
                     if i in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
                         camera.apply_aircraft(i)
-                    elif i in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                    elif i in (Settings.PLAYER_MISSILES or
+                               Settings.AI_MISSILES):
                         camera.apply_missiles(i)
                     else:
                         camera.apply_rect(i)
             else:
-                camera.apply_rect(sprite)
+                if sprite in Settings.PLAYER_SPRITE:
+                    camera.apply_aircraft(sprite)
+                elif sprite in Settings.AI_SPRITE:
+                    camera.apply_aircraft(sprite)
+                else:
+                    camera.apply_rect(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
-        self.destination_player = list(self.destination_player)
-        self.destination_player[0] += camera.dx
-        self.destination_player[1] += camera.dy
+        self.player.destination[0] += camera.dx
+        self.player.destination[1] += camera.dy
+        self.ai.destination[0] += camera.dx
+        self.ai.destination[1] += camera.dy
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -660,9 +656,9 @@ class Run:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.destination_player = list(event.pos)
+                        self.player.new_destination(event.pos)
                     if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
-                            Settings.OIL_VOLUME:
+                        Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
                         Settings.NUM_OF_AIRCRAFT -= 1
                         Settings.OIL_VOLUME -= 1
@@ -709,11 +705,13 @@ class Run:
 
             self.camera_update()
 
-            if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not arrow_pressed:
+            if pygame.mouse.get_pos()[
+                0] >= Settings.WIDTH - 50 and not arrow_pressed:
                 camera.dx = -20
             elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
                 camera.dx = 20
-            elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not arrow_pressed:
+            elif pygame.mouse.get_pos()[
+                1] >= Settings.HEIGHT - 50 and not arrow_pressed:
                 camera.dy = -20
             elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
                 camera.dy = 20
@@ -741,11 +739,16 @@ class Run:
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ALL_SPRITES.draw(screen)
                 Settings.ICONS_GROUP.draw(screen)
-                self.move(self.destination_player, self.player, screen)
                 self.destination_ai()
                 self.fog_of_war()
 
                 help_surface.blit(screen, (0, 0))
+
+                if not self.player.stop:
+                    pygame.draw.circle(
+                        screen, BLUE, (self.player.destination[0],
+                                       self.player.destination[1]),
+                        Settings.CELL_SIZE // 7)
 
                 if not (Settings.IS_PAUSE or self.defeat or self.menu):
                     Settings.ALL_SPRITES.update()
@@ -831,4 +834,3 @@ if __name__ == '__main__':
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
-

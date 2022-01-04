@@ -62,6 +62,7 @@ PLAYER_AIRCRAFT = pygame.sprite.Group()
 AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
 ICONS_GROUP = pygame.sprite.Group()
+CARRIER_GROP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
@@ -74,6 +75,8 @@ FUEL_CONSUMPTION_SPEED = 1000
 BASES_RATIO_R_A_M_O = 0.2, 0.2, 0.25, 0.35
 BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
+PLAYER_SPEED = 1.5
+AI_SPEED = 1
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),

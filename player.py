@@ -1,33 +1,36 @@
 import pygame
 from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
-    PLAYER_SPRITE, ALL_SPRITES_FOR_SURE
+from Settings import PLAYER_IMAGE, PLAYER_SPRITE
 import Settings
+from carrier import Carrier
+from math import sin, cos, atan2
 
 
-class Player(pygame.sprite.Sprite):
-    """Класс, определяющий параметры и спрайт игрока"""
-    def __init__(self, visibility):
-        super().__init__(ALL_SPRITES, PLAYER_SPRITE, ALL_SPRITES_FOR_SURE)
-        self.image = new_image_size(PLAYER_IMAGE)
-        self.rect = self.image.get_rect(center=[
-            40, randint(40, Settings.HEIGHT - 40)])
-        self.speedx = self.speedy = 0
-        self.radius = Settings.CELL_SIZE * 4
-        self.visibility = visibility
-        self.health_capacity = 100
-        self.current_health = 100
-        self.mask = pygame.mask.from_surface(self.image)
+class Player(Carrier):
+    """Класс авианосца игрока"""
+    def __init__(self):
+        super().__init__(PLAYER_SPRITE, PLAYER_IMAGE)
+        self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
+        self.pos = list(self.rect.center)
+        self.destination = list(self.rect.center)
 
     def update(self):
-        """Обновление позиции игрока"""
+        """Обновление позиции объекта"""
         if Settings.OIL_VOLUME:
-            self.rect.x += self.speedx
-            self.rect.y += self.speedy
+            if self.pos != self.destination and not self.stop:
+                # Обновление кооординат (из полярнйо системы в декартову)
+                self.pos[0] = self.pos[0] + Settings.PLAYER_SPEED * cos(
+                    self.alpha)
+                self.pos[1] = self.pos[1] + Settings.PLAYER_SPEED * sin(
+                    self.alpha)
+                self.rect.center = self.pos
 
-    def new_position(self):
-        """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(PLAYER_IMAGE)
-        self.rect = self.image.get_rect(
-            topleft=new_coords(self.rect.x, self.rect.y))
-        self.mask = pygame.mask.from_surface(self.image)
+            if abs(self.destination[0] - self.rect.centerx) <= 10 and \
+                    abs(self.destination[1] - self.rect.centery) <= 10:
+                self.stop = True
+
+            if self.stop:
+                pygame.time.set_timer(Settings.FUEL_CONSUMPTION, 0)
+
+            self.alpha = atan2(self.destination[1] - self.pos[1],
+                               self.destination[0] - self.pos[0])
