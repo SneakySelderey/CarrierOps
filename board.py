@@ -27,7 +27,7 @@ class Board:
         """Функция для добавления базы на поле"""
         base = Base(x, y, 'neutral', True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[1]
-        while pygame.sprite.collide_mask(base, land):
+        while land.rect.collidepoint(x, y) and land.mask.get_at((x - land.rect.x, y - land.rect.y)):
             a = Settings.WIDTH * 2 // Settings.CELL_SIZE
             b = Settings.HEIGHT * 2 // Settings.CELL_SIZE
             base.rect.center = random.randint(0, a) * Settings.CELL_SIZE, \
