@@ -445,6 +445,10 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
+        self.overall_shift_x = 0
+        self.overall_shift_y = 0
+        self.centered = False
+
         self.solomon_water = SolomonWater(True)
         self.land_check = MovePoint(True)
         self.solomon_land = SolomonLand(True)
@@ -634,11 +638,18 @@ class Run:
         self.destination_player[0] += camera.dx
         self.destination_player[1] += camera.dy
 
+        if not self.centered:
+            self.overall_shift_x += camera.dx
+            self.overall_shift_y += camera.dy
+        self.centered = False
+        print(self.overall_shift_x)
+
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
         alpha_menu = 0
         arrow_pressed = False
+        self.centered = False
         # water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH, Settings.HEIGHT))
         while self.running:
             for event in pygame.event.get():
@@ -658,6 +669,12 @@ class Run:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                    if event.key == pygame.K_c:
+                        camera.dx += -self.overall_shift_x
+                        camera.dy += -self.overall_shift_y
+                        self.overall_shift_x = 0
+                        self.overall_shift_y = 0
+                        self.centered = True
                     if event.key == pygame.K_UP:
                         camera.dy += 20
                         arrow_pressed = True
