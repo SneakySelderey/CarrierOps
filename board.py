@@ -26,7 +26,7 @@ class Board:
     def add_base(self, x, y):
         """Функция для добавления базы на поле"""
         base = Base(x, y, 'neutral', True, self.cell_size, self)
-        land = list(Settings.BACKGROUND_MAP)[1]
+        land = list(Settings.BACKGROUND_MAP)[0]
         while land.rect.collidepoint(x, y) and land.mask.get_at((x - land.rect.x, y - land.rect.y)):
             a = Settings.WIDTH * 2 // Settings.CELL_SIZE
             b = Settings.HEIGHT * 2 // Settings.CELL_SIZE

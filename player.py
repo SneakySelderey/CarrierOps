@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, visibility):
         super().__init__(ALL_SPRITES, PLAYER_SPRITE, ALL_SPRITES_FOR_SURE)
         self.image = new_image_size(PLAYER_IMAGE)
-        land = list(Settings.BACKGROUND_MAP)[1]
+        land = list(Settings.BACKGROUND_MAP)[0]
         while True:
             self.rect = self.image.get_rect(center=[
                 40, randint(40, Settings.HEIGHT - 40)])

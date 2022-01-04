@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, SolomonWater
+from map_solomon import SolomonLand
 from Settings import *
 import Settings
 
@@ -449,7 +449,6 @@ class Run:
         self.overall_shift_y = 0
         self.centered = False
 
-        self.solomon_water = SolomonWater(True)
         self.solomon_land = SolomonLand(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
@@ -483,7 +482,7 @@ class Run:
         dx, dy = destination
         center = game_obj.rect.center
 
-        land = list(Settings.BACKGROUND_MAP)[1]
+        land = list(Settings.BACKGROUND_MAP)[0]
         if pygame.sprite.collide_mask(game_obj, land):
             N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
             for i in N:
@@ -535,7 +534,7 @@ class Run:
 
                 # проверка на обнаружение ракетой
                 missile_tracking = False
-                for missile in self.friendly_missiles:
+                for missile in Settings.PLAYER_MISSILES:
                     # если цель в радиусе обнаружения ракеты, то
                     # поднимается соответствующий флаг
                     missile_x, missile_y = missile.rect.center
@@ -545,7 +544,7 @@ class Run:
                     # если ракета исчерпала свой ресурс, она падает в море и
                     # спрайт удаляется
                     if missile.total_ticks >= 10:
-                        self.friendly_missiles.remove(missile)
+                        Settings.PLAYER_MISSILES.remove(missile)
                         Settings.ALL_SPRITES.remove(missile)
                         Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                     # отрисовка радиуса обнаружения ракеты
@@ -563,7 +562,7 @@ class Run:
 
                 # проверка на обнаружение самолетом
                 air_tracking = False
-                for aircraft in self.friendly_aircraft:
+                for aircraft in Settings.PLAYER_AIRCRAFT:
                     air_x, air_y = aircraft.rect.center
                     # если цель в радиусе обнаружения самолета, то
                     # поднимается соответствующий флаг
@@ -572,7 +571,7 @@ class Run:
                         air_tracking = True
                     # если самолет исчерпала свой ресурс, он возвращается на авианосец
                     if aircraft.delete:
-                        self.friendly_aircraft.remove(aircraft)
+                        Settings.PLAYER_AIRCRAFT.remove(aircraft)
                         Settings.ALL_SPRITES.remove(aircraft)
                         Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                     # отрисовка радиуса обнаружения самолета
@@ -655,7 +654,7 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.destination_player = list(event.pos)
-                        land = list(Settings.BACKGROUND_MAP)[1]
+                        land = list(Settings.BACKGROUND_MAP)[0]
                         land.mask = pygame.mask.from_surface(land.image)
                     if event.button == 2:
                         self.aircraft_launch(event.pos)
