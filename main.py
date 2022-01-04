@@ -744,6 +744,12 @@ class Run:
 
                 help_surface.blit(screen, (0, 0))
 
+                if not self.player.stop:
+                    pygame.draw.circle(
+                        screen, BLUE, (self.player.destination[0],
+                                       self.player.destination[1]),
+                        Settings.CELL_SIZE // 7)
+
                 if not (Settings.IS_PAUSE or self.defeat or self.menu):
                     Settings.ALL_SPRITES.update()
                     if not self.ai_detected:
@@ -752,12 +758,6 @@ class Run:
                     text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                     screen.blit(text_pause, text_pause.get_rect(
                         center=(WIDTH // 2, HEIGHT // 2)))
-
-                if not self.player.stop:
-                    pygame.draw.circle(
-                        screen, BLUE, (self.player.destination[0],
-                                       self.player.destination[1]),
-                        Settings.CELL_SIZE // 7)
 
                 if alpha == 255:
                     self.running = False

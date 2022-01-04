@@ -11,7 +11,7 @@ class AI(Carrier):
         super().__init__(AI_SPRITE, AI_IMAGE)
         self.rect.center = [Settings.WIDTH, randint(40, Settings.HEIGHT - 40)]
         self.pos = list(self.rect.center)
-        self.destination = self.pos
+        self.destination = list(self.rect.center)
 
     def update(self):
         """Обновление позиции объекта"""

@@ -12,7 +12,7 @@ class Player(Carrier):
         super().__init__(PLAYER_SPRITE, PLAYER_IMAGE)
         self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
         self.pos = list(self.rect.center)
-        self.destination = self.pos
+        self.destination = list(self.rect.center)
 
     def update(self):
         """Обновление позиции объекта"""
