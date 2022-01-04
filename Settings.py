@@ -103,7 +103,7 @@ SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').conv
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg').convert_alpha()
 SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
 SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
-MOVE_POINT = pygame.image.load('data/img/move_point.png').convert_alpha()
+SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

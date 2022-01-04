@@ -26,7 +26,8 @@ class SolomonWater(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
         self.visibility = visibility
-        self.mask = pygame.mask.from_surface(self.image)
+        self.mask = pygame.mask.from_surface(pygame.transform.scale(Settings.SOLOMON_WATERMASK,
+                                                                    (Settings.WIDTH * 2, Settings.HEIGHT * 2)))
         Settings.ALL_SPRITES_FOR_SURE.add(self)
         Settings.BACKGROUND_MAP.add(self)
 
