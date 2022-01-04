@@ -46,3 +46,9 @@ class Carrier(pygame.sprite.Sprite):
                     top + c_y * Settings.CELL_SIZE))
         self.pos = list(self.rect.center)
         self.mask = pygame.mask.from_surface(self.image)
+        dest_x = (self.destination[0] - left) // cell_size
+        dest_y = (self.destination[1] - top) // cell_size
+        self.destination = [left + dest_x * Settings.CELL_SIZE,
+                            top + dest_y * Settings.CELL_SIZE]
+        self.alpha = atan2(self.destination[1] - self.pos[1],
+                           self.destination[0] - self.pos[0])

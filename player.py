@@ -3,7 +3,7 @@ from random import randint
 from Settings import PLAYER_IMAGE, PLAYER_SPRITE
 import Settings
 from carrier import Carrier
-from math import sin, cos
+from math import sin, cos, atan2
 
 
 class Player(Carrier):
@@ -31,3 +31,6 @@ class Player(Carrier):
 
             if self.stop:
                 pygame.time.set_timer(Settings.FUEL_CONSUMPTION, 0)
+
+            self.alpha = atan2(self.destination[1] - self.pos[1],
+                               self.destination[0] - self.pos[0])

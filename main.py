@@ -21,7 +21,6 @@ def update_objects():
      for carrier in Settings.CARRIER_GROP]
     [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
      obj not in Settings.CARRIER_GROP]
-    game_objects.destination_player = game_objects.player.rect.center
     game_objects.cell_size = Settings.CELL_SIZE
     ALL_SPRITES_FOR_SURE.update()
 
@@ -458,7 +457,6 @@ class Run:
         self.battle = False
 
         self.player = Player()
-        self.destination_player = list(self.player.rect.center)
         self.ai = AI()
         for i in range(10):
             x = randint(0, self.cells_x - 1)
