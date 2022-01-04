@@ -448,6 +448,7 @@ class Run:
         self.overall_shift_x = 0
         self.overall_shift_y = 0
         self.centered = False
+        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
 
         self.solomon_land = SolomonLand(True)
         self.player = Player(True)
@@ -646,7 +647,6 @@ class Run:
         alpha_menu = 0
         arrow_pressed = False
         self.centered = False
-        # water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH, Settings.HEIGHT))
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -717,6 +717,7 @@ class Run:
                     camera.dy = 0
 
             screen.fill(DEEPSKYBLUE4)
+            screen.blit(self.water, (self.overall_shift_x, self.overall_shift_y))
             self.fog_of_war()
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()
