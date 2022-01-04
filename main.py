@@ -458,10 +458,7 @@ class Run:
 
         self.player = Player()
         self.ai = AI()
-        for i in range(10):
-            x = randint(0, self.cells_x - 1)
-            y = randint(0, self.cells_y - 1)
-            self.board.add_base(x, y)
+        self.board.add_bases()
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []

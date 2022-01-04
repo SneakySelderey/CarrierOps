@@ -77,6 +77,7 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
+NUM_OF_BASES = 10
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
@@ -132,6 +133,8 @@ GEAR_ICON = pygame.transform.scale(pygame.image.load('data/img/gear.png'),
                                    (40, 40))
 OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
                                    (40, 40))
+PLAYER_BASE = pygame.image.load('data/img/base_player.png').convert_alpha()
+AI_BASE = pygame.image.load('data/img/base_ai.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

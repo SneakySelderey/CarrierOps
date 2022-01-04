@@ -2,6 +2,7 @@ import pygame
 from Settings import DARK_RED
 import Settings
 from base import Base
+from random import sample
 
 
 class Board:
@@ -22,9 +23,19 @@ class Board:
         self.top = top
         self.cell_size = cell_size
 
-    def add_base(self, x, y):
+    def add_bases(self):
+        """Функция для добавления баз"""
+        cells = [(i, j) for i in range(self.width) for j in range(self.height)]
+        player_base, *bases, ai_base = sorted(sample(
+            cells, Settings.NUM_OF_BASES + 2))
+        [self.add_base(*base) for base in bases]
+        self.add_base(*player_base, 'player')
+        self.add_base(*ai_base, 'ai')
+
+    def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
-        base = Base(x, y, 'neutral', True, self.cell_size, self)
+        base = Base(x, y, 'neutral' if not mega else mega[0], True,
+                    self.cell_size, self)
         self.board[x][y] = base
         self.bases.append(base)
 

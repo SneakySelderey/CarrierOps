@@ -1,16 +1,19 @@
 import pygame
 from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, \
     BASES_SPRITES, ALL_SPRITES_FOR_SURE, random_resource_type, OIL_ICON, \
-    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED
+    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED, \
+    PLAYER_BASE, AI_BASE
 import Settings
 
 
 class Base(pygame.sprite.Sprite):
     """Класс, определяющий спрайт и местоположение базы-острова"""
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
-              'hostile': BASE_HOSTILE}
-    ResourceType = {'oil': [OIL_ICON, Settings.OIL_VOLUME], 'repair': [GEAR_ICON, Settings.NUM_OF_REPAIR_PARTS],
-                    'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES], 'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
+              'hostile': BASE_HOSTILE, 'player': PLAYER_BASE, 'ai': AI_BASE}
+    ResourceType = {'oil': [OIL_ICON, Settings.OIL_VOLUME],
+                    'repair': [GEAR_ICON, Settings.NUM_OF_REPAIR_PARTS],
+                    'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES],
+                    'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
 
     def __init__(self, x, y, state, visibility, cell_size, parent):
         super().__init__(ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE)
