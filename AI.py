@@ -10,8 +10,8 @@ class AI(pygame.sprite.Sprite):
     def __init__(self, visibility):
         super().__init__(ALL_SPRITES, AI_SPRITE, ALL_SPRITES_FOR_SURE)
         self.image = new_image_size(AI_IMAGE)
-        self.rect = self.image.get_rect(center=[Settings.WIDTH,
-                                                randint(0, Settings.HEIGHT)])
+        self.rect = self.image.get_rect(center=[Settings.WIDTH * 2,
+                                                randint(0, Settings.HEIGHT * 2)])
         self.speedx = self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
         self.visibility = visibility

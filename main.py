@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, MovePoint, SolomonWater
+from map_solomon import SolomonLand, SolomonWater
 from Settings import *
 import Settings
 
@@ -450,7 +450,6 @@ class Run:
         self.centered = False
 
         self.solomon_water = SolomonWater(True)
-        self.land_check = MovePoint(True)
         self.solomon_land = SolomonLand(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
@@ -485,7 +484,6 @@ class Run:
         center = game_obj.rect.center
 
         land = list(Settings.BACKGROUND_MAP)[1]
-        self.land_check.rect.center = center
         if pygame.sprite.collide_mask(game_obj, land):
             N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
             for i in N:
@@ -499,10 +497,9 @@ class Run:
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
         if screen is not None and list(self.player.rect.center) != destination:
-            list(Settings.MOVE_POINT_SPRITE)[0].visibility = True
-            list(Settings.MOVE_POINT_SPRITE)[0].rect.center = destination
-        else:
-            list(Settings.MOVE_POINT_SPRITE)[0].visibility = False
+            pygame.draw.circle(
+                screen, BLUE, (destination[0], destination[1]),
+                Settings.CELL_SIZE // 7)
         return [stop_x, stop_y]
 
     def destination_ai(self):
@@ -722,9 +719,9 @@ class Run:
 
             screen.fill(DEEPSKYBLUE4)
             Settings.ALL_SPRITES.draw(screen)
+            self.fog_of_war()
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()
-            self.fog_of_war()
             self.board.update()
             self.board.render(screen)
             help_surface.fill((0, 0, 0, alpha))
