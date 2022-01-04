@@ -226,7 +226,7 @@ class IconText(pygame_gui.elements.UILabel):
         подпись и текст"""
         self.pos = Settings.WIDTH / (icon.rect.topright[0] + 10), \
                    Settings.HEIGHT / (icon.rect.topright[1] + 15)
-        txt = txt if icon != OIL else f'{txt}/100'
+        txt = f'{txt}  ' if icon != OIL else f'{txt}/100'
         text = pygame.font.Font('data/font/Teletactile.ttf', 18).render(
             str(txt), True, WHITE)
         rect = text.get_rect(topleft=(icon.rect.topright[0] + 10,

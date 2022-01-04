@@ -9,8 +9,8 @@ class Base(pygame.sprite.Sprite):
     """Класс, определяющий спрайт и местоположение базы-острова"""
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
               'hostile': BASE_HOSTILE}
-    ResourceType = {'oil': OIL_ICON, 'repair': GEAR_ICON,
-                    'missile': MISSILE_ICON, 'aircraft': PLANE_ICON}
+    ResourceType = {'oil': [OIL_ICON, Settings.OIL_VOLUME], 'repair': [GEAR_ICON, Settings.NUM_OF_REPAIR_PARTS],
+                    'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES], 'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
 
     def __init__(self, x, y, state, visibility, cell_size, parent):
         super().__init__(ALL_SPRITES, BASES_SPRITES, ALL_SPRITES_FOR_SURE)
@@ -27,6 +27,7 @@ class Base(pygame.sprite.Sprite):
         self.visibility = visibility
         self.ticks_to_capture = Settings.BASE_TICKS
         self.start_of_capture = 0
+        self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
         self.mask = pygame.mask.from_surface(self.image)
         self.ico = BaseIcon(self)
         self.bar = BaseBar(self)
@@ -68,6 +69,19 @@ class Base(pygame.sprite.Sprite):
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
                              self.y * Settings.CELL_SIZE + self.parent.top]
 
+        if self.ticks_to_give_resource:
+            self.ticks_to_give_resource -= 1
+        elif self.state == 'friendly':
+            self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
+            if self.resource_type == 'oil':
+                Settings.OIL_VOLUME = min(Settings.OIL_VOLUME + 1, 100)
+            elif self.resource_type == 'missile':
+                Settings.NUM_OF_MISSILES += 1
+            elif self.resource_type == 'aircraft':
+                Settings.NUM_OF_AIRCRAFT += 1
+            else:
+                Settings.NUM_OF_REPAIR_PARTS += 1
+
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.rect.topleft = [self.x * self.size, self.y * self.size]
@@ -82,7 +96,7 @@ class BaseIcon(pygame.sprite.Sprite):
         """Инициализация. Принимает базу"""
         super().__init__(ALL_SPRITES, ALL_SPRITES_FOR_SURE)
         self.resource = base.resource_type
-        self.image = new_image_size(Base.ResourceType[self.resource])
+        self.image = new_image_size(Base.ResourceType[self.resource][0])
         self.rect = self.image.get_rect(bottomleft=base.rect.topright)
         self.parent = base
         self.visibility = True
@@ -93,7 +107,7 @@ class BaseIcon(pygame.sprite.Sprite):
 
     def new_position(self):
         """обновление положеняи при изменении разрешения"""
-        self.image = new_image_size(Base.ResourceType[self.resource])
+        self.image = new_image_size(Base.ResourceType[self.resource][0])
         self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
 
 
