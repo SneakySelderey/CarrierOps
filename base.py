@@ -1,7 +1,7 @@
 import pygame
 from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, \
     BASES_SPRITES, ALL_SPRITES_FOR_SURE, random_resource_type, OIL_ICON, \
-    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, new_coords
+    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED
 import Settings
 
 
@@ -25,29 +25,45 @@ class Base(pygame.sprite.Sprite):
                              y * cell_size + parent.top]
         self.resource_type = random_resource_type()
         self.visibility = visibility
+        self.ticks_to_capture = Settings.BASE_TICKS
+        self.start_of_capture = 0
         self.mask = pygame.mask.from_surface(self.image)
         self.ico = BaseIcon(self)
+        self.bar = BaseBar(self)
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
         base_grid = self.x, self.y
+        prev_start = self.start_of_capture
         player = list(Settings.PLAYER_SPRITE)[0]
         if pygame.sprite.collide_mask(self, player):
-            self.state = 'friendly'
-            if base_grid in Settings.HOSTILE_BASES:
-                Settings.HOSTILE_BASES.remove(base_grid)
-            if base_grid not in Settings.FRIENDLY_BASES:
-                Settings.FRIENDLY_BASES.append(base_grid)
+            self.start_of_capture = 1
         for ai in Settings.AI_SPRITE:
             if pygame.sprite.collide_mask(self, ai) and not \
                     pygame.sprite.collide_mask(self, player):
+                self.start_of_capture = 2
+
+        self.ticks_to_capture = self.ticks_to_capture if \
+            prev_start == self.start_of_capture else Settings.BASE_TICKS
+
+        if self.ticks_to_capture and self.start_of_capture:
+            self.ticks_to_capture -= 1
+        else:
+            if self.start_of_capture == 1:
+                self.state = 'friendly'
+                if base_grid in Settings.HOSTILE_BASES:
+                    Settings.HOSTILE_BASES.remove(base_grid)
+                if base_grid not in Settings.FRIENDLY_BASES:
+                    Settings.FRIENDLY_BASES.append(base_grid)
+            elif self.start_of_capture == 2:
                 self.state = 'hostile'
                 if base_grid in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.remove(base_grid)
                 if base_grid not in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.append(base_grid)
-        self.image = pygame.transform.scale(Base.Images[self.state], (
-            Settings.CELL_SIZE, Settings.CELL_SIZE))
+
+            self.image = pygame.transform.scale(Base.Images[self.state], (
+                Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
                              self.y * Settings.CELL_SIZE + self.parent.top]
@@ -80,3 +96,33 @@ class BaseIcon(pygame.sprite.Sprite):
         self.image = new_image_size(Base.ResourceType[self.resource])
         self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
 
+
+class BaseBar(pygame.sprite.Sprite):
+    """Класс для полоски захвата базы"""
+    def __init__(self, base):
+        """Инициализация. Принимает базу"""
+        super().__init__(ALL_SPRITES_FOR_SURE, ALL_SPRITES)
+        self.parent = base
+        self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(bottomleft=(base.rect.topleft[0],
+                                                    base.rect.topleft[1] - 10))
+        self.visibility = True
+
+    def update(self):
+        """Обновление полоски"""
+        if self.parent.start_of_capture and self.parent.ticks_to_capture:
+            self.image = pygame.Surface((int(
+                Settings.CELL_SIZE - Settings.CELL_SIZE / Settings.BASE_TICKS
+                * self.parent.ticks_to_capture), 5))
+            self.image.fill(BLUE if self.parent.start_of_capture == 1 else RED)
+        else:
+            self.image = self.image = pygame.Surface((Settings.CELL_SIZE, 10),
+                                                     pygame.SRCALPHA)
+        self.rect.bottomleft = (self.parent.rect.topleft[0],
+                                self.parent.rect.topleft[1] - 10)
+
+    def new_position(self):
+        """Обновление позиции при изменении разрешения"""
+        self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(bottomleft=(
+            self.parent.rect.topleft[0], self.parent.rect.topleft[1] - 10))

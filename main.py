@@ -460,7 +460,9 @@ class Run:
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
-                                 self.friendly_missiles, [base.ico for base in self.board.bases],
+                                 self.friendly_missiles,
+                                 [base.ico for base in self.board.bases],
+                                 [base.bar for base in self.board.bases],
                                  self.hostile_missiles, self.friendly_aircraft]
 
     def missile_launch(self, destination):
