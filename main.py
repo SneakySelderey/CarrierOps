@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, LandCheck
+from map_solomon import SolomonLand, LandCheck, SolomonWater
 from Settings import *
 import Settings
 
@@ -447,6 +447,7 @@ class Run:
 
         self.land_check = LandCheck(True)
         self.solomon_land = SolomonLand(True)
+        self.solomon_water = SolomonWater(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
         self.ai = AI(False)
@@ -460,7 +461,7 @@ class Run:
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
                                  self.hostile_missiles, self.friendly_aircraft,
-                                 self.solomon_land, self.land_check]
+                                 self.solomon_land, self.land_check, self.solomon_water]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""

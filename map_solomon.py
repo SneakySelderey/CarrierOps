@@ -30,18 +30,18 @@ class LandCheck(pygame.sprite.Sprite):
         Settings.BACKGROUND_MAP.add(self)
 
 
-# class SolomonWater(pygame.sprite.Sprite):
-#     """Класс, определяющий параметры и спрайт карты"""
-#     def __init__(self, visibility):
-#         super().__init__()
-#         self.image = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
-#         self.rect = self.image.get_rect()
-#         self.rect.topleft = (0, 0)
-#         self.visibility = visibility
-#         self.mask = pygame.mask.from_surface(self.image)
-#         Settings.ALL_SPRITES_FOR_SURE.add(self)
-#         Settings.BACKGROUND_MAP.add(self)
-#
-#     def update(self):
-#         """Обновление позиции карты"""
-#         pass
+class SolomonWater(pygame.sprite.Sprite):
+    """Класс, определяющий параметры и спрайт карты"""
+    def __init__(self, visibility):
+        super().__init__()
+        self.image = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0, 0)
+        self.visibility = visibility
+        self.mask = pygame.mask.from_surface(self.image)
+        Settings.ALL_SPRITES_FOR_SURE.add(self)
+        Settings.BACKGROUND_MAP.add(self)
+
+    def update(self):
+        """Обновление позиции карты"""
+        pass
