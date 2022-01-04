@@ -456,16 +456,16 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
+        self.board.add_bases()
         self.player = Player()
         self.ai = AI()
-        self.board.add_bases()
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.list_all_sprites = [self.player, self.ai, self.board.bases,
                                  self.friendly_missiles,
-                                 [base.ico for base in self.board.bases],
-                                 [base.bar for base in self.board.bases],
+                                 [base.ico for base in self.board.bases if base.state not in ['player', 'ai']],
+                                 [base.bar for base in self.board.bases if base.state not in ['player', 'ai']],
                                  self.hostile_missiles, self.friendly_aircraft]
 
     def missile_launch(self, destination):
@@ -487,7 +487,7 @@ class Run:
         ai_pos_y = self.ai.rect.centery // self.cell_size
         for base in self.board.bases:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if base.start_of_capture != 2:
+            if base.start_of_capture != 2 and base.state != 'ai':
                 distance.append(
                     (dist, [base.rect.centerx, base.rect.centery]))
         try:
@@ -590,16 +590,25 @@ class Run:
                     self.play_contact_lost = False
 
         for base in self.board.bases:
-            base.bar.visibility = False
-            if base.start_of_capture in [0, 1] or \
-                    pygame.sprite.collide_circle_ratio(1)(player, base):
-                base.bar.visibility = True
-            for aircraft in self.friendly_aircraft:
-                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+            try:
+                base.bar.visibility = False
+                if base.start_of_capture in [0, 1] or \
+                        pygame.sprite.collide_circle_ratio(1)(player, base):
                     base.bar.visibility = True
-            for missile in self.friendly_missiles:
-                if pygame.sprite.collide_circle_ratio(1)(missile, base):
-                    base.bar.visibility = True
+                for aircraft in self.friendly_aircraft:
+                    if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+                        base.bar.visibility = True
+                for missile in self.friendly_missiles:
+                    if pygame.sprite.collide_circle_ratio(1)(missile, base):
+                        base.bar.visibility = True
+            except AttributeError:
+                if base.state == 'ai' and (
+                        pygame.sprite.collide_circle_ratio(0.5)(player, base)
+                        or any(pygame.sprite.collide_circle_ratio(0.47)(
+                        aircraft, base) for aircraft in self.friendly_aircraft)
+                        or any(pygame.sprite.collide_circle_ratio(0.35)(
+                        missile, base) for missile in self.friendly_missiles)):
+                    base.visibility = True
 
         # отрисовка нужных и прятанье ненужных спрайтов
         for sprite in self.list_all_sprites:

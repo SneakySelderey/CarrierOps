@@ -10,7 +10,10 @@ class Player(Carrier):
     """Класс авианосца игрока"""
     def __init__(self):
         super().__init__(PLAYER_SPRITE, PLAYER_IMAGE)
-        self.rect.center = [40, randint(40, Settings.HEIGHT - 40)]
+        self.rect.center = [Settings.PLAYER_START[0] * Settings.CELL_SIZE +
+                            Settings.CELL_SIZE // 2,
+                            Settings.PLAYER_START[1] * Settings.CELL_SIZE +
+                            Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
 

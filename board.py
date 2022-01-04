@@ -28,6 +28,7 @@ class Board:
         cells = [(i, j) for i in range(self.width) for j in range(self.height)]
         player_base, *bases, ai_base = sorted(sample(
             cells, Settings.NUM_OF_BASES + 2))
+        Settings.PLAYER_START = player_base
         [self.add_base(*base) for base in bases]
         self.add_base(*player_base, 'player')
         self.add_base(*ai_base, 'ai')
