@@ -12,6 +12,7 @@ from camera import Camera
 from map_solomon import SolomonLand
 from Settings import *
 import Settings
+from threading import Thread
 
 
 def delete_save(save):
@@ -701,7 +702,8 @@ class Run:
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
 
-            self.camera_update()
+            thread2 = Thread(target=game_objects.camera_update(), args=())
+            thread2.start()
 
             if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not arrow_pressed:
                 camera.dx = -20
