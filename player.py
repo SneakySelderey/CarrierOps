@@ -1,3 +1,4 @@
+import pygame
 from random import randint
 from Settings import PLAYER_IMAGE, PLAYER_SPRITE
 import Settings
@@ -27,3 +28,6 @@ class Player(Carrier):
             if abs(self.destination[0] - self.rect.centerx) <= 10 and \
                     abs(self.destination[1] - self.rect.centery) <= 10:
                 self.stop = True
+
+            if self.stop:
+                pygame.time.set_timer(Settings.FUEL_CONSUMPTION, 0)

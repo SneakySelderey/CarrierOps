@@ -485,26 +485,6 @@ class Run:
             destination, True))
         TAKEOFF.play()
 
-    def move(self, destination, game_obj, screen=None):
-        """Движание игрока или ИИ"""
-        dx, dy = destination
-        center = game_obj.rect.center
-        prev_speed = game_obj.speedx, game_obj.speedy
-        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
-        stop_x = game_obj.speedx == 0
-        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
-        stop_y = game_obj.speedy == 0
-        if screen is not None and list(self.player.rect.center) != destination:
-            pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]),
-                Settings.CELL_SIZE // 7)
-        if screen is not None:
-            if stop_x and stop_y and (prev_speed[0] or prev_speed[1]):
-                pygame.time.set_timer(FUEL_CONSUMPTION, 0)
-            elif not (stop_x and stop_y) and not \
-                (prev_speed[0] or prev_speed[1]):
-                pygame.time.set_timer(FUEL_CONSUMPTION, FUEL_CONSUMPTION_SPEED)
-
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
         distance = []
@@ -774,6 +754,12 @@ class Run:
                     text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                     screen.blit(text_pause, text_pause.get_rect(
                         center=(WIDTH // 2, HEIGHT // 2)))
+
+                if not self.player.stop:
+                    pygame.draw.circle(
+                        screen, BLUE, (self.player.destination[0],
+                                       self.player.destination[1]),
+                        Settings.CELL_SIZE // 7)
 
                 if alpha == 255:
                     self.running = False

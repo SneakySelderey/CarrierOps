@@ -32,6 +32,9 @@ class Carrier(pygame.sprite.Sprite):
         self.destination = list(pos)
         self.alpha = atan2(self.destination[1] - self.pos[1],
                            self.destination[0] - self.pos[0])
+        if self.alpha != 0 and self.obj_img == PLAYER_IMAGE:
+            pygame.time.set_timer(Settings.FUEL_CONSUMPTION,
+                                  Settings.FUEL_CONSUMPTION_SPEED)
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -41,4 +44,5 @@ class Carrier(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(
             center=(left + c_x * Settings.CELL_SIZE,
                     top + c_y * Settings.CELL_SIZE))
+        self.pos = list(self.rect.center)
         self.mask = pygame.mask.from_surface(self.image)
