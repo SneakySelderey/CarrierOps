@@ -527,6 +527,11 @@ class Run:
         """Отрисовка тумана войны"""
         ai_x, ai_y = self.ai.rect.center
         player_x, player_y = self.player.rect.center
+
+        # отрисовка нужных и прятанье ненужных спрайтов
+        [pygame.sprite.Group([picture for picture in group if picture.visibility]).draw(screen)
+         for group in self.list_all_sprites]
+
         # отрисовка спрайта противника
         for player in Settings.PLAYER_SPRITE:
             for ai in Settings.AI_SPRITE:
@@ -612,10 +617,6 @@ class Run:
                         CONTACT_LOST.play()
                         self.play_contact_lost = False
 
-        # отрисовка нужных и прятанье ненужных спрайтов
-        [pygame.sprite.Group([picture for picture in group if picture.visibility]).draw(screen)
-         for group in self.list_all_sprites]
-
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)
@@ -642,7 +643,6 @@ class Run:
             self.overall_shift_x += camera.dx
             self.overall_shift_y += camera.dy
         self.centered = False
-        print(self.overall_shift_x)
 
     def main(self):
         """Функция с основным игровым циклом"""
