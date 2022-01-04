@@ -721,12 +721,12 @@ class Run:
                     camera.dy = 0
 
             screen.fill(DEEPSKYBLUE4)
-            self.board.update()
-            self.board.render(screen)
             Settings.ALL_SPRITES.draw(screen)
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()
             self.fog_of_war()
+            self.board.update()
+            self.board.render(screen)
             help_surface.fill((0, 0, 0, alpha))
             help_surface.fill((0, 0, 0, alpha_menu))
             screen.blit(help_surface, (0, 0))
