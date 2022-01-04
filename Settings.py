@@ -49,6 +49,7 @@ PLAYER_AIRCRAFT = pygame.sprite.Group()
 AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
+MOVE_POINT_SPRITE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
@@ -102,6 +103,7 @@ SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').conv
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg').convert_alpha()
 SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
 SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
+MOVE_POINT = pygame.image.load('data/img/move_point.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

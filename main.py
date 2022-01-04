@@ -9,7 +9,7 @@ from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, LandCheck, SolomonWater
+from map_solomon import SolomonLand, MovePoint, SolomonWater
 from Settings import *
 import Settings
 
@@ -446,7 +446,7 @@ class Run:
         self.battle = False
 
         self.solomon_water = SolomonWater(True)
-        self.land_check = LandCheck(True)
+        self.land_check = MovePoint(True)
         self.solomon_land = SolomonLand(True)
         self.player = Player(True)
         self.destination_player = list(self.player.rect.center)
@@ -458,10 +458,10 @@ class Run:
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
-        self.list_all_sprites = [self.solomon_water, self.player, self.ai, self.board.bases,
-                                 self.friendly_missiles,
-                                 self.hostile_missiles, self.friendly_aircraft,
-                                 self.solomon_land, self.land_check]
+        self.list_all_sprites = [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
+                                 Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
+                                 Settings.AI_SPRITE, Settings.PLAYER_MISSILES, Settings.PLAYER_AIRCRAFT,
+                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -495,9 +495,10 @@ class Run:
         game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
         stop_y = game_obj.speedy == 0
         if screen is not None and list(self.player.rect.center) != destination:
-            pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]),
-                Settings.CELL_SIZE // 7)
+            list(Settings.MOVE_POINT_SPRITE)[0].visibility = True
+            list(Settings.MOVE_POINT_SPRITE)[0].rect.center = destination
+        else:
+            list(Settings.MOVE_POINT_SPRITE)[0].visibility = False
         return [stop_x, stop_y]
 
     def destination_ai(self):
@@ -608,18 +609,8 @@ class Run:
                         self.play_contact_lost = False
 
         # отрисовка нужных и прятанье ненужных спрайтов
-        for sprite in self.list_all_sprites:
-            if type(sprite) == list:
-                for i in sprite:
-                    if i.visibility:
-                        Settings.ALL_SPRITES.add(i)
-                    else:
-                        Settings.ALL_SPRITES.remove(i)
-            else:
-                if sprite.visibility:
-                    Settings.ALL_SPRITES.add(sprite)
-                else:
-                    Settings.ALL_SPRITES.remove(sprite)
+        [pygame.sprite.Group([picture for picture in group if picture.visibility]).draw(screen)
+         for group in self.list_all_sprites]
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
@@ -629,17 +620,14 @@ class Run:
 
     def camera_update(self):
         # обновляем положение всех спрайтов
-        for sprite in self.list_all_sprites:
-            if type(sprite) == list:
-                for i in sprite:
-                    if i in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
-                        camera.apply_aircraft(i)
-                    elif i in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
-                        camera.apply_missiles(i)
-                    else:
-                        camera.apply_rect(i)
-            else:
-                camera.apply_rect(sprite)
+        for group in self.list_all_sprites:
+            for sprite in group:
+                if sprite in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
+                    camera.apply_aircraft(sprite)
+                elif sprite in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                    camera.apply_missiles(sprite)
+                else:
+                    camera.apply_rect(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
         self.destination_player = list(self.destination_player)
