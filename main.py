@@ -9,7 +9,8 @@ from camera import Camera
 from Settings import *
 import Settings
 import pygame_gui
-from carrier import Carrier
+from player import Player
+from AI import AI
 
 
 def update_objects():
@@ -456,9 +457,9 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
-        self.player = Carrier('player')
+        self.player = Player()
         self.destination_player = list(self.player.rect.center)
-        self.ai = Carrier('ai')
+        self.ai = AI()
         for i in range(10):
             x = randint(0, self.cells_x - 1)
             y = randint(0, self.cells_y - 1)
@@ -517,7 +518,7 @@ class Run:
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            self.move(distance[idx][1], self.ai)
+            self.ai.new_destination(distance[idx][1])
         except ValueError:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
@@ -641,18 +642,24 @@ class Run:
                 for i in sprite:
                     if i in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
                         camera.apply_aircraft(i)
-                    elif i in (
-                        Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                    elif i in (Settings.PLAYER_MISSILES or
+                               Settings.AI_MISSILES):
                         camera.apply_missiles(i)
                     else:
                         camera.apply_rect(i)
             else:
-                camera.apply_rect(sprite)
+                if sprite in Settings.PLAYER_SPRITE:
+                    camera.apply_aircraft(sprite)
+                elif sprite in Settings.AI_SPRITE:
+                    camera.apply_aircraft(sprite)
+                else:
+                    camera.apply_rect(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
-        self.destination_player = list(self.destination_player)
-        self.destination_player[0] += camera.dx
-        self.destination_player[1] += camera.dy
+        self.player.destination[0] += camera.dx
+        self.player.destination[1] += camera.dy
+        self.ai.destination[0] += camera.dx
+        self.ai.destination[1] += camera.dy
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -671,7 +678,7 @@ class Run:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        self.destination_player = list(event.pos)
+                        self.player.new_destination(event.pos)
                     if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
                         Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
@@ -754,7 +761,6 @@ class Run:
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ALL_SPRITES.draw(screen)
                 Settings.ICONS_GROUP.draw(screen)
-                self.move(self.destination_player, self.player, screen)
                 self.destination_ai()
                 self.fog_of_war()
 

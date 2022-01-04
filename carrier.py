@@ -1,42 +1,41 @@
 import pygame
-from random import randint
 from Settings import ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
     PLAYER_SPRITE, ALL_SPRITES_FOR_SURE, AI_SPRITE, AI_IMAGE, CARRIER_GROP
 import Settings
+from math import atan2
 
 
 class Carrier(pygame.sprite.Sprite):
-    """Класс, определяющий параметры и спрайт игрока"""
+    """Класс, определяющий параметры и спрайт авианосца"""
     Data = {'player': [PLAYER_SPRITE, PLAYER_IMAGE, True],
             'ai': [AI_SPRITE, AI_IMAGE, False]}
 
-    def __init__(self, obj):
+    def __init__(self, group, img):
         super().__init__(ALL_SPRITES, ALL_SPRITES_FOR_SURE,
-                         Carrier.Data[obj][0], CARRIER_GROP)
-        self.image = new_image_size(Carrier.Data[obj][1])
-        if obj == 'player':
-            self.rect = self.image.get_rect(center=[
-                40, randint(40, Settings.HEIGHT - 40)])
-        else:
-            self.rect = self.image.get_rect(center=[
-                Settings.WIDTH, randint(40, Settings.HEIGHT - 40)])
-        self.obj = obj
-        self.speedx = self.speedy = 0
+                         group, CARRIER_GROP)
+        self.obj_img = img
+        self.image = new_image_size(img)
+        self.rect = self.image.get_rect()
+        self.pos = list(self.rect.center)
+        self.destination = self.pos
+        self.alpha = 0
+        self.stop = False
         self.radius = Settings.CELL_SIZE * 4
-        self.visibility = Carrier.Data[obj][2]
+        self.visibility = True if img == PLAYER_IMAGE else False
         self.health_capacity = 100
         self.current_health = 100
         self.mask = pygame.mask.from_surface(self.image)
 
-    def update(self):
-        """Обновление позиции игрока"""
-        if Settings.OIL_VOLUME:
-            self.rect.x += self.speedx
-            self.rect.y += self.speedy
+    def new_destination(self, pos):
+        """Функция для задания новой точки направления"""
+        self.stop = False
+        self.destination = list(pos)
+        self.alpha = atan2(self.destination[1] - self.pos[1],
+                           self.destination[0] - self.pos[0])
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(Carrier.Data[self.obj][1])
+        self.image = new_image_size(self.obj_img)
         c_x = (self.rect.centerx - left) // cell_size
         c_y = (self.rect.centery - top) // cell_size
         self.rect = self.image.get_rect(
