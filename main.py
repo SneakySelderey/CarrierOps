@@ -506,92 +506,103 @@ class Run:
         ai_x, ai_y = self.ai.rect.center
         player_x, player_y = self.player.rect.center
         # отрисовка спрайта противника
-        for player in Settings.PLAYER_SPRITE:
-            for ai in Settings.AI_SPRITE:
+        player = list(Settings.PLAYER_SPRITE)[0]
+        for ai in Settings.AI_SPRITE:
 
-                # проверка на обнаружение ракетой
-                missile_tracking = False
-                for missile in self.friendly_missiles:
-                    # если цель в радиусе обнаружения ракеты, то
-                    # поднимается соответствующий флаг
-                    missile_x, missile_y = missile.rect.center
-                    # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
-                    if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
-                        missile_tracking = True
-                    # если ракета исчерпала свой ресурс, она падает в море и
-                    # спрайт удаляется
-                    if missile.total_ticks >= 10:
-                        self.friendly_missiles.remove(missile)
-                        Settings.ALL_SPRITES.remove(missile)
-                        Settings.ALL_SPRITES_FOR_SURE.remove(missile)
-                    # отрисовка радиуса обнаружения ракеты
-                    if not missile.activated:
-                        missile.activation = list(missile.activation)
-                        missile.activation[0] += camera.dx
-                        missile.activation[1] += camera.dy
-                        pygame.draw.line(screen, BLUE,
-                                         (missile_x, missile_y),
-                                         (missile.activation[0],
-                                          missile.activation[1]))
-                    pygame.draw.circle(screen, BLUE,
-                                       (missile_x, missile_y),
-                                       Settings.CELL_SIZE * 2, 1)
-
-                # проверка на обнаружение самолетом
-                air_tracking = False
-                for aircraft in self.friendly_aircraft:
-                    air_x, air_y = aircraft.rect.center
-                    # если цель в радиусе обнаружения самолета, то
-                    # поднимается соответствующий флаг
-                    # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
-                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
-                        air_tracking = True
-                    # если самолет исчерпала свой ресурс, он возвращается на авианосец
-                    if aircraft.delete:
-                        self.friendly_aircraft.remove(aircraft)
-                        Settings.ALL_SPRITES.remove(aircraft)
-                        Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
-                    # отрисовка радиуса обнаружения самолета
-                    aircraft.destination = list(aircraft.destination)
-                    aircraft.destination[0] += camera.dx
-                    aircraft.destination[1] += camera.dy
+            # проверка на обнаружение ракетой
+            missile_tracking = False
+            for missile in self.friendly_missiles:
+                # если цель в радиусе обнаружения ракеты, то
+                # поднимается соответствующий флаг
+                missile_x, missile_y = missile.rect.center
+                # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
+                if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
+                    missile_tracking = True
+                # если ракета исчерпала свой ресурс, она падает в море и
+                # спрайт удаляется
+                if missile.total_ticks >= 10:
+                    self.friendly_missiles.remove(missile)
+                    Settings.ALL_SPRITES.remove(missile)
+                    Settings.ALL_SPRITES_FOR_SURE.remove(missile)
+                # отрисовка радиуса обнаружения ракеты
+                if not missile.activated:
+                    missile.activation = list(missile.activation)
+                    missile.activation[0] += camera.dx
+                    missile.activation[1] += camera.dy
                     pygame.draw.line(screen, BLUE,
-                                     (air_x, air_y),
-                                     (aircraft.destination[0],
-                                      aircraft.destination[1]))
-                    pygame.draw.circle(screen, BLUE,
-                                       (air_x, air_y),
-                                       Settings.CELL_SIZE * 3.5, 1)
+                                     (missile_x, missile_y),
+                                     (missile.activation[0],
+                                      missile.activation[1]))
+                pygame.draw.circle(screen, BLUE,
+                                   (missile_x, missile_y),
+                                   Settings.CELL_SIZE * 2, 1)
 
-                # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-                # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-                if pygame.sprite.collide_circle_ratio(0.5)(player,
-                                                           ai) or missile_tracking or air_tracking:
-                    self.ai.visibility = True
-                    pygame.draw.circle(screen, RED, (ai_x, ai_y),
-                                       Settings.CELL_SIZE * 4, 1)
-                    self.ai_detected = True
+            # проверка на обнаружение самолетом
+            air_tracking = False
+            for aircraft in self.friendly_aircraft:
+                air_x, air_y = aircraft.rect.center
+                # если цель в радиусе обнаружения самолета, то
+                # поднимается соответствующий флаг
+                # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
+                    air_tracking = True
+                # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                if aircraft.delete:
+                    self.friendly_aircraft.remove(aircraft)
+                    Settings.ALL_SPRITES.remove(aircraft)
+                    Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
+                # отрисовка радиуса обнаружения самолета
+                aircraft.destination = list(aircraft.destination)
+                aircraft.destination[0] += camera.dx
+                aircraft.destination[1] += camera.dy
+                pygame.draw.line(screen, BLUE,
+                                 (air_x, air_y),
+                                 (aircraft.destination[0],
+                                  aircraft.destination[1]))
+                pygame.draw.circle(screen, BLUE,
+                                   (air_x, air_y),
+                                   Settings.CELL_SIZE * 3.5, 1)
+
+            # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+            # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
+            if pygame.sprite.collide_circle_ratio(0.5)(player,
+                                                       ai) or missile_tracking or air_tracking:
+                self.ai.visibility = True
+                pygame.draw.circle(screen, RED, (ai_x, ai_y),
+                                   Settings.CELL_SIZE * 4, 1)
+                self.ai_detected = True
+                self.play_contact_lost = True
+                if self.play_new_contact:
+                    if missile_tracking:
+                        WEAPON_ACQUIRE.play()
+                    else:
+                        NEW_CONTACT.play()
+                    self.play_new_contact = False
                     self.play_contact_lost = True
-                    if self.play_new_contact:
-                        if missile_tracking:
-                            WEAPON_ACQUIRE.play()
-                        else:
-                            NEW_CONTACT.play()
-                        self.play_new_contact = False
-                        self.play_contact_lost = True
-                        Settings.IS_PAUSE = True
-                        Settings.ALL_SPRITES.draw(screen)
+                    Settings.IS_PAUSE = True
+                    Settings.ALL_SPRITES.draw(screen)
 
-                # противник прячется в тумане войны
-                elif not pygame.sprite.collide_circle_ratio(0.5)(player,
-                                                                 ai) and not missile_tracking and \
-                    not air_tracking:
-                    self.ai.visibility = False
-                    self.ai_detected = False
-                    self.play_new_contact = True
-                    if self.play_contact_lost:
-                        CONTACT_LOST.play()
-                        self.play_contact_lost = False
+            # противник прячется в тумане войны
+            elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
+                    and not missile_tracking and not air_tracking:
+                self.ai.visibility = False
+                self.ai_detected = False
+                self.play_new_contact = True
+                if self.play_contact_lost:
+                    CONTACT_LOST.play()
+                    self.play_contact_lost = False
+
+        for base in self.board.bases:
+            base.bar.visibility = False
+            if base.start_of_capture in [0, 1] or \
+                    pygame.sprite.collide_circle_ratio(1)(player, base):
+                base.bar.visibility = True
+            for aircraft in self.friendly_aircraft:
+                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+                    base.bar.visibility = True
+            for missile in self.friendly_missiles:
+                if pygame.sprite.collide_circle_ratio(1)(missile, base):
+                    base.bar.visibility = True
 
         # отрисовка нужных и прятанье ненужных спрайтов
         for sprite in self.list_all_sprites:
