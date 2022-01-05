@@ -39,15 +39,15 @@ class Carrier(pygame.sprite.Sprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.obj_img)
-        c_x = (self.rect.centerx - left) // cell_size
-        c_y = (self.rect.centery - top) // cell_size
+        c_x = (self.rect.centerx - left) / cell_size
+        c_y = (self.rect.centery - top) / cell_size
         self.rect = self.image.get_rect(
             center=(left + c_x * Settings.CELL_SIZE,
                     top + c_y * Settings.CELL_SIZE))
         self.pos = list(self.rect.center)
         self.mask = pygame.mask.from_surface(self.image)
-        dest_x = (self.destination[0] - left) // cell_size
-        dest_y = (self.destination[1] - top) // cell_size
+        dest_x = (self.destination[0] - left) / cell_size
+        dest_y = (self.destination[1] - top) / cell_size
         self.destination = [left + dest_x * Settings.CELL_SIZE,
                             top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.pos[1],

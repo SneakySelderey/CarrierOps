@@ -23,13 +23,13 @@ class SolomonLand(pygame.sprite.Sprite):
     def update(self):
         """Обновление позиции карты"""
 
-    def new_position(self):
+    def new_position(self, *args):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(SOLOMON_LAND, (
             Settings.CELL_SIZE * self.parent_board.width,
             Settings.CELL_SIZE * self.parent_board.height))
         self.rect = self.image.get_rect()
-        self.rect.topleft = (self.parent_board.left, self.parent_board.top)
+        self.rect.topleft = (args[2], args[1])
         self.mask = pygame.mask.from_surface(pygame.transform.scale(
             SOLOMON_WATERMASK, (
                 Settings.CELL_SIZE * self.parent_board.width,

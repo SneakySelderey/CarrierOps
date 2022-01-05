@@ -42,8 +42,15 @@ def update_objects():
     [carrier.new_position(game_objects.board.cell_size,
                           game_objects.board.top, game_objects.board.left)
      for carrier in Settings.CARRIER_GROP]
+    [carrier.new_position(game_objects.board.cell_size,
+                          game_objects.board.top, game_objects.board.left)
+     for carrier in Settings.PLAYER_AIRCRAFT]
+    [carrier.new_position(game_objects.board.cell_size,
+                          game_objects.board.top, game_objects.board.left)
+     for carrier in Settings.PLAYER_MISSILES]
     [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
-     obj not in Settings.CARRIER_GROP]
+     obj not in Settings.CARRIER_GROP and obj not in Settings.PLAYER_AIRCRAFT
+     and obj not in Settings.PLAYER_MISSILES]
     game_objects.cell_size = Settings.CELL_SIZE
     ALL_SPRITES_FOR_SURE.update()
 
@@ -729,7 +736,9 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
+        global screen
         alpha = 0
+        zoom = None
         arrow_pressed = False
         Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
             Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
@@ -763,6 +772,8 @@ class Run:
                     if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
+                    if event.button == 4:
+                        zoom = pygame.transform.smoothscale(screen, (Settings.WIDTH + 6, Settings.HEIGHT + 6))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
@@ -857,6 +868,9 @@ class Run:
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ICONS_GROUP.draw(screen)
+                if zoom is not None:
+                    screen.blit(zoom, (0, 0))
+                    zoom = None
 
                 if not self.player.stop:
                     pygame.draw.circle(

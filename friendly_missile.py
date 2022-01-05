@@ -54,14 +54,19 @@ class MissileFriendly(pygame.sprite.Sprite):
         if self.activated:
             self.missile_tracking()
 
-    def new_position(self):
+    def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(MISSILE_FRIENDLY)
-        rect = self.image.get_rect()
-        rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
-        self.rect = rect
-        self.pos = [*new_coords(self.pos[0], self.pos[1])]
-        self.activation = list(new_coords(*self.activation))
+        c_x = (self.rect.centerx - left) / cell_size
+        c_y = (self.rect.centery - top) / cell_size
+        self.rect = self.image.get_rect(
+            center=(left + c_x * Settings.CELL_SIZE,
+                    top + c_y * Settings.CELL_SIZE))
+        self.pos = pygame.math.Vector2(list(self.rect.center))
+        act_x = (self.activation[0] - left) / cell_size
+        act_y = (self.activation[1] - top) / cell_size
+        self.activation = [left + act_x * Settings.CELL_SIZE,
+                           top + act_y * Settings.CELL_SIZE]
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
         if not self.activated:
