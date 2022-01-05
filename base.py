@@ -92,13 +92,14 @@ class Base(pygame.sprite.Sprite):
             elif self.state == 'friendly':
                 self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
                 if self.resource_type == 'oil':
-                    Settings.OIL_VOLUME = min(Settings.OIL_VOLUME + 1, 100)
+                    Settings.BASE_OIL_VOLUME = min(
+                        Settings.BASE_OIL_VOLUME + 1, 100)
                 elif self.resource_type == 'missile':
-                    Settings.NUM_OF_MISSILES += 1
+                    Settings.BASE_NUM_OF_MISSILES += 1
                 elif self.resource_type == 'aircraft':
-                    Settings.NUM_OF_AIRCRAFT += 1
+                    Settings.BASE_NUM_OF_AIRCRAFT += 1
                 else:
-                    Settings.NUM_OF_REPAIR_PARTS += 1
+                    Settings.BASE_NUM_OF_REPAIR_PARTS += 1
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""

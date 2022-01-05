@@ -437,6 +437,45 @@ def show_load_menu(from_main=True):
         pygame.display.flip()
 
 
+def show_resources_menu():
+    """Функция для отрисовки меню ресурсов"""
+    # Переменные для создания красивой картинки
+    alpha_up = 0
+    alpha_down = 255
+    background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
+    background2 = screen
+    while True:
+        delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r or event.key == pygame.K_ESCAPE:
+                    return 1
+            resource_manager.process_events(event)
+        # Создание красивой картинки и эффекта затемнения
+        help_surface.blit(screen, (0, 0))
+        if alpha_up < 255:
+            help_surface.fill((0, 0, 0, alpha_up))
+            background2.set_alpha(255 - alpha_up)
+        alpha_up = min(alpha_up + 15, 255)
+        if alpha_up == 255:
+            alpha_down = max(alpha_down - 15, 150)
+            screen.blit(background, (0, 0))
+            help_surface.fill((0, 0, 0, alpha_down))
+        screen.blit(background2, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        [i.update_text(j) for i, j in zip([AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
+            Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
+            Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
+        Settings.RESOURCES_BASE.update()
+        Settings.RESOURCES_BASE.draw(screen)
+        # Обновление менеджера
+        resource_manager.update(delta)
+        resource_manager.draw_ui(screen)
+        pygame.display.flip()
+
+
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
@@ -453,6 +492,7 @@ class Run:
         self.ai_detected = False
         self.defeat = False
         self.menu = False
+        self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
@@ -687,6 +727,8 @@ class Run:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                    if event.key == pygame.K_r:
+                        self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_UP:
                         camera.dy += 20
                         arrow_pressed = True
@@ -736,7 +778,9 @@ class Run:
                 if not arrow_pressed:
                     camera.dx = 0
                     camera.dy = 0
-
+            if self.resource_menu:
+                result = show_resources_menu()
+                self.resource_menu = False
             if self.menu:
                 # Получим код возврата от игрового меню
                 result = show_in_game_menu()
@@ -767,7 +811,8 @@ class Run:
                                        self.player.destination[1]),
                         Settings.CELL_SIZE // 7)
 
-                if not (Settings.IS_PAUSE or self.defeat or self.menu):
+                if not (Settings.IS_PAUSE or self.defeat or self.menu or
+                        self.resource_menu):
                     Settings.ALL_SPRITES.update()
                     if not self.ai_detected:
                         self.ai.update()
@@ -783,6 +828,8 @@ class Run:
 
                 campaign_manager.update(delta)
                 campaign_manager.draw_ui(screen)
+
+                print(Settings.BASE_OIL_VOLUME)
 
                 pygame.display.flip()
 
@@ -812,7 +859,7 @@ if __name__ == '__main__':
     game_objects = None
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, True, False, False, False
+        False, False, False, False, False, True
     running = True
     # Создадим камеру
     camera = Camera()

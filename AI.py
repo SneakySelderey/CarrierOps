@@ -23,7 +23,7 @@ class AI(Carrier):
                 self.alpha)
             self.rect.center = self.pos
 
-        if abs(self.destination[0] - self.rect.centerx) <= 10 and \
-                abs(self.destination[1] - self.rect.centery) <= 10:
-            self.stop = True
+        # if abs(self.destination[0] - self.rect.centerx) <= 10 and \
+        #         abs(self.destination[1] - self.rect.centery) <= 10:
+        #     self.stop = True
 

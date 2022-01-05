@@ -1,6 +1,6 @@
 from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, \
     get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP, ICONS_GROUP, PLANE_ICON, \
-    MISSILE_ICON, OIL_ICON, GEAR_ICON
+    MISSILE_ICON, OIL_ICON, GEAR_ICON, RESOURCES_BASE
 import pygame
 import pygame_gui
 import Settings
@@ -132,6 +132,10 @@ class Label(pygame_gui.elements.UILabel):
             rect.bottomright = pos
         self.set_relative_position(rect.topleft)
 
+    def update_text(self, txt):
+        """Функция для утсановки нового текста"""
+        self.set_text(str(txt))
+
 
 class Button(pygame_gui.elements.UIButton):
     """Класс для кнопки"""
@@ -205,23 +209,23 @@ class BasesLost(pygame.sprite.Sprite):
 
 class Icon(pygame.sprite.Sprite):
     """Класс для иконок ресурсов"""
-    def __init__(self, image, pos):
+    def __init__(self, image, pos, group):
         """Инициализация. Принимает изрбражениеи его положение на экране"""
-        super().__init__(ICONS_GROUP)
+        super().__init__(group)
         self.image = image
         self.rect = self.image.get_rect(center=(
             Settings.WIDTH * pos[0], Settings.HEIGHT * pos[1]))
         self.pos = pos
 
     def update(self):
-        """ункция обновления положения иконки"""
+        """Функция обновления положения иконки"""
         self.rect.center = (Settings.WIDTH * self.pos[0],
                             Settings.HEIGHT * self.pos[1])
 
 
 class IconText(pygame_gui.elements.UILabel):
     """Класс для подписи к иконке"""
-    def __init__(self, icon, txt):
+    def __init__(self, icon, txt, manager):
         """Инициализация. Принимает иконку, рядом с котрой должна быть
         подпись и текст"""
         self.pos = Settings.WIDTH / (icon.rect.topright[0] + 10), \
@@ -232,7 +236,7 @@ class IconText(pygame_gui.elements.UILabel):
         rect = text.get_rect(topleft=(icon.rect.topright[0] + 10,
                                       icon.rect.topright[1] + 12))
         self.ico = icon
-        super().__init__(manager=campaign_manager, relative_rect=rect,
+        super().__init__(manager=manager, relative_rect=rect,
                          text=str(txt), object_id='caption')
 
     def update_element(self):
@@ -244,7 +248,6 @@ class IconText(pygame_gui.elements.UILabel):
         """Функция для обновления текста подписи"""
         text = Settings.NUM_OF_AIRCRAFT if self.ico == AIRCRAFT else \
             Settings.NUM_OF_MISSILES if self.ico == MISSILES else \
-            Settings.NUM_OF_REPAIR_PARTS if self.ico == GEARS else \
             f'{Settings.OIL_VOLUME}/100'
         self.set_text(str(text))
 
@@ -274,6 +277,10 @@ bars_manager = pygame_gui.UIManager(
 campaign_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+resource_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+
 
 # Создание элементов интерфейса
 QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
@@ -315,10 +322,44 @@ TO_LOAD_BUTTON = Button('LOAD', 0.7, 0.45, 15, load_manager, 'stable_btn')
 TO_DELETE_BUTTON = Button('DELETE', 0.7, 0.55, 15, load_manager, 'stable_btn')
 USERS_LIST = OptionList(0.1, 0.25, user_data_manager)
 OK_BUTTON_LOAD = Button('OK', 0.5, 0.9, 10, load_manager)
-
+RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
+                        resource_manager, 'settings', 'center')
+BASES_LOST = BasesLost()
+TITLE = Title()
+AIRCRAFT = Icon(PLANE_ICON, (0.2, 0.04), ICONS_GROUP)
+MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
+#GEARS = Icon(GEAR_ICON, (0.34, 0.04), ICONS_GROUP)
+OIL = Icon(OIL_ICON, (0.34, 0.04), ICONS_GROUP)
+AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT, campaign_manager)
+MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES, campaign_manager)
+#GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS, campaign_manager)
+OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME, campaign_manager)
+AIRCRAFT_BASE = Icon(PLANE_ICON, (0.12, 0.2), RESOURCES_BASE)
+MISSILES_BASE = Icon(MISSILE_ICON, (0.12, 0.4), RESOURCES_BASE)
+GEARS_BASE = Icon(GEAR_ICON, (0.12, 0.8), RESOURCES_BASE)
+OIL_BASE = Icon(OIL_ICON, (0.12, 0.6), RESOURCES_BASE)
+AIRCRAFT_BASE_CAPT = Label(24, 'AIRCRAFT', 0.3, 0.2,
+                           resource_manager, 'option', 'center')
+MISSILES_BASE_CAPT = Label(24, 'MISSILES', 0.3, 0.4,
+                           resource_manager, 'option', 'center')
+GEARS_BASE_CAPT = Label(24, 'REPAIR PARTS', 0.3, 0.8,
+                        resource_manager, 'option', 'center')
+OIL_BASE_CAPT = Label(24, 'OIL VOLUME', 0.3, 0.6,
+                      resource_manager, 'option', 'center')
+AIR_NUM = Label(24, f'{Settings.BASE_NUM_OF_AIRCRAFT}', 0.5, 0.2,
+                resource_manager, 'option', 'center')
+MIS_NUM = Label(24, f'{Settings.BASE_NUM_OF_MISSILES}', 0.5, 0.4,
+                resource_manager, 'option', 'center')
+OIL_NUM = Label(24, f'{Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
+                resource_manager, 'option', 'center')
+REP_NUM = Label(24, f'{Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
+                resource_manager, 'option', 'center')
+CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
-          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL]
+          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL, RESOURCES_LABEL,
+          AIRCRAFT_BASE_CAPT, MISSILES_BASE_CAPT, GEARS_BASE_CAPT,
+          OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
@@ -331,14 +372,3 @@ SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
 LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
                  'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON,
                  'OK': OK_BUTTON_LOAD}
-BASES_LOST = BasesLost()
-TITLE = Title()
-AIRCRAFT = Icon(PLANE_ICON, (0.2, 0.04))
-MISSILES = Icon(MISSILE_ICON, (0.27, 0.04))
-GEARS = Icon(GEAR_ICON, (0.34, 0.04))
-OIL = Icon(OIL_ICON, (0.41, 0.04))
-AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT)
-MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES)
-GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS)
-OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME)
-CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, GEARS_CAPTION, OIL_CAPTION]
