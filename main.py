@@ -459,9 +459,6 @@ class Run:
             x = random.randint(0, self.cells_x - 1)
             y = random.randint(0, self.cells_y - 1)
             self.board.add_base(x, y)
-        self.friendly_missiles = []
-        self.hostile_missiles = []
-        self.friendly_aircraft = []
         self.list_all_sprites = [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
                                  Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
                                  Settings.AI_SPRITE, Settings.PLAYER_MISSILES, Settings.PLAYER_AIRCRAFT,
@@ -469,13 +466,13 @@ class Run:
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
-        self.friendly_missiles.append(MissileFriendly(
+        Settings.PLAYER_MISSILES.add(MissileFriendly(
             destination, True))
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
-        self.friendly_aircraft.append(AircraftFriendly(
+        Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
             destination, True))
         TAKEOFF.play()
 
