@@ -427,7 +427,7 @@ def show_load_menu(from_main=True):
                             rebase_load_manager()
                 if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and \
-                        from_main:
+                            from_main:
                         # Выведем сообщение, если пользователь решил
                         # сохраниться, не начав игру
                         give_tooltip(2)
@@ -471,7 +471,7 @@ def show_resources_menu():
     # Переменные для создания красивой картинки
     alpha_up = 0
     alpha_down = 255
-    background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
+    background = pygame.transform.scale(RESOURCE_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen
     while True:
         delta = clock.tick(60) / 1000.0
@@ -525,9 +525,7 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-        self.solomon_land = SolomonLand(True)
-        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (
-            Settings.WIDTH * 2, Settings.HEIGHT * 2))
+        self.solomon_land = SolomonLand(True, self.board)
 
         self.board.add_bases()
         self.player = Player()
@@ -763,6 +761,7 @@ class Run:
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+        camera.rebase()
         self.centered = False
         while self.running:
             delta = clock.tick(FPS) / 1000.0
@@ -831,6 +830,7 @@ class Run:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
             self.camera_update()
+            Settings.BASES_SPRITES.update()
 
             if pygame.mouse.get_pos()[
                 0] >= Settings.WIDTH - 50 and not arrow_pressed:
@@ -866,15 +866,16 @@ class Run:
                     show_setting_screen(False)
             else:
                 screen.fill(DEEPSKYBLUE4)
-                screen.blit(self.water, (camera.overall_shift_x,
-                                         camera.overall_shift_y))
+                screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
+                    Settings.CELL_SIZE * self.board.width,
+                    Settings.CELL_SIZE * self.board.height)),
+                            (camera.overall_shift_x, camera.overall_shift_y))
                 self.board.update()
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
-                Settings.BASES_SPRITES.update()
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ICONS_GROUP.draw(screen)
                 help_surface.blit(screen, (0, 0))

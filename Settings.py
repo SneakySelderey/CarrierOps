@@ -146,6 +146,7 @@ MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png').convert_alph
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png').convert_alpha()
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').convert_alpha()
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg').convert_alpha()
+RESOURCE_BACKGROUND = pygame.image.load('data/img/resource_menu_background.jpg').convert_alpha()
 SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
 SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
 SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask.png').convert_alpha()

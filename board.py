@@ -41,10 +41,12 @@ class Board:
         else:
             base = SuperBase(x, y, mega[0], True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[0]
-        while land.rect.collidepoint(x, y) and land.mask.get_at(
-                (x - land.rect.x, y - land.rect.y)):
+        while land.rect.collidepoint(base.rect.centerx, base.rect.centery) \
+                and land.mask.get_at((base.rect.centerx - land.rect.x,
+                                      base.rect.centery - land.rect.y)):
             a, b = choice(self.cells)
-            base.rect.center = a * Settings.CELL_SIZE, b * Settings.CELL_SIZE
+            base.rect.center = (a + 0.5) * Settings.CELL_SIZE, \
+                               (b + 0.5) * Settings.CELL_SIZE
         try:
             self.cells.remove((a, b))
         except NameError:
