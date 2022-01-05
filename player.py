@@ -10,8 +10,12 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, visibility):
         super().__init__(ALL_SPRITES, PLAYER_SPRITE, ALL_SPRITES_FOR_SURE)
         self.image = new_image_size(PLAYER_IMAGE)
-        self.rect = self.image.get_rect(center=[
-            40, randint(40, Settings.HEIGHT - 40)])
+        land = list(Settings.BACKGROUND_MAP)[0]
+        while True:
+            self.rect = self.image.get_rect(center=[
+                40, randint(40, Settings.HEIGHT - 40)])
+            if not pygame.sprite.collide_mask(self, land):
+                break
         self.speedx = self.speedy = 0
         self.radius = Settings.CELL_SIZE * 4
         self.visibility = visibility
