@@ -11,6 +11,7 @@ import Settings
 import pygame_gui
 from player import Player
 from AI import AI
+import win32gui
 
 
 def calculate_speed():
@@ -220,6 +221,12 @@ def show_setting_screen(flag=True):
                         # объектов
                         if game_objects is not None:
                             update_objects()
+                        hwnd = win32gui.FindWindow(None, "CarrierOps")
+                        if not Settings.IS_FULLSCREEN:
+                            win32gui.MoveWindow(hwnd, (
+                                screensize[0] - WIDTH) // 2, (
+                                screensize[1] - HEIGHT) // 2,
+                                                WIDTH, HEIGHT, True)
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
