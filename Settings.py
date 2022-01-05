@@ -87,12 +87,15 @@ AI_SPEED = 1
 NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
+MAP = 'SOLOMON'
+NEIGHBOURS = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2),
+              (2, -2)]
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+3:]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
@@ -146,9 +149,10 @@ MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png').convert_alph
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png').convert_alpha()
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').convert_alpha()
 SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg').convert_alpha()
+RESOURCE_BACKGROUND = pygame.image.load('data/img/resource_menu_background.jpg').convert_alpha()
 SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
 SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
-SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask.png').convert_alpha()
+SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask_negate.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

@@ -1,8 +1,7 @@
 import pygame
-from Settings import DARK_RED
 import Settings
 from base import Base, SuperBase
-from random import sample
+from random import sample, choice
 
 
 class Board:
@@ -16,6 +15,9 @@ class Board:
         self.left = 20
         self.top = 20
         self.cell_size = 30
+        self.cells = {(i, j) for i in range(self.width) for j in
+                      range(self.height)}
+        self.used = set()
 
     def set_view(self, left, top, cell_size):
         """Метод, задающий отступ сетки и размер одной ячейки"""
@@ -25,24 +27,30 @@ class Board:
 
     def add_bases(self):
         """Функция для добавления баз"""
-        cells = [(i, j) for i in range(self.width) for j in range(self.height)]
+        self.cell_size = Settings.CELL_SIZE
         player_base, *bases, ai_base = sorted(sample(
-            cells, Settings.NUM_OF_BASES + 2))
-        Settings.PLAYER_START = player_base
-        Settings.AI_START = ai_base
+            self.cells, Settings.NUM_OF_BASES + 2))
         [self.add_base(*base) for base in bases]
-        self.add_base(*player_base, 'player')
-        self.add_base(*ai_base, 'ai')
+        self.add_base(player_base[0], player_base[1], 'player')
+        self.add_base(ai_base[0], ai_base[1], 'ai')
 
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
-        base = Base(x, y, 'neutral', True, self.cell_size, self)
+        if not mega:
+            base = Base(x, y, 'neutral', True, self.cell_size, self)
+        else:
+            base = SuperBase(x, y, mega[0], True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[0]
-        while land.rect.collidepoint(x, y) and land.mask.get_at((x - land.rect.x, y - land.rect.y)):
-            a = Settings.WIDTH * 2 // Settings.CELL_SIZE
-            b = Settings.HEIGHT * 2 // Settings.CELL_SIZE
-            base.rect.center = random.randint(0, a) * Settings.CELL_SIZE, \
-                               random.randint(0, b) * Settings.CELL_SIZE
+        while pygame.sprite.collide_mask(land, base) is not None:
+            self.used.add((x, y))
+            x, y = choice(list(self.cells - self.used))
+            base.x, base.y = x, y
+            base.new_position()
+        self.used.add((x, y))
+        if mega and mega[0] == 'player':
+            Settings.PLAYER_START = (x, y)
+        elif mega and mega[0] == 'ai':
+            Settings.AI_START = (x, y)
         self.board[x][y] = base
         self.bases.append(base)
 
@@ -54,10 +62,6 @@ class Board:
             y * self.cell_size + self.top, self.cell_size,
             self.cell_size), 1) for y in range(self.height)
          for x in range(self.width)]
-
-    def update(self):
-        """Обновление размера сетки"""
-        self.cell_size = Settings.CELL_SIZE
 
     def get_cell(self, mouse_pos):
         """Функция для определения ячейки, на которую нажал пользователь"""
