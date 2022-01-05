@@ -730,7 +730,7 @@ class Run:
                     camera.dy = 0
 
             screen.fill(DEEPSKYBLUE4)
-            #screen.blit(self.water, (self.overall_shift_x, self.overall_shift_y))
+            screen.blit(self.water, (camera.overall_shift_x, camera.overall_shift_y))
             self.fog_of_war()
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()
