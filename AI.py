@@ -9,7 +9,9 @@ class AI(Carrier):
     """Класс авианосца игрока"""
     def __init__(self):
         super().__init__(AI_SPRITE, AI_IMAGE)
-        self.rect.center = [Settings.WIDTH, randint(40, Settings.HEIGHT - 40)]
+        self.rect.center = [Settings.AI_START[0] * Settings.CELL_SIZE +
+                            Settings.CELL_SIZE // 2, Settings.AI_START[1] *
+                            Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
 

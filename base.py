@@ -24,23 +24,16 @@ class Base(pygame.sprite.Sprite):
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.state = state
         self.to_add = True
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [x * cell_size + parent.left,
-                             y * cell_size + parent.top]
+        self.rect = self.image.get_rect(topleft=[
+            x * cell_size + parent.left, y * cell_size + parent.top])
         self.visibility = visibility
         self.ticks_to_capture = Settings.BASE_TICKS
         self.start_of_capture = 0
         self.mask = pygame.mask.from_surface(self.image)
-        if self.state == 'ai':
-            Settings.HOSTILE_BASES.append(self)
-            self.visibility = False
-        elif self.state == 'player':
-            Settings.FRIENDLY_BASES.append(self)
-        self.ticks_to_give_resource = None
+        self.bar = BaseBar(self)
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
             self.ico = BaseIcon(self)
-            self.bar = BaseBar(self)
             self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
 
     def update(self):
@@ -48,13 +41,12 @@ class Base(pygame.sprite.Sprite):
         base_grid = self.x, self.y
         prev_start = self.start_of_capture
         player = list(Settings.PLAYER_SPRITE)[0]
-        if pygame.sprite.collide_mask(self, player) and self.state != 'player':
+        if pygame.sprite.collide_mask(self, player):
             self.start_of_capture = 1
-        if self.state != 'ai':
-            for ai in Settings.AI_SPRITE:
-                if pygame.sprite.collide_mask(self, ai) and not \
-                        pygame.sprite.collide_mask(self, player):
-                    self.start_of_capture = 2
+        for ai in Settings.AI_SPRITE:
+            if pygame.sprite.collide_mask(self, ai) and not \
+                    pygame.sprite.collide_mask(self, player):
+                self.start_of_capture = 2
 
         self.ticks_to_capture = self.ticks_to_capture if \
             prev_start == self.start_of_capture else Settings.BASE_TICKS
@@ -85,21 +77,19 @@ class Base(pygame.sprite.Sprite):
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
                              self.y * Settings.CELL_SIZE + self.parent.top]
 
-        if self.state not in ['player', 'ai'] and self.ticks_to_give_resource \
-                is not None:
-            if self.ticks_to_give_resource:
-                self.ticks_to_give_resource -= 1
-            elif self.state == 'friendly':
-                self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
-                if self.resource_type == 'oil':
-                    Settings.BASE_OIL_VOLUME = min(
-                        Settings.BASE_OIL_VOLUME + 1, 100)
-                elif self.resource_type == 'missile':
-                    Settings.BASE_NUM_OF_MISSILES += 1
-                elif self.resource_type == 'aircraft':
-                    Settings.BASE_NUM_OF_AIRCRAFT += 1
-                else:
-                    Settings.BASE_NUM_OF_REPAIR_PARTS += 1
+        if self.ticks_to_give_resource:
+            self.ticks_to_give_resource -= 1
+        elif self.state == 'friendly':
+            self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
+            if self.resource_type == 'oil':
+                Settings.BASE_OIL_VOLUME = min(
+                    Settings.BASE_OIL_VOLUME + 1, 100)
+            elif self.resource_type == 'missile':
+                Settings.BASE_NUM_OF_MISSILES += 1
+            elif self.resource_type == 'aircraft':
+                Settings.BASE_NUM_OF_AIRCRAFT += 1
+            else:
+                Settings.BASE_NUM_OF_REPAIR_PARTS += 1
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -107,6 +97,61 @@ class Base(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.mask = pygame.mask.from_surface(self.image)
+
+
+class SuperBase(Base):
+    """Класс для галвнйо базы"""
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.ticks_to_capture = 0
+        if self.state == 'ai':
+            Settings.HOSTILE_BASES.append(self)
+            self.start_of_capture = 2
+            self.visibility = False
+        else:
+            self.start_of_capture = 1
+            Settings.FRIENDLY_BASES.append(self)
+
+    def update(self):
+        """Обновление изображения базы, если она захватывается"""
+        base_grid = self.x, self.y
+        prev_start = self.start_of_capture
+        player = list(Settings.PLAYER_SPRITE)[0]
+        if pygame.sprite.collide_mask(self, player):
+            self.start_of_capture = 1
+        for ai in Settings.AI_SPRITE:
+            if pygame.sprite.collide_mask(self, ai) and not \
+                    pygame.sprite.collide_mask(self, player):
+                self.start_of_capture = 2
+
+        self.ticks_to_capture = self.ticks_to_capture if \
+            prev_start == self.start_of_capture else Settings.BASE_TICKS
+
+        if prev_start != self.start_of_capture:
+            self.to_add = True
+
+        if self.ticks_to_capture and self.start_of_capture:
+            self.ticks_to_capture -= 1
+        elif self.to_add:
+            self.to_add = False
+            if self.start_of_capture == 1:
+                self.state = 'player'
+                if base_grid in Settings.HOSTILE_BASES:
+                    Settings.HOSTILE_BASES.remove(base_grid)
+                if base_grid not in Settings.FRIENDLY_BASES:
+                    Settings.FRIENDLY_BASES.append(base_grid)
+            elif self.start_of_capture == 2:
+                self.state = 'ai'
+                if base_grid in Settings.FRIENDLY_BASES:
+                    Settings.FRIENDLY_BASES.remove(base_grid)
+                if base_grid not in Settings.HOSTILE_BASES:
+                    Settings.HOSTILE_BASES.append(base_grid)
+
+            self.image = pygame.transform.scale(Base.Images[self.state], (
+                Settings.CELL_SIZE, Settings.CELL_SIZE))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
+                             self.y * Settings.CELL_SIZE + self.parent.top]
 
 
 class BaseIcon(pygame.sprite.Sprite):

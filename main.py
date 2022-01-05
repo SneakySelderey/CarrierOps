@@ -465,9 +465,10 @@ def show_resources_menu():
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
-        [i.update_text(j) for i, j in zip([AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
-            Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
-            Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
+        [i.update_text(j) for i, j in zip(
+            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
+                Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
+                Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
         Settings.RESOURCES_BASE.update()
         Settings.RESOURCES_BASE.draw(screen)
         # Обновление менеджера
@@ -630,24 +631,17 @@ class Run:
                     self.play_contact_lost = False
 
         for base in self.board.bases:
-            try:
                 base.bar.visibility = False
                 if base.start_of_capture in [0, 1] or \
-                        pygame.sprite.collide_circle_ratio(1)(player, base):
+                        pygame.sprite.collide_circle_ratio(0.5)(player, base):
                     base.bar.visibility = True
                 for aircraft in self.friendly_aircraft:
-                    if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
                         base.bar.visibility = True
                 for missile in self.friendly_missiles:
-                    if pygame.sprite.collide_circle_ratio(1)(missile, base):
+                    if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
                         base.bar.visibility = True
-            except AttributeError:
-                if base.state == 'ai' and (
-                        pygame.sprite.collide_circle_ratio(0.5)(player, base)
-                        or any(pygame.sprite.collide_circle_ratio(0.47)(
-                        aircraft, base) for aircraft in self.friendly_aircraft)
-                        or any(pygame.sprite.collide_circle_ratio(0.35)(
-                        missile, base) for missile in self.friendly_missiles)):
+                if base.bar.visibility and base.state == 'ai':
                     base.visibility = True
 
         # отрисовка нужных и прятанье ненужных спрайтов
@@ -700,7 +694,9 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
-        HEALTH_BAR = pygame_gui.elements.UIScreenSpaceHealthBar(
+        Settings.NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
+            Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
+        health_bar = pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
@@ -779,7 +775,7 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
             if self.resource_menu:
-                result = show_resources_menu()
+                show_resources_menu()
                 self.resource_menu = False
             if self.menu:
                 # Получим код возврата от игрового меню
@@ -828,8 +824,6 @@ class Run:
 
                 campaign_manager.update(delta)
                 campaign_manager.draw_ui(screen)
-
-                print(Settings.BASE_OIL_VOLUME)
 
                 pygame.display.flip()
 

@@ -1,7 +1,7 @@
 import pygame
 from Settings import DARK_RED
 import Settings
-from base import Base
+from base import Base, SuperBase
 from random import sample
 
 
@@ -29,14 +29,19 @@ class Board:
         player_base, *bases, ai_base = sorted(sample(
             cells, Settings.NUM_OF_BASES + 2))
         Settings.PLAYER_START = player_base
+        Settings.AI_START = ai_base
         [self.add_base(*base) for base in bases]
         self.add_base(*player_base, 'player')
         self.add_base(*ai_base, 'ai')
 
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
-        base = Base(x, y, 'neutral' if not mega else mega[0], True,
-                    self.cell_size, self)
+        if not mega:
+            base = Base(x, y, 'neutral', True,
+                        self.cell_size, self)
+        else:
+            base = SuperBase(x, y, mega[0], True, self.cell_size, self)
+            print(x, y)
         self.board[x][y] = base
         self.bases.append(base)
 
