@@ -57,6 +57,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = new_coords(*self.destination)
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
+        self.radius = Settings.CELL_SIZE * 3.5
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""

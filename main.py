@@ -14,6 +14,15 @@ from AI import AI
 import win32gui
 
 
+def move_window():
+    """Функция для перемещения окна на середину экрана"""
+    hwnd = win32gui.FindWindow(None, "CarrierOps")
+    win32gui.MoveWindow(hwnd, (
+        screensize[0] - WIDTH) // 2, (
+                            screensize[1] - HEIGHT) // 2,
+                        WIDTH, HEIGHT, True)
+
+
 def calculate_speed():
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
@@ -23,10 +32,6 @@ def calculate_speed():
     Settings.AIR_SPEED = 2 * Settings.AIR_SPEED / diff
     Settings.MISSILE_SPEED = 2 * Settings.MISSILE_SPEED / diff
     Settings.AI_SPEED = 2 * Settings.AI_SPEED / diff
-    print(Settings.PLAYER_SPEED)
-    print(Settings.AI_SPEED)
-    print(Settings.AIR_SPEED)
-    print(Settings.MISSILE_SPEED)
 
 
 def update_objects():
@@ -38,7 +43,6 @@ def update_objects():
     [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
      obj not in Settings.CARRIER_GROP]
     game_objects.cell_size = Settings.CELL_SIZE
-    calculate_speed()
     ALL_SPRITES_FOR_SURE.update()
 
 
@@ -195,6 +199,7 @@ def show_setting_screen(flag=True):
                         else:
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text(' ')
                             screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            move_window()
                         Settings.IS_FULLSCREEN = not Settings.IS_FULLSCREEN
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
@@ -221,12 +226,11 @@ def show_setting_screen(flag=True):
                         # объектов
                         if game_objects is not None:
                             update_objects()
-                        hwnd = win32gui.FindWindow(None, "CarrierOps")
+                        if Settings.P_HEIGHT != HEIGHT and \
+                                Settings.P_WIDTH != WIDTH:
+                            calculate_speed()
                         if not Settings.IS_FULLSCREEN:
-                            win32gui.MoveWindow(hwnd, (
-                                screensize[0] - WIDTH) // 2, (
-                                screensize[1] - HEIGHT) // 2,
-                                                WIDTH, HEIGHT, True)
+                            move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:

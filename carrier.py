@@ -52,3 +52,4 @@ class Carrier(pygame.sprite.Sprite):
                             top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.pos[1],
                            self.destination[0] - self.pos[0])
+        self.radius = Settings.CELL_SIZE * 4

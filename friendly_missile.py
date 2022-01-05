@@ -16,6 +16,7 @@ class MissileFriendly(pygame.sprite.Sprite):
                                                 player.rect.centery])
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
+        self.radius = Settings.CELL_SIZE * 2
         # Таймеры
         self.ticks = 10
         self.ticks2 = 0
@@ -25,7 +26,6 @@ class MissileFriendly(pygame.sprite.Sprite):
                 activation[0] - player.rect.centerx,
                 activation[1] - player.rect.centery)).normalize()
             self.visibility = visibility
-            self.radius = Settings.CELL_SIZE * 2
         except ValueError:
             self.total_ticks = 10
             self.alpha = pygame.math.Vector2(0, 0)
@@ -63,6 +63,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
         self.mask = pygame.mask.from_surface(self.image)
+        self.radius = Settings.CELL_SIZE * 2
         if not self.activated:
             try:
                 x, y = new_coords(self.activation[0] - self.pos[0],
