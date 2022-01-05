@@ -710,9 +710,12 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
-        calculate_speed()
-        Settings.NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
+        Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
             Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
+        Settings.NUM_OF_REPAIR_PARTS = 0
+        Settings.OIL_VOLUME = 100
+        Settings.NUM_OF_AIRCRAFT = 3
+        Settings.NUM_OF_MISSILES = 5
         health_bar = pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
@@ -868,6 +871,7 @@ if __name__ == '__main__':
     FPS = 60
 
     game_objects = None
+    calculate_speed()
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
