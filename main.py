@@ -638,8 +638,18 @@ class Run:
         self.destination_player[1] += camera.dy
 
         if not self.centered:
-            self.overall_shift_x += camera.dx
-            self.overall_shift_y += camera.dy
+            camera.overall_shift_x += camera.dx
+            camera.overall_shift_y += camera.dy
+        else:
+            for i in (Settings.PLAYER_AIRCRAFT, Settings.PLAYER_MISSILES,
+                      Settings.AI_AIRCRAFT, Settings.AI_MISSILES):
+                for j in i:
+                    try:
+                        j.destination[0] += camera.dx
+                        j.destination[1] += camera.dy
+                    except AttributeError:
+                        j.activation[0] += camera.dx
+                        j.activation[1] += camera.dy
         self.centered = False
 
     def main(self):
@@ -667,10 +677,11 @@ class Run:
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
                     if event.key == pygame.K_c:
-                        camera.dx += -self.overall_shift_x
-                        camera.dy += -self.overall_shift_y
-                        self.overall_shift_x = 0
-                        self.overall_shift_y = 0
+                        camera.dx = camera.dy = 0
+                        camera.dx += -camera.overall_shift_x
+                        camera.dy += -camera.overall_shift_y
+                        camera.overall_shift_x = 0
+                        camera.overall_shift_y = 0
                         self.centered = True
                     if event.key == pygame.K_UP:
                         camera.dy += 20
@@ -719,7 +730,7 @@ class Run:
                     camera.dy = 0
 
             screen.fill(DEEPSKYBLUE4)
-            screen.blit(self.water, (self.overall_shift_x, self.overall_shift_y))
+            #screen.blit(self.water, (self.overall_shift_x, self.overall_shift_y))
             self.fog_of_war()
             self.move(self.destination_player, self.player, screen)
             self.destination_ai()

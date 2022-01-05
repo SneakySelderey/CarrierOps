@@ -7,6 +7,8 @@ class Camera:
         """Зададим начальный сдвиг камеры"""
         self.dx = 0
         self.dy = 0
+        self.overall_shift_x = 0
+        self.overall_shift_y = 0
 
     def apply_rect(self, obj):
         """Сдвинуть объект на смещение камеры"""
