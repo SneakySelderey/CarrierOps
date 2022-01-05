@@ -4,6 +4,7 @@ import pygame.sprite
 from board import Board
 from friendly_missile import MissileFriendly
 from gui_elements import *
+import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
 from map_solomon import SolomonLand
@@ -81,23 +82,23 @@ def give_tooltip(num):
 
 def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
-    global SETTINGS_ELEMENTS, LOAD_ELEMENTS
     user_data_manager.clear_and_reset()
     bars_manager.clear_and_reset()
     [label.update_element() for label in LABELS]
     [element.update_element() for element in MENU_ELEMENTS.values()]
     for i in SETTINGS_ELEMENTS:
         if i == 'MUSIC':
-            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
+            gui_elements.SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
                 rect=LABELS[4].rect)
         elif i == 'EFFECTS':
-            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
+            gui_elements.SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
                 rect=LABELS[3].rect)
         else:
             try:
-                SETTINGS_ELEMENTS[i].update_element()
+                gui_elements.SETTINGS_ELEMENTS[i].update_element()
             except AttributeError:
-                SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
+                gui_elements.SETTINGS_ELEMENTS[i] = \
+                    SETTINGS_ELEMENTS[i].get_same()
     [element.update_element() for element in IN_GAME_ELEMENTS.values()]
     [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
     for i in LOAD_ELEMENTS:
@@ -111,13 +112,12 @@ def rebase_elements():
 
 def rebase_load_manager():
     """Функция для обновления элементов меню загрузки"""
-    global LOAD_ELEMENTS
     user_data_manager.clear_and_reset()
-    for i in LOAD_ELEMENTS:
+    for i in gui_elements.LOAD_ELEMENTS:
         try:
-            LOAD_ELEMENTS[i].update_element()
+            gui_elements.LOAD_ELEMENTS[i].update_element()
         except AttributeError:
-            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
+            gui_elements.LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
     [label.update_element() for label in LABELS]
 
 
@@ -434,11 +434,11 @@ def show_load_menu(from_main=True):
                 if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
                     rebase_load_manager()
                 if event.user_type == \
-                    pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
                     # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
                 if event.user_type == \
-                    pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
@@ -537,12 +537,17 @@ class Run:
         self.overall_shift_x = 0
         self.overall_shift_y = 0
         self.centered = False
-        self.list_all_sprites = [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
-                                 Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
-                                 Settings.AI_SPRITE, Settings.PLAYER_MISSILES, Settings.PLAYER_AIRCRAFT,
+        self.list_all_sprites = [Settings.BACKGROUND_MAP,
+                                 Settings.BASES_SPRITES,
+                                 Settings.PLAYER_SPRITE,
+                                 Settings.MOVE_POINT_SPRITE,
+                                 Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
+                                 Settings.PLAYER_AIRCRAFT,
                                  Settings.AI_MISSILES, Settings.AI_AIRCRAFT, 
-                                 [base.ico for base in self.board.bases if base.state not in ['player', 'ai']],
-                                 [base.bar for base in self.board.bases if base.state not in ['player', 'ai']]]
+                                 [base.ico for base in self.board.bases if
+                                  base.state not in ['player', 'ai']],
+                                 [base.bar for base in self.board.bases if
+                                  base.state not in ['player', 'ai']]]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -555,30 +560,6 @@ class Run:
         Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
             destination, True))
         TAKEOFF.play()
-
-    #def move(self, destination, game_obj, screen=None):
-    #    """Движание игрока или ИИ"""
-    #    dx, dy = destination
-    #    center = game_obj.rect.center
-
-    #    land = list(Settings.BACKGROUND_MAP)[0]
-    #    if pygame.sprite.collide_mask(game_obj, land):
-    #        N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
-    #        for i in N:
-    #            game_obj.rect.center = game_obj.rect.center[0] + i[0], \
-    #                                          game_obj.rect.center[1] + i[1]
-    #            if not pygame.sprite.collide_mask(game_obj, land):
-    #                break
-
-    #    game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
-    #    stop_x = game_obj.speedx == 0
-    #    game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
-    #    stop_y = game_obj.speedy == 0
-    #    if screen is not None and list(self.player.rect.center) != destination:
-    #        pygame.draw.circle(
-    #            screen, BLUE, (destination[0], destination[1]),
-    #            Settings.CELL_SIZE // 7)
-    #    return [stop_x, stop_y]
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -715,11 +696,12 @@ class Run:
         # обновляем положение всех спрайтов
         for group in self.list_all_sprites:
             for sprite in group:
-                if sprite in Settings.PLAYER_SPRITE or sprite in Settings.AI_SPRITE:
+                if sprite in set(Settings.PLAYER_AIRCRAFT) | set(
+                    Settings.AI_AIRCRAFT) | set(Settings.PLAYER_SPRITE) | set(
+                        Settings.AI_SPRITE):
                     camera.apply_aircraft(sprite)
-                elif sprite in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
-                    camera.apply_aircraft(sprite)
-                elif sprite in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
+                elif sprite in set(Settings.PLAYER_MISSILES) | set(
+                        Settings.AI_MISSILES):
                     camera.apply_missiles(sprite)
                 else:
                     camera.apply_rect(sprite)
@@ -755,13 +737,14 @@ class Run:
         Settings.OIL_VOLUME = 100
         Settings.NUM_OF_AIRCRAFT = 3
         Settings.NUM_OF_MISSILES = 5
-        health_bar = pygame_gui.elements.UIScreenSpaceHealthBar(
+        pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         camera.rebase()
+        Settings.ALL_SPRITES_FOR_SURE.update()
         self.centered = False
         while self.running:
             delta = clock.tick(FPS) / 1000.0
@@ -772,10 +755,8 @@ class Run:
                     if event.button == 1:
                         self.player.new_destination(event.pos)
                         self.destination_player = list(event.pos)
-                        land = list(Settings.BACKGROUND_MAP)[0]
-                        print(land.rect.collidepoint(*event.pos) and land.mask.get_at((event.pos[0] - land.rect.x, event.pos[1] - land.rect.y)))
                     if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
-                        Settings.OIL_VOLUME:
+                            Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
                         Settings.NUM_OF_AIRCRAFT -= 1
                         Settings.OIL_VOLUME -= 1
@@ -830,15 +811,14 @@ class Run:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
             self.camera_update()
-            Settings.BASES_SPRITES.update()
 
-            if pygame.mouse.get_pos()[
-                0] >= Settings.WIDTH - 50 and not arrow_pressed:
+            if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not \
+                    arrow_pressed:
                 camera.dx = -20
             elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
                 camera.dx = 20
-            elif pygame.mouse.get_pos()[
-                1] >= Settings.HEIGHT - 50 and not arrow_pressed:
+            elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not \
+                    arrow_pressed:
                 camera.dy = -20
             elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
                 camera.dy = 20
@@ -854,15 +834,15 @@ class Run:
                 self.resource_menu = False
             if self.menu:
                 # Получим код возврата от игрового меню
-                result = show_in_game_menu()
-                if result == 1:  # пользователь нажал на RESUME
+                res = show_in_game_menu()
+                if res == 1:  # пользователь нажал на RESUME
                     self.menu = False
-                if result == 2:  # Если нажал на MAIN MENU
+                if res == 2:  # Если нажал на MAIN MENU
                     self.running = False
                     return 2
-                if result == 3:  # Если нажал на LOAD SAVE
+                if res == 3:  # Если нажал на LOAD SAVE
                     show_load_menu(False)
-                if result == 4:  # Если нажал на SETTINGS
+                if res == 4:  # Если нажал на SETTINGS
                     show_setting_screen(False)
             else:
                 screen.fill(DEEPSKYBLUE4)
