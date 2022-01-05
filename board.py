@@ -1,7 +1,24 @@
 import pygame
 import Settings
 from base import Base, SuperBase
-from random import sample, randint, choice
+from random import sample, choice
+
+
+def check_collision(board):
+    """Функция для проверки коллизиции ячеек поля и суши"""
+    land = list(Settings.BACKGROUND_MAP)[0]
+    cell = board.cell_size
+    for i in board.cells:
+        to_check = [(i[0] * cell, i[1] + cell),
+                    ((i[0] + 1) * cell, (i[1] + 1) * cell),
+                    ((i[0] + 1) * cell, i[1] * cell),
+                    (i[0] * cell, (i[1] + 1) * cell),
+                    ((i[0] + 0.5) * cell, (i[1] + 0.5) * cell)]
+        if sum([1 if land.rect.collidepoint(point[0], point[1]) and
+                land.mask.get_at((point[0] - land.rect.x,
+                                  point[1] - land.rect.y)) else 0
+                for point in to_check]) > 2:
+            board.cells.remove(i)
 
 
 class Board:
@@ -26,6 +43,10 @@ class Board:
 
     def add_bases(self):
         """Функция для добавления баз"""
+        self.cell_size = Settings.CELL_SIZE
+        print(len(self.cells))
+        #check_collision(self)
+        print(len(self.cells))
         player_base, *bases, ai_base = sorted(sample(
             self.cells, Settings.NUM_OF_BASES + 2))
         Settings.PLAYER_START = player_base
@@ -41,14 +62,13 @@ class Board:
         else:
             base = SuperBase(x, y, mega[0], True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[0]
-        while land.rect.collidepoint(base.rect.centerx, base.rect.centery) \
-                and land.mask.get_at((base.rect.centerx - land.rect.x,
-                                      base.rect.centery - land.rect.y)):
-            a, b = choice(self.cells)
-            base.rect.center = (a + 0.5) * Settings.CELL_SIZE, \
-                               (b + 0.5) * Settings.CELL_SIZE
+        while pygame.sprite.collide_mask(land, base):
+            self.cells.remove((x, y))
+            x, y = choice(self.cells)
+            base.rect.center = (x + 0.5) * Settings.CELL_SIZE, \
+                               (y + 0.5) * Settings.CELL_SIZE
         try:
-            self.cells.remove((a, b))
+            self.cells.remove((x, y))
         except NameError:
             pass
         self.board[x][y] = base
@@ -62,10 +82,6 @@ class Board:
             y * self.cell_size + self.top, self.cell_size,
             self.cell_size), 1) for y in range(self.height)
          for x in range(self.width)]
-
-    def update(self):
-        """Обновление размера сетки"""
-        self.cell_size = Settings.CELL_SIZE
 
     def get_cell(self, mouse_pos):
         """Функция для определения ячейки, на которую нажал пользователь"""

@@ -773,7 +773,7 @@ class Run:
                         self.player.new_destination(event.pos)
                         self.destination_player = list(event.pos)
                         land = list(Settings.BACKGROUND_MAP)[0]
-                        land.mask = pygame.mask.from_surface(land.image)
+                        print(land.rect.collidepoint(*event.pos) and land.mask.get_at((event.pos[0] - land.rect.x, event.pos[1] - land.rect.y)))
                     if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
                         Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
@@ -870,7 +870,6 @@ class Run:
                     Settings.CELL_SIZE * self.board.width,
                     Settings.CELL_SIZE * self.board.height)),
                             (camera.overall_shift_x, camera.overall_shift_y))
-                self.board.update()
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -878,7 +877,6 @@ class Run:
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ICONS_GROUP.draw(screen)
-                help_surface.blit(screen, (0, 0))
 
                 if not self.player.stop:
                     pygame.draw.circle(
