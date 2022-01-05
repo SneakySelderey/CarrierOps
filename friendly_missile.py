@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
-    MISSILE_FRIENDLY, PLAYER_SPRITE, MISSILE_SPEED, PLAYER_MISSILES, \
+    MISSILE_FRIENDLY, PLAYER_SPRITE, PLAYER_MISSILES, \
     ALL_SPRITES_FOR_SURE
 import Settings
 
@@ -16,21 +16,24 @@ class MissileFriendly(pygame.sprite.Sprite):
                                                 player.rect.centery])
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
-        self.alpha = pygame.math.Vector2((
-            activation[0] - player.rect.centerx,
-            activation[1] - player.rect.centery)).normalize()
-        self.visibility = visibility
         self.radius = Settings.CELL_SIZE * 2
+        # Таймеры
+        self.ticks = 10
+        self.ticks2 = 0
+        self.total_ticks = 0
+        try:
+            self.alpha = pygame.math.Vector2((
+                activation[0] - player.rect.centerx,
+                activation[1] - player.rect.centery)).normalize()
+            self.visibility = visibility
+        except ValueError:
+            self.total_ticks = 10
+            self.alpha = pygame.math.Vector2(0, 0)
 
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
         self.activation = activation
-
-        # Таймеры
-        self.ticks = 10
-        self.ticks2 = 0
-        self.total_ticks = 0
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
@@ -39,7 +42,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.total_ticks += 0.02
 
         if self.pos != self.activation:
-            self.pos += self.alpha * MISSILE_SPEED
+            self.pos += self.alpha * Settings.MISSILE_SPEED
             self.rect.center = self.pos.x, self.pos.y
 
         if abs(self.activation[0] - self.rect.centerx) <= 10 and \
@@ -60,6 +63,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
         self.activation = new_coords(*self.activation)
         self.mask = pygame.mask.from_surface(self.image)
+        self.radius = Settings.CELL_SIZE * 2
         if not self.activated:
             try:
                 x, y = new_coords(self.activation[0] - self.pos[0],

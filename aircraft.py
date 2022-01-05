@@ -28,23 +28,24 @@ class AircraftFriendly(pygame.sprite.Sprite):
 
     def update(self):
         """Обновление координат самолета при полете"""
-        self.total_ticks += 1
+        if not self.delete:
+            self.total_ticks += 1
 
-        if self.pos != self.destination and not self.stop:
-            # Обновление кооординат (из полярнйо системы в декартову)
-            self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(self.alpha)
-            self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
-            self.rect.center = self.pos
+            if self.pos != self.destination and not self.stop:
+                # Обновление кооординат (из полярнйо системы в декартову)
+                self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(self.alpha)
+                self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
+                self.rect.center = self.pos
 
-        if abs(self.destination[0] - self.rect.centerx) <= 10 and \
-                abs(self.destination[1] - self.rect.centery) <= 10:
-            #  Если самолет достиг цели
-            self.stop = True
+            if abs(self.destination[0] - self.rect.centerx) <= 10 and \
+                    abs(self.destination[1] - self.rect.centery) <= 10:
+                #  Если самолет достиг цели
+                self.stop = True
 
-        if self.total_ticks >= 1500:
-            self.aircraft_return()
-        else:
-            self.aircraft_tracking()
+            if self.total_ticks >= 1500:
+                self.aircraft_return()
+            else:
+                self.aircraft_tracking()
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -56,6 +57,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = list(new_coords(*self.destination))
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
+        self.radius = Settings.CELL_SIZE * 3.5
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""
@@ -68,6 +70,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.destination = player.rect.centerx, player.rect.centery
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
+            Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
 
     def aircraft_tracking(self):

@@ -1,10 +1,7 @@
 from random import choice
 import sys
-import random
 import pygame.sprite
 from board import Board
-from player import Player
-from AI import AI
 from friendly_missile import MissileFriendly
 from gui_elements import *
 from aircraft import AircraftFriendly
@@ -12,7 +9,42 @@ from camera import Camera
 from map_solomon import SolomonLand
 from Settings import *
 import Settings
-from threading import Thread
+import pygame_gui
+from player import Player
+from AI import AI
+import win32gui
+
+
+def move_window():
+    """Функция для перемещения окна на середину экрана"""
+    hwnd = win32gui.FindWindow(None, "CarrierOps")
+    win32gui.MoveWindow(hwnd, (
+        screensize[0] - WIDTH) // 2, (
+                            screensize[1] - HEIGHT) // 2,
+                        WIDTH, HEIGHT, True)
+
+
+def calculate_speed():
+    """Функция для подсчета скорости движимых объектов после изменения
+    разрешения"""
+    diff = sum([Settings.P_WIDTH / Settings.WIDTH,
+                Settings.P_HEIGHT / Settings.HEIGHT])
+    Settings.PLAYER_SPEED = 2 * Settings.PLAYER_SPEED / diff
+    Settings.AIR_SPEED = 2 * Settings.AIR_SPEED / diff
+    Settings.MISSILE_SPEED = 2 * Settings.MISSILE_SPEED / diff
+    Settings.AI_SPEED = 2 * Settings.AI_SPEED / diff
+
+
+def update_objects():
+    """Функция для обновления координат игровых объектов при изменении
+    разрешения"""
+    [carrier.new_position(game_objects.board.cell_size,
+                          game_objects.board.top, game_objects.board.left)
+     for carrier in Settings.CARRIER_GROP]
+    [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
+     obj not in Settings.CARRIER_GROP]
+    game_objects.cell_size = Settings.CELL_SIZE
+    ALL_SPRITES_FOR_SURE.update()
 
 
 def delete_save(save):
@@ -37,27 +69,23 @@ def give_tooltip(num):
     """Функция для создания подсказки. Принимает номер подсказки"""
     if num == 1:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Сохранение не выбрано")
     elif num == 2:
         pygame_gui.elements.UITooltip(
-            manager=load_manager,
+            manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
 
 
 def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
-    global MENU_ELEMENTS, IN_GAME_ELEMENTS, SETTINGS_ELEMENTS, \
-        GAMEOVER_ELEMENTS, LABELS, LOAD_ELEMENTS
-    menu_manager.clear_and_reset()
-    settings_manager.clear_and_reset()
-    gameover_manager.clear_and_reset()
-    game_manager.clear_and_reset()
-    load_manager.clear_and_reset()
-    LABELS = [i.get_same() for i in LABELS]
-    MENU_ELEMENTS = {i: MENU_ELEMENTS[i].get_same() for i in MENU_ELEMENTS}
+    global SETTINGS_ELEMENTS, LOAD_ELEMENTS
+    user_data_manager.clear_and_reset()
+    bars_manager.clear_and_reset()
+    [label.update_element() for label in LABELS]
+    [element.update_element() for element in MENU_ELEMENTS.values()]
     for i in SETTINGS_ELEMENTS:
         if i == 'MUSIC':
             SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
@@ -66,22 +94,31 @@ def rebase_elements():
             SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
                 rect=LABELS[3].rect)
         else:
-            SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
-    IN_GAME_ELEMENTS = {i: IN_GAME_ELEMENTS[i].get_same() for i in
-                        IN_GAME_ELEMENTS}
-    GAMEOVER_ELEMENTS = {i: GAMEOVER_ELEMENTS[i].get_same() for i in
-                         GAMEOVER_ELEMENTS}
-    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
+            try:
+                SETTINGS_ELEMENTS[i].update_element()
+            except AttributeError:
+                SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same()
+    [element.update_element() for element in IN_GAME_ELEMENTS.values()]
+    [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
+    for i in LOAD_ELEMENTS:
+        try:
+            LOAD_ELEMENTS[i].update_element()
+        except AttributeError:
+            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
     GAMEOVER_GROUP.update()
     TITLE_GROUP.update()
 
 
 def rebase_load_manager():
     """Функция для обновления элементов меню загрузки"""
-    global LOAD_ELEMENTS, LABELS
-    load_manager.clear_and_reset()
-    LOAD_ELEMENTS = {i: LOAD_ELEMENTS[i].get_same() for i in LOAD_ELEMENTS}
-    LABELS = [i.get_same() for i in LABELS]
+    global LOAD_ELEMENTS
+    user_data_manager.clear_and_reset()
+    for i in LOAD_ELEMENTS:
+        try:
+            LOAD_ELEMENTS[i].update_element()
+        except AttributeError:
+            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
+    [label.update_element() for label in LABELS]
 
 
 def clear_sprite_groups():
@@ -110,7 +147,7 @@ def show_menu_screen():
     background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
     alpha = 130
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -136,21 +173,19 @@ def show_menu_screen():
         menu_manager.update(delta)
         menu_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
     global WIDTH, HEIGHT, help_surface, screen
     # Переменные для красивой картинки и эффекта затемнения
-    fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
     background2 = screen if not flag else pygame.transform.scale(
         MENU_BACKGROUND, (WIDTH, HEIGHT))
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -166,6 +201,7 @@ def show_setting_screen(flag=True):
                         else:
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text(' ')
                             screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            move_window()
                         Settings.IS_FULLSCREEN = not Settings.IS_FULLSCREEN
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
@@ -191,11 +227,12 @@ def show_setting_screen(flag=True):
                         # Если игра уже начата, обновим координаты всех
                         # объектов
                         if game_objects is not None:
-                            [i.new_position() for i in ALL_SPRITES_FOR_SURE]
-                            game_objects.destination_player = new_coords(
-                                *game_objects.destination_player)
-                            game_objects.cell_size = Settings.CELL_SIZE
-                            ALL_SPRITES.update()
+                            update_objects()
+                        if Settings.P_HEIGHT != HEIGHT and \
+                                Settings.P_WIDTH != WIDTH:
+                            calculate_speed()
+                        if not Settings.IS_FULLSCREEN:
+                            move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                     # Изменение громкости звуков или музыки
                     if event.ui_element == SETTINGS_ELEMENTS['EFFECTS']:
@@ -210,6 +247,7 @@ def show_setting_screen(flag=True):
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
             settings_manager.process_events(event)
+            bars_manager.process_events(event)
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -225,8 +263,9 @@ def show_setting_screen(flag=True):
         # Обновление менеджера
         settings_manager.update(delta)
         settings_manager.draw_ui(screen)
+        bars_manager.update(delta)
+        bars_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(fps)
 
 
 def show_gameover_screen():
@@ -239,7 +278,7 @@ def show_gameover_screen():
     pygame.display.flip()
     clock.tick(5000)
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -264,17 +303,16 @@ def show_gameover_screen():
         gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
     # Переменные для создания красивой картинки
     help_surface_2 = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    help_surface_2.blit(screen, (0, 0))
+    help_surface_2.blit(help_surface, (0, 0))
     alpha = 0
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -301,7 +339,6 @@ def show_in_game_menu():
         game_manager.draw_ui(screen)
         game_manager.update(delta)
         pygame.display.flip()
-        clock.tick(FPS)
 
 
 def show_slides():
@@ -353,7 +390,6 @@ def show_slides():
 def show_load_menu(from_main=True):
     """Функция для отрисовки и взаимодействия с меню сохранения и загрузки"""
     # Переменные для создания красивой картинки
-    fps = 240
     alpha_up = 0
     alpha_down = 255
     background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
@@ -362,7 +398,7 @@ def show_load_menu(from_main=True):
     # Переменная для выбранного элемента в списке
     item_selected = None
     while True:
-        delta = clock.tick(FPS) / 1000.0
+        delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
@@ -391,24 +427,25 @@ def show_load_menu(from_main=True):
                             rebase_load_manager()
                 if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and \
-                            from_main:
+                        from_main:
                         # Выведем сообщение, если пользователь решил
                         # сохраниться, не начав игру
                         give_tooltip(2)
                 if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
                     rebase_load_manager()
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                    pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
                     # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                    pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return 1
             load_manager.process_events(event)
+            user_data_manager.process_events(event)
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -424,12 +461,54 @@ def show_load_menu(from_main=True):
         # Обновление менеджера
         load_manager.update(delta)
         load_manager.draw_ui(screen)
+        user_data_manager.update(delta)
+        user_data_manager.draw_ui(screen)
         pygame.display.flip()
-        clock.tick(fps)
+
+
+def show_resources_menu():
+    """Функция для отрисовки меню ресурсов"""
+    # Переменные для создания красивой картинки
+    alpha_up = 0
+    alpha_down = 255
+    background = pygame.transform.scale(SAVE_LOAD_BACKGROUND, (WIDTH, HEIGHT))
+    background2 = screen
+    while True:
+        delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r or event.key == pygame.K_ESCAPE:
+                    return 1
+            resource_manager.process_events(event)
+        # Создание красивой картинки и эффекта затемнения
+        help_surface.blit(screen, (0, 0))
+        if alpha_up < 255:
+            help_surface.fill((0, 0, 0, alpha_up))
+            background2.set_alpha(255 - alpha_up)
+        alpha_up = min(alpha_up + 15, 255)
+        if alpha_up == 255:
+            alpha_down = max(alpha_down - 15, 150)
+            screen.blit(background, (0, 0))
+            help_surface.fill((0, 0, 0, alpha_down))
+        screen.blit(background2, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        [i.update_text(j) for i, j in zip(
+            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
+                Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
+                Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
+        Settings.RESOURCES_BASE.update()
+        Settings.RESOURCES_BASE.draw(screen)
+        # Обновление менеджера
+        resource_manager.update(delta)
+        resource_manager.draw_ui(screen)
+        pygame.display.flip()
 
 
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
+
     def __init__(self):
         self.cell_size = Settings.CELL_SIZE
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
@@ -443,26 +522,31 @@ class Run:
         self.ai_detected = False
         self.defeat = False
         self.menu = False
+        self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
 
-        self.overall_shift_x = 0
-        self.overall_shift_y = 0
-        self.centered = False
-        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
-
-        self.solomon_land = SolomonLand(True)
-        self.player = Player(True)
+        #self.board.add_bases()
+        self.player = Player()
         self.destination_player = list(self.player.rect.center)
-        self.ai = AI(False)
+        self.ai = AI()
         for i in range(10):
             x = random.randint(0, self.cells_x - 1)
             y = random.randint(0, self.cells_y - 1)
             self.board.add_base(x, y)
+        self.friendly_missiles = []
+        self.hostile_missiles = []
+        self.friendly_aircraft = []
+        self.overall_shift_x = 0
+        self.overall_shift_y = 0
+        self.centered = False
+        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
         self.list_all_sprites = [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
                                  Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
                                  Settings.AI_SPRITE, Settings.PLAYER_MISSILES, Settings.PLAYER_AIRCRAFT,
-                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT]
+                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT, 
+                                 [base.ico for base in self.board.bases if base.state not in ['player', 'ai']],
+                                 [base.bar for base in self.board.bases if base.state not in ['player', 'ai']]]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -476,29 +560,29 @@ class Run:
             destination, True))
         TAKEOFF.play()
 
-    def move(self, destination, game_obj, screen=None):
-        """Движание игрока или ИИ"""
-        dx, dy = destination
-        center = game_obj.rect.center
+    #def move(self, destination, game_obj, screen=None):
+    #    """Движание игрока или ИИ"""
+    #    dx, dy = destination
+    #    center = game_obj.rect.center
 
-        land = list(Settings.BACKGROUND_MAP)[0]
-        if pygame.sprite.collide_mask(game_obj, land):
-            N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
-            for i in N:
-                game_obj.rect.center = game_obj.rect.center[0] + i[0], \
-                                              game_obj.rect.center[1] + i[1]
-                if not pygame.sprite.collide_mask(game_obj, land):
-                    break
+    #    land = list(Settings.BACKGROUND_MAP)[0]
+    #    if pygame.sprite.collide_mask(game_obj, land):
+    #        N = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2), (2, -2)]
+    #        for i in N:
+    #            game_obj.rect.center = game_obj.rect.center[0] + i[0], \
+    #                                          game_obj.rect.center[1] + i[1]
+    #            if not pygame.sprite.collide_mask(game_obj, land):
+    #                break
 
-        game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
-        stop_x = game_obj.speedx == 0
-        game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
-        stop_y = game_obj.speedy == 0
-        if screen is not None and list(self.player.rect.center) != destination:
-            pygame.draw.circle(
-                screen, BLUE, (destination[0], destination[1]),
-                Settings.CELL_SIZE // 7)
-        return [stop_x, stop_y]
+    #    game_obj.speedx = 1 if dx > center[0] else -1 if dx < center[0] else 0
+    #    stop_x = game_obj.speedx == 0
+    #    game_obj.speedy = 1 if dy > center[1] else -1 if dy < center[1] else 0
+    #    stop_y = game_obj.speedy == 0
+    #    if screen is not None and list(self.player.rect.center) != destination:
+    #        pygame.draw.circle(
+    #            screen, BLUE, (destination[0], destination[1]),
+    #            Settings.CELL_SIZE // 7)
+    #    return [stop_x, stop_y]
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -507,13 +591,13 @@ class Run:
         ai_pos_y = self.ai.rect.centery // self.cell_size
         for base in self.board.bases:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if (base.x, base.y) not in Settings.HOSTILE_BASES:
+            if base.start_of_capture != 2 and base.state != 'ai':
                 distance.append(
                     (dist, [base.rect.centerx, base.rect.centery]))
         try:
             destination_ai = min(distance)
             idx = distance.index(destination_ai)
-            self.move(distance[idx][1], self.ai)
+            self.ai.new_destination(distance[idx][1])
         except ValueError:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
@@ -528,89 +612,132 @@ class Run:
          for group in self.list_all_sprites]
 
         # отрисовка спрайта противника
-        for player in Settings.PLAYER_SPRITE:
-            for ai in Settings.AI_SPRITE:
+        player = list(Settings.PLAYER_SPRITE)[0]
+        for ai in Settings.AI_SPRITE:
 
-                # проверка на обнаружение ракетой
-                missile_tracking = False
-                for missile in Settings.PLAYER_MISSILES:
-                    # если цель в радиусе обнаружения ракеты, то
-                    # поднимается соответствующий флаг
-                    missile_x, missile_y = missile.rect.center
-                    # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
-                    if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
-                        missile_tracking = True
-                    # если ракета исчерпала свой ресурс, она падает в море и
-                    # спрайт удаляется
-                    if missile.total_ticks >= 10:
-                        Settings.PLAYER_MISSILES.remove(missile)
-                        Settings.ALL_SPRITES.remove(missile)
-                        Settings.ALL_SPRITES_FOR_SURE.remove(missile)
-                    # отрисовка радиуса обнаружения ракеты
-                    if not missile.activated:
-                        missile.activation = list(missile.activation)
-                        missile.activation[0] += camera.dx
-                        missile.activation[1] += camera.dy
-                        pygame.draw.line(screen, BLUE,
+            # проверка на обнаружение ракетой
+            missile_tracking = False
+            for missile in self.friendly_missiles:
+                # если цель в радиусе обнаружения ракеты, то
+                # поднимается соответствующий флаг
+                missile_x, missile_y = missile.rect.center
+                # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
+                if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
+                    missile_tracking = True
+                # если ракета исчерпала свой ресурс, она падает в море и
+                # спрайт удаляется
+                if missile.total_ticks >= 10:
+                    self.friendly_missiles.remove(missile)
+                    Settings.ALL_SPRITES.remove(missile)
+                    Settings.ALL_SPRITES_FOR_SURE.remove(missile)
+                # отрисовка радиуса обнаружения ракеты
+                if not missile.activated:
+                    missile.activation = list(missile.activation)
+                    missile.activation[0] += camera.dx
+                    missile.activation[1] += camera.dy
+                    pygame.draw.line(screen, BLUE,
                                          (missile_x, missile_y),
                                          (missile.activation[0],
                                           missile.activation[1]))
-                    pygame.draw.circle(screen, BLUE,
-                                       (missile_x, missile_y),
-                                       Settings.CELL_SIZE * 2, 1)
+                pygame.draw.circle(screen, BLUE,
+                                   (missile_x, missile_y),
+                                   Settings.CELL_SIZE * 2, 1)
+        
 
                 # проверка на обнаружение самолетом
-                air_tracking = False
-                for aircraft in Settings.PLAYER_AIRCRAFT:
-                    air_x, air_y = aircraft.rect.center
-                    # если цель в радиусе обнаружения самолета, то
-                    # поднимается соответствующий флаг
-                    # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
-                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
-                        air_tracking = True
-                    # если самолет исчерпала свой ресурс, он возвращается на авианосец
-                    if aircraft.delete:
-                        Settings.PLAYER_AIRCRAFT.remove(aircraft)
-                        Settings.ALL_SPRITES.remove(aircraft)
-                        Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
-                    # отрисовка радиуса обнаружения самолета
-                    aircraft.destination = list(aircraft.destination)
-                    aircraft.destination[0] += camera.dx
-                    aircraft.destination[1] += camera.dy
-                    pygame.draw.line(screen, BLUE,
-                                     (air_x, air_y),
-                                     (aircraft.destination[0],
-                                      aircraft.destination[1]))
-                    pygame.draw.circle(screen, BLUE,
-                                       (air_x, air_y),
-                                       Settings.CELL_SIZE * 3.5, 1)
+            air_tracking = False
+            for aircraft in Settings.PLAYER_AIRCRAFT:
+                air_x, air_y = aircraft.rect.center
+                # если цель в радиусе обнаружения самолета, то
+                # поднимается соответствующий флаг
+                # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
+                    air_tracking = True
+                # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                if aircraft.delete:
+                    Settings.PLAYER_AIRCRAFT.remove(aircraft)
+                    Settings.ALL_SPRITES.remove(aircraft)
+                    Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
+                # отрисовка радиуса обнаружения самолета
+                aircraft.destination = list(aircraft.destination)
+                aircraft.destination[0] += camera.dx
+                aircraft.destination[1] += camera.dy
+                pygame.draw.line(screen, BLUE,
+                                 (missile_x, missile_y),
+                                 (missile.activation[0],
+                                  missile.activation[1]))
+                pygame.draw.circle(screen, BLUE,
+                                   (missile_x, missile_y),
+                                   Settings.CELL_SIZE * 2, 1)
 
-                # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-                # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-                if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or missile_tracking or air_tracking:
-                    self.ai.visibility = True
-                    pygame.draw.circle(screen, RED, (ai_x, ai_y), Settings.CELL_SIZE * 4, 1)
-                    self.ai_detected = True
+            # проверка на обнаружение самолетом
+            air_tracking = False
+            for aircraft in self.friendly_aircraft:
+                air_x, air_y = aircraft.rect.center
+                # если цель в радиусе обнаружения самолета, то
+                # поднимается соответствующий флаг
+                # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
+                    air_tracking = True
+                # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                if aircraft.delete:
+                    self.friendly_aircraft.remove(aircraft)
+                    Settings.ALL_SPRITES.remove(aircraft)
+                    Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
+                # отрисовка радиуса обнаружения самолета
+                aircraft.destination = list(aircraft.destination)
+                aircraft.destination[0] += camera.dx
+                aircraft.destination[1] += camera.dy
+                pygame.draw.line(screen, BLUE,
+                                 (air_x, air_y),
+                                 (aircraft.destination[0],
+                                  aircraft.destination[1]))
+                pygame.draw.circle(screen, BLUE,
+                                   (air_x, air_y),
+                                   Settings.CELL_SIZE * 3.5, 1)
+
+            # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
+            # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
+            if pygame.sprite.collide_circle_ratio(0.5)(player,
+                                                       ai) or missile_tracking or air_tracking:
+                self.ai.visibility = True
+                pygame.draw.circle(screen, RED, (ai_x, ai_y),
+                                   Settings.CELL_SIZE * 4, 1)
+                self.ai_detected = True
+                self.play_contact_lost = True
+                if self.play_new_contact:
+                    if missile_tracking:
+                        WEAPON_ACQUIRE.play()
+                    else:
+                        NEW_CONTACT.play()
+                    self.play_new_contact = False
                     self.play_contact_lost = True
-                    if self.play_new_contact:
-                        if missile_tracking:
-                            WEAPON_ACQUIRE.play()
-                        else:
-                            NEW_CONTACT.play()
-                        self.play_new_contact = False
-                        self.play_contact_lost = True
-                        Settings.IS_PAUSE = True
-                        Settings.ALL_SPRITES.draw(screen)
+                    Settings.IS_PAUSE = True
+                    Settings.ALL_SPRITES.draw(screen)
 
-                # противник прячется в тумане войны
-                elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) and not missile_tracking and \
-                        not air_tracking:
-                    self.ai.visibility = False
-                    self.ai_detected = False
-                    self.play_new_contact = True
-                    if self.play_contact_lost:
-                        CONTACT_LOST.play()
-                        self.play_contact_lost = False
+            # противник прячется в тумане войны
+            elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
+                    and not missile_tracking and not air_tracking:
+                self.ai.visibility = False
+                self.ai_detected = False
+                self.play_new_contact = True
+                if self.play_contact_lost:
+                    CONTACT_LOST.play()
+                    self.play_contact_lost = False
+
+        for base in self.board.bases:
+                base.bar.visibility = False
+                if base.start_of_capture in [0, 1] or \
+                        pygame.sprite.collide_circle_ratio(0.5)(player, base):
+                    base.bar.visibility = True
+                for aircraft in self.friendly_aircraft:
+                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
+                        base.bar.visibility = True
+                for missile in self.friendly_missiles:
+                    if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
+                        base.bar.visibility = True
+                if base.bar.visibility and base.state == 'ai':
+                    base.visibility = True
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
@@ -622,7 +749,9 @@ class Run:
         # обновляем положение всех спрайтов
         for group in self.list_all_sprites:
             for sprite in group:
-                if sprite in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
+                if sprite in Settings.PLAYER_SPRITE or sprite in Settings.AI_SPRITE:
+                    camera.apply_aircraft(sprite)
+                elif sprite in (Settings.PLAYER_AIRCRAFT or Settings.AI_AIRCRAFT):
                     camera.apply_aircraft(sprite)
                 elif sprite in (Settings.PLAYER_MISSILES or Settings.AI_MISSILES):
                     camera.apply_missiles(sprite)
@@ -630,9 +759,10 @@ class Run:
                     camera.apply_rect(sprite)
         self.board.top += camera.dy
         self.board.left += camera.dx
-        self.destination_player = list(self.destination_player)
-        self.destination_player[0] += camera.dx
-        self.destination_player[1] += camera.dy
+        self.player.destination[0] += camera.dx
+        self.player.destination[1] += camera.dy
+        self.ai.destination[0] += camera.dx
+        self.ai.destination[1] += camera.dy
 
         if not self.centered:
             camera.overall_shift_x += camera.dx
@@ -652,27 +782,46 @@ class Run:
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
-        alpha_menu = 0
         arrow_pressed = False
+        Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
+            Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
+        Settings.NUM_OF_REPAIR_PARTS = 0
+        Settings.OIL_VOLUME = 100
+        Settings.NUM_OF_AIRCRAFT = 3
+        Settings.NUM_OF_MISSILES = 5
+        health_bar = pygame_gui.elements.UIScreenSpaceHealthBar(
+            relative_rect=pygame.Rect(10, 13, 200, 30),
+            manager=campaign_manager,
+            sprite_to_monitor=list(PLAYER_SPRITE)[0]
+        )
+        pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         self.centered = False
         while self.running:
+            delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     terminate()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.player.new_destination(event.pos)
                         self.destination_player = list(event.pos)
                         land = list(Settings.BACKGROUND_MAP)[0]
                         land.mask = pygame.mask.from_surface(land.image)
-                    if event.button == 2:
+                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
+                        Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
-                    if event.button == 3:
+                        Settings.NUM_OF_AIRCRAFT -= 1
+                        Settings.OIL_VOLUME -= 1
+                    if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
+                        Settings.NUM_OF_MISSILES -= 1
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
                     if event.key == pygame.K_ESCAPE:
                         self.menu = not self.menu
+                    if event.key == pygame.K_r:
+                        self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.dx = camera.dy = 0
                         camera.dx += -camera.overall_shift_x
@@ -709,15 +858,20 @@ class Run:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/'
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
+                campaign_manager.process_events(event)
+                if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
+                    Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
             thread2 = Thread(target=game_objects.camera_update(), args=())
             thread2.start()
 
-            if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not arrow_pressed:
+            if pygame.mouse.get_pos()[
+                0] >= Settings.WIDTH - 50 and not arrow_pressed:
                 camera.dx = -20
             elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
                 camera.dx = 20
-            elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not arrow_pressed:
+            elif pygame.mouse.get_pos()[
+                1] >= Settings.HEIGHT - 50 and not arrow_pressed:
                 camera.dy = -20
             elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
                 camera.dy = 20
@@ -747,6 +901,10 @@ class Run:
                 text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                 screen.blit(text_pause, text_pause.get_rect(
                     center=(WIDTH // 2, HEIGHT // 2)))
+                
+            if self.resource_menu:
+                show_resources_menu()
+                self.resource_menu = False
             if self.menu:
                 # Получим код возврата от игрового меню
                 result = show_in_game_menu()
@@ -757,18 +915,45 @@ class Run:
                     return 2
                 if result == 3:  # Если нажал на LOAD SAVE
                     show_load_menu(False)
-                    alpha_menu = 200
                 if result == 4:  # Если нажал на SETTINGS
                     show_setting_screen(False)
-                    alpha_menu = 200
-            if alpha == 255:
-                self.running = False
-            if self.defeat:
-                alpha = min(alpha + 10, 255)
-            if alpha_menu != 0:
-                alpha_menu = max(alpha_menu - 20, 0)
-            clock.tick(FPS)
-            pygame.display.flip()
+            else:
+                screen.fill(GRAY5)
+                self.board.update()
+                self.board.render(screen)
+                [capt.update_text() for capt in CAPTIONS]
+                Settings.ALL_SPRITES.draw(screen)
+                Settings.ICONS_GROUP.draw(screen)
+                self.destination_ai()
+                self.fog_of_war()
+
+                help_surface.blit(screen, (0, 0))
+
+                if not self.player.stop:
+                    pygame.draw.circle(
+                        screen, BLUE, (self.player.destination[0],
+                                       self.player.destination[1]),
+                        Settings.CELL_SIZE // 7)
+
+                if not (Settings.IS_PAUSE or self.defeat or self.menu or
+                        self.resource_menu):
+                    Settings.ALL_SPRITES.update()
+                    if not self.ai_detected:
+                        self.ai.update()
+                if Settings.IS_PAUSE:
+                    text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
+                    screen.blit(text_pause, text_pause.get_rect(
+                        center=(WIDTH // 2, HEIGHT // 2)))
+
+                if alpha == 255:
+                    self.running = False
+                if self.defeat:
+                    alpha = min(alpha + 10, 255)
+
+                campaign_manager.update(delta)
+                campaign_manager.draw_ui(screen)
+
+                pygame.display.flip()
 
         # После поражения
         while alpha > 0:
@@ -794,6 +979,7 @@ if __name__ == '__main__':
     FPS = 60
 
     game_objects = None
+    calculate_speed()
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
@@ -836,4 +1022,3 @@ if __name__ == '__main__':
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
-

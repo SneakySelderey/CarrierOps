@@ -1,5 +1,6 @@
 from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, \
-    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP
+    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP, ICONS_GROUP, PLANE_ICON, \
+    MISSILE_ICON, OIL_ICON, GEAR_ICON, RESOURCES_BASE
 import pygame
 import pygame_gui
 import Settings
@@ -31,7 +32,7 @@ class OptionList(pygame_gui.elements.UISelectionList):
 
 class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
     """Класс горизонтального ползунка"""
-    def __init__(self, start, end, default, rect, pos_w, d, manager,
+    def __init__(self, default, rect, pos_w, d, manager,
                  relative_to_label):
         if relative_to_label == 'right':
             slider_rect = pygame.Rect(rect.topright[0] + d,
@@ -41,9 +42,8 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
             slider_rect = pygame.Rect(rect.topleft[0] - d,
                                       rect.topleft[1], Settings.WIDTH * pos_w,
                                       rect.height)
-        super().__init__(value_range=(start, end), start_value=default,
+        super().__init__(value_range=(0, 100), start_value=default,
                          manager=manager, relative_rect=slider_rect)
-        self.v_range = range(start, end + 1)
         self.default = default
         self.pos_w = pos_w
         self.d = d
@@ -51,13 +51,11 @@ class HorizontalSlider(pygame_gui.elements.UIHorizontalSlider):
         self.label_rect = rect
         self.manager = manager
 
-    def get_same(self, manager=None, rect=None):
+    def get_same(self, rect=None):
         """Функция для получения идентичного ползунка"""
-        manager = self.manager if manager is None else manager
         rect = self.label_rect if rect is None else rect
-        return HorizontalSlider(self.v_range[0], self.v_range[-1],
-                                self.default, rect, self.pos_w,
-                                self.d, manager, self.relative_to_label)
+        return HorizontalSlider(self.get_current_value(), rect, self.pos_w,
+                                self.d, self.manager, self.relative_to_label)
 
 
 class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
@@ -80,11 +78,10 @@ class WindowSizesMenu(pygame_gui.elements.UIDropDownMenu):
                          starting_option=start,
                          relative_rect=max_scr_rect)
 
-    def get_same(self, manager=None):
-        """Функция для полученяи идентичногго выпадающего спсика"""
-        manager = self.manager if manager is None else manager
-        return WindowSizesMenu(self.pos[0], self.pos[1], self.d, manager,
-                               f'{Settings.WIDTH}X{Settings.HEIGHT}')
+    def update_element(self):
+        """"Функция для обновления выпадающего меню"""
+        self.set_relative_position((Settings.WIDTH * self.pos[0],
+                                   Settings.HEIGHT * self.pos[1]))
 
 
 class Label(pygame_gui.elements.UILabel):
@@ -119,11 +116,25 @@ class Label(pygame_gui.elements.UILabel):
             super().__init__(text=title, relative_rect=rect, manager=manager,
                              object_id=obj_id)
 
-    def get_same(self, manager=None):
-        """Функция для получения идентичной метки"""
-        manager = self.manager if manager is None else manager
-        return Label(self.font_size, self.title, self.pos[0], self.pos[1],
-                     manager, self.obj_id, self.place)
+    def update_element(self):
+        """Функция для обновления положения метки"""
+        rect = self.rect
+        pos = Settings.WIDTH * self.pos[0], Settings.HEIGHT * self.pos[1]
+        if self.place == 'center':
+            rect.center = pos
+        elif self.place == 'topleft':
+            rect.topleft = pos
+        elif self.place == 'topright':
+            rect.topright = pos
+        elif self.place == 'bottomleft':
+            rect.bottomleft = pos
+        else:
+            rect.bottomright = pos
+        self.set_relative_position(rect.topleft)
+
+    def update_text(self, txt):
+        """Функция для утсановки нового текста"""
+        self.set_text(str(txt))
 
 
 class Button(pygame_gui.elements.UIButton):
@@ -145,6 +156,13 @@ class Button(pygame_gui.elements.UIButton):
         else:
             super().__init__(relative_rect=rect, text=title, manager=manager,
                              object_id=obj_id)
+
+    def update_element(self, pos=None):
+        """Функция для обновления положения кнопки"""
+        rect = self.rect
+        pos1, pos2 = self.pos[0], self.pos[1] if pos is None else pos
+        rect.center = Settings.WIDTH * pos1, Settings.HEIGHT * pos2
+        self.set_relative_position(rect.topleft)
 
     def get_same(self, manager=None, pos1=None, pos2=None):
         """Функция для получения идентичной кнопки"""
@@ -189,17 +207,80 @@ class BasesLost(pygame.sprite.Sprite):
             0.375 * Settings.HEIGHT)
 
 
+class Icon(pygame.sprite.Sprite):
+    """Класс для иконок ресурсов"""
+    def __init__(self, image, pos, group):
+        """Инициализация. Принимает изрбражениеи его положение на экране"""
+        super().__init__(group)
+        self.image = image
+        self.rect = self.image.get_rect(center=(
+            Settings.WIDTH * pos[0], Settings.HEIGHT * pos[1]))
+        self.pos = pos
+
+    def update(self):
+        """Функция обновления положения иконки"""
+        self.rect.center = (Settings.WIDTH * self.pos[0],
+                            Settings.HEIGHT * self.pos[1])
+
+
+class IconText(pygame_gui.elements.UILabel):
+    """Класс для подписи к иконке"""
+    def __init__(self, icon, txt, manager):
+        """Инициализация. Принимает иконку, рядом с котрой должна быть
+        подпись и текст"""
+        self.pos = Settings.WIDTH / (icon.rect.topright[0] + 10), \
+                   Settings.HEIGHT / (icon.rect.topright[1] + 15)
+        txt = f'{txt}  ' if icon != OIL else f'{txt}/100'
+        text = pygame.font.Font('data/font/Teletactile.ttf', 18).render(
+            str(txt), True, WHITE)
+        rect = text.get_rect(topleft=(icon.rect.topright[0] + 10,
+                                      icon.rect.topright[1] + 12))
+        self.ico = icon
+        super().__init__(manager=manager, relative_rect=rect,
+                         text=str(txt), object_id='caption')
+
+    def update_element(self):
+        """Функция для обновления положения подписи"""
+        self.set_relative_position((Settings.WIDTH * self.pos[0],
+                                    Settings.HEIGHT * self.pos[1]))
+
+    def update_text(self):
+        """Функция для обновления текста подписи"""
+        text = Settings.NUM_OF_AIRCRAFT if self.ico == AIRCRAFT else \
+            Settings.NUM_OF_MISSILES if self.ico == MISSILES else \
+            f'{Settings.OIL_VOLUME}/100'
+        self.set_text(str(text))
+
+
 # Создание менеджеров
-menu_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
-gameover_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                        'data/system/settings.json')
-game_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
-settings_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                        'data/system/settings.json')
-load_manager = pygame_gui.UIManager((Settings.WIDTH, Settings.HEIGHT),
-                                    'data/system/settings.json')
+menu_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+gameover_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+game_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+settings_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+load_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+user_data_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+bars_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+campaign_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+resource_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
+
 
 # Создание элементов интерфейса
 QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
@@ -226,10 +307,10 @@ EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
 
 OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
 DROP_DOWN_MENU = WindowSizesMenu(0.61, 0.43, 15, settings_manager)
-MUSIC_BAR = HorizontalSlider(0, 100, 20, MUSIC_LABEL.rect, 0.16, 40,
-                             settings_manager, 'right')
-EFFECT_BAR = HorizontalSlider(0, 100, 100, EFFECTS_LABEL.rect, 0.16, 30,
-                              settings_manager, 'right')
+MUSIC_BAR = HorizontalSlider(20, MUSIC_LABEL.rect, 0.16, 40,
+                             bars_manager, 'right')
+EFFECT_BAR = HorizontalSlider(100, EFFECTS_LABEL.rect, 0.16, 30,
+                              bars_manager, 'right')
 FULLSCREEN_LABEL = Label(24, 'FULLSCREEN', 0.6, 0.2,
                          settings_manager, 'option', 'topleft')
 FULLSCREEN_BUTTON = Button(' ', 0.66, 0.27, 5, settings_manager,
@@ -239,12 +320,46 @@ LOAD_LABEL = Label(36, 'SAVE AND LOAD', 0.5, 0.1, load_manager, 'settings',
 TO_SAVE_BUTTON = Button('SAVE', 0.7, 0.35, 15, load_manager, 'stable_btn')
 TO_LOAD_BUTTON = Button('LOAD', 0.7, 0.45, 15, load_manager, 'stable_btn')
 TO_DELETE_BUTTON = Button('DELETE', 0.7, 0.55, 15, load_manager, 'stable_btn')
-USERS_LIST = OptionList(0.1, 0.25, load_manager)
+USERS_LIST = OptionList(0.1, 0.25, user_data_manager)
 OK_BUTTON_LOAD = Button('OK', 0.5, 0.9, 10, load_manager)
-
+RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
+                        resource_manager, 'settings', 'center')
+BASES_LOST = BasesLost()
+TITLE = Title()
+AIRCRAFT = Icon(PLANE_ICON, (0.20, 0.04), ICONS_GROUP)
+MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
+#GEARS = Icon(GEAR_ICON, (0.34, 0.04), ICONS_GROUP)
+OIL = Icon(OIL_ICON, (0.34, 0.04), ICONS_GROUP)
+AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT, campaign_manager)
+MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES, campaign_manager)
+#GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS, campaign_manager)
+OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME, campaign_manager)
+AIRCRAFT_BASE = Icon(PLANE_ICON, (0.12, 0.2), RESOURCES_BASE)
+MISSILES_BASE = Icon(MISSILE_ICON, (0.12, 0.4), RESOURCES_BASE)
+GEARS_BASE = Icon(GEAR_ICON, (0.12, 0.8), RESOURCES_BASE)
+OIL_BASE = Icon(OIL_ICON, (0.12, 0.6), RESOURCES_BASE)
+AIRCRAFT_BASE_CAPT = Label(24, 'AIRCRAFT', 0.3, 0.2,
+                           resource_manager, 'option', 'center')
+MISSILES_BASE_CAPT = Label(24, 'MISSILES', 0.3, 0.4,
+                           resource_manager, 'option', 'center')
+GEARS_BASE_CAPT = Label(24, 'REPAIR PARTS', 0.3, 0.8,
+                        resource_manager, 'option', 'center')
+OIL_BASE_CAPT = Label(24, 'OIL VOLUME', 0.3, 0.6,
+                      resource_manager, 'option', 'center')
+AIR_NUM = Label(24, f'  {Settings.BASE_NUM_OF_AIRCRAFT}', 0.5, 0.2,
+                resource_manager, 'option', 'center')
+MIS_NUM = Label(24, f'  {Settings.BASE_NUM_OF_MISSILES}', 0.5, 0.4,
+                resource_manager, 'option', 'center')
+OIL_NUM = Label(24, f'  {Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
+                resource_manager, 'option', 'center')
+REP_NUM = Label(24, f'  {Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
+                resource_manager, 'option', 'center')
+CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
-          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL]
+          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL, RESOURCES_LABEL,
+          AIRCRAFT_BASE_CAPT, MISSILES_BASE_CAPT, GEARS_BASE_CAPT,
+          OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
@@ -257,5 +372,3 @@ SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
 LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
                  'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON,
                  'OK': OK_BUTTON_LOAD}
-BASES_LOST = BasesLost()
-TITLE = Title()

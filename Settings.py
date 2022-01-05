@@ -2,6 +2,19 @@ import pygame
 import ctypes
 import os
 import sqlite3
+from random import random
+
+
+def random_resource_type():
+    """Функция дял случайного выбора типа базы в зависимости от соотношения"""
+    n = random()
+    if 0 <= n < BASES_RATIO_R_A_M_O[0]:
+        return 'repair'
+    if BASES_RATIO_R_A_M_O[0] <= n < sum(BASES_RATIO_R_A_M_O[:2]):
+        return 'aircraft'
+    if sum(BASES_RATIO_R_A_M_O[:2]) <= n < sum(BASES_RATIO_R_A_M_O[:3]):
+        return 'missile'
+    return 'oil'
 
 
 def get_bigger_rect(rect, d):
@@ -48,33 +61,55 @@ PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()
 AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
+ICONS_GROUP = pygame.sprite.Group()
+RESOURCES_BASE = pygame.sprite.Group()
+CARRIER_GROP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
 MISSILE_SPEED = 2
+NUM_OF_MISSILES = 5
+NUM_OF_AIRCRAFT = 3
+OIL_VOLUME = 100
+NUM_OF_REPAIR_PARTS = 0
+BASE_NUM_OF_MISSILES = 0
+BASE_NUM_OF_AIRCRAFT = 0
+BASE_OIL_VOLUME = 0
+BASE_NUM_OF_REPAIR_PARTS = 0
+FUEL_CONSUMPTION_SPEED = 1000
+BASES_RATIO_R_A_M_O = 0.2, 0.2, 0.25, 0.35
+BASE_TICKS = 240
+GIVE_RESOURCE_TIME = 1000
+PLAYER_SPEED = 1.5
+AI_SPEED = 1
+NUM_OF_BASES = 10
+PLAYER_START = None
+AI_START = None
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
 try:
-    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize)+3:]
+    WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index((1280, 720)):]
 WIDTH, HEIGHT = WINDOW_SIZE[0]
-P_WIDTH, P_HEIGHT = WIDTH, HEIGHT
+P_WIDTH, P_HEIGHT = 1600, 900
 CELL_SIZE = WIDTH // 20
 IS_FULLSCREEN = False
 IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
 
+# Подлючение к БД
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
 CONNECTION.execute("PRAGMA foreign_keys = ON")
 USER_DATA = get_user_data()
 
 # Events
-MUSIC_END = pygame.USEREVENT+1
+MUSIC_END = pygame.USEREVENT + 1
+FUEL_CONSUMPTION = pygame.USEREVENT + 2
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -88,6 +123,16 @@ RED = pygame.Color('red')
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения
+PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
+                                    (40, 40))
+MISSILE_ICON = pygame.transform.scale(pygame.image.load(
+    'data/img/missile.png'), (40, 40))
+GEAR_ICON = pygame.transform.scale(pygame.image.load('data/img/gear.png'),
+                                   (40, 40))
+OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
+                                   (40, 40))
+PLAYER_BASE = pygame.image.load('data/img/base_player.png').convert_alpha()
+AI_BASE = pygame.image.load('data/img/base_ai.png').convert_alpha()
 PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png').convert_alpha()
 AI_IMAGE = pygame.image.load('data/img/AI_cursor.png').convert_alpha()
 AI_HIDDEN = pygame.image.load('data/img/AI_cursor_hidden.png').convert_alpha()

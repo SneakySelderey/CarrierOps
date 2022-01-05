@@ -221,5 +221,43 @@
              "normal_border": "#FFFFFF",
              "normal_text": "#FFFFFF"
          }
-  }
+  },
+  "screen_space_health_bar":
+     {
+         "colours":
+         {
+             "normal_text": "#FFFFFF",
+             "normal_border": "#DDDDDD",
+             "filled_bar": "#f4251b,#A4150b,180",
+             "unfilled_bar": "#CCCCCC"
+         },
+         "font":
+         {
+             "name":  "Teletacticle",
+             "size":  12,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         }
+     },
+  "caption":
+     {
+         "colours":
+         {
+             "dark_bg": "#00000000",
+             "normal_text":"#FFFFFF"
+         },
+         "font":
+         {
+             "name":  "Teletacticle",
+             "size":  18,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         },
+         "misc":
+         {
+             "text_horiz_alignment": "left"
+         }
+     }
 }

@@ -1,31 +1,26 @@
-import pygame
-from random import randint
-from Settings import new_coords, ALL_SPRITES, new_image_size, AI_IMAGE, \
-    AI_SPRITE, ALL_SPRITES_FOR_SURE
+from Settings import AI_IMAGE, AI_SPRITE
 import Settings
+from carrier import Carrier
+from math import sin, cos
 
 
-class AI(pygame.sprite.Sprite):
-    """Класс, определяющий параметры и спрайт ИИ"""
-    def __init__(self, visibility):
-        super().__init__(ALL_SPRITES, AI_SPRITE, ALL_SPRITES_FOR_SURE)
-        self.image = new_image_size(AI_IMAGE)
-        self.rect = self.image.get_rect(center=[Settings.WIDTH * 2,
-                                                randint(0, Settings.HEIGHT * 2)])
-        self.speedx = self.speedy = 0
-        self.radius = Settings.CELL_SIZE * 4
-        self.visibility = visibility
-        self.mask = pygame.mask.from_surface(self.image)
+class AI(Carrier):
+    """Класс авианосца игрока"""
+    def __init__(self):
+        super().__init__(AI_SPRITE, AI_IMAGE)
+        self.rect.center = [Settings.AI_START[0] * Settings.CELL_SIZE +
+                            Settings.CELL_SIZE // 2, Settings.AI_START[1] *
+                            Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
+        self.pos = list(self.rect.center)
+        self.destination = list(self.rect.center)
 
     def update(self):
-        """Обновление позиции спрайта"""
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
-
-    def new_position(self):
-        """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(AI_IMAGE)
-        self.rect = self.image.get_rect(topleft=new_coords(*self.rect.topleft))
-        self.mask = pygame.mask.from_surface(self.image)
-
+        """Обновление позиции объекта"""
+        if self.pos != self.destination and not self.stop:
+            # Обновление кооординат (из полярной системы в декартову)
+            self.pos[0] = self.pos[0] + Settings.AI_SPEED * cos(
+                self.alpha)
+            self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
+                self.alpha)
+            self.rect.center = self.pos
 
