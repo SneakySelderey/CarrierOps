@@ -64,6 +64,8 @@ AI_AIRCRAFT = pygame.sprite.Group()
 ICONS_GROUP = pygame.sprite.Group()
 RESOURCES_BASE = pygame.sprite.Group()
 CARRIER_GROP = pygame.sprite.Group()
+BACKGROUND_MAP = pygame.sprite.Group()
+MOVE_POINT_SPRITE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
@@ -89,7 +91,6 @@ WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
                (1024, 768), (800, 600)]
-SPEEDS = {1: (1.8, 1.2, 2.4, 2.4)}
 try:
     WINDOW_SIZE = WINDOW_SIZE[WINDOW_SIZE.index(screensize):]
 except ValueError:
@@ -115,24 +116,13 @@ BLACK = pygame.Color('black')
 DARK_RED = pygame.Color('darkred')
 WHITE = pygame.Color('white')
 GRAY5 = pygame.Color('gray5')
+DEEPSKYBLUE4 = pygame.Color('deepskyblue4')
+GREY = pygame.Color('grey')
 BLUE = pygame.Color('blue')
 RED = pygame.Color('red')
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения
-PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png')
-AI_IMAGE = pygame.image.load('data/img/AI_cursor.png')
-AI_HIDDEN = pygame.image.load('data/img/AI_cursor_hidden.png')
-BASE_FRIENDLY = pygame.image.load('data/img/base_friendly.png')
-BASE_HOSTILE = pygame.image.load('data/img/base_hostile.png')
-BASE_NEUTRAL = pygame.image.load('data/img/base_neutral.png')
-MISSILE_FRIENDLY = pygame.image.load('data/img/missile_friendly.png')
-MISSILE_HOSTILE = pygame.image.load('data/img/missile_hostile.png')
-AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png')
-MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png')
-GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png')
-SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png')
-SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg')
 PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
                                     (40, 40))
 MISSILE_ICON = pygame.transform.scale(pygame.image.load(
@@ -143,6 +133,22 @@ OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
                                    (40, 40))
 PLAYER_BASE = pygame.image.load('data/img/base_player.png').convert_alpha()
 AI_BASE = pygame.image.load('data/img/base_ai.png').convert_alpha()
+PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png').convert_alpha()
+AI_IMAGE = pygame.image.load('data/img/AI_cursor.png').convert_alpha()
+AI_HIDDEN = pygame.image.load('data/img/AI_cursor_hidden.png').convert_alpha()
+BASE_FRIENDLY = pygame.image.load('data/img/base_friendly.png').convert_alpha()
+BASE_HOSTILE = pygame.image.load('data/img/base_hostile.png').convert_alpha()
+BASE_NEUTRAL = pygame.image.load('data/img/base_neutral.png').convert_alpha()
+MISSILE_FRIENDLY = pygame.image.load('data/img/missile_friendly.png').convert_alpha()
+MISSILE_HOSTILE = pygame.image.load('data/img/missile_hostile.png').convert_alpha()
+AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png').convert_alpha()
+MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png').convert_alpha()
+GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png').convert_alpha()
+SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').convert_alpha()
+SAVE_LOAD_BACKGROUND = pygame.image.load('data/img/SAVE_LOAD_BACKGROUND.jpg').convert_alpha()
+SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
+SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
+SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

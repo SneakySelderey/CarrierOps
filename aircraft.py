@@ -19,7 +19,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
         self.total_ticks = 0  # Общее число тиков
-        self.destination = destination  # Направление движения
+        self.destination = list(destination)  # Направление движения
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
@@ -54,7 +54,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
-        self.destination = new_coords(*self.destination)
+        self.destination = list(new_coords(*self.destination))
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
         self.radius = Settings.CELL_SIZE * 3.5

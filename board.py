@@ -36,19 +36,20 @@ class Board:
 
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
-        if not mega:
-            base = Base(x, y, 'neutral', True,
-                        self.cell_size, self)
-        else:
-            base = SuperBase(x, y, mega[0], True, self.cell_size, self)
-            print(x, y)
+        base = Base(x, y, 'neutral', True, self.cell_size, self)
+        land = list(Settings.BACKGROUND_MAP)[0]
+        while land.rect.collidepoint(x, y) and land.mask.get_at((x - land.rect.x, y - land.rect.y)):
+            a = Settings.WIDTH * 2 // Settings.CELL_SIZE
+            b = Settings.HEIGHT * 2 // Settings.CELL_SIZE
+            base.rect.center = random.randint(0, a) * Settings.CELL_SIZE, \
+                               random.randint(0, b) * Settings.CELL_SIZE
         self.board[x][y] = base
         self.bases.append(base)
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
         self.cell_size = Settings.CELL_SIZE
-        [pygame.draw.rect(screen, DARK_RED, (
+        [pygame.draw.rect(screen, Settings.GREY, (
             x * self.cell_size + self.left,
             y * self.cell_size + self.top, self.cell_size,
             self.cell_size), 1) for y in range(self.height)

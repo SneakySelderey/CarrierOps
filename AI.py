@@ -17,7 +17,7 @@ class AI(Carrier):
     def update(self):
         """Обновление позиции объекта"""
         if self.pos != self.destination and not self.stop:
-            # Обновление кооординат (из полярнйо системы в декартову)
+            # Обновление кооординат (из полярной системы в декартову)
             self.pos[0] = self.pos[0] + Settings.AI_SPEED * cos(
                 self.alpha)
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
