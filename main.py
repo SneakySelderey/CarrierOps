@@ -25,34 +25,31 @@ def move_window():
                         WIDTH, HEIGHT, True)
 
 
-def calculate_speed():
+def calculate_speed(cell):
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
-    diff = sum([Settings.P_WIDTH / Settings.WIDTH,
-                Settings.P_HEIGHT / Settings.HEIGHT])
-    Settings.PLAYER_SPEED = 2 * Settings.PLAYER_SPEED / diff
-    Settings.AIR_SPEED = 2 * Settings.AIR_SPEED / diff
-    Settings.MISSILE_SPEED = 2 * Settings.MISSILE_SPEED / diff
-    Settings.AI_SPEED = 2 * Settings.AI_SPEED / diff
+    diff = Settings.CELL_SIZE / cell
+    Settings.PLAYER_SPEED *= diff
+    Settings.AIR_SPEED *= diff
+    Settings.MISSILE_SPEED *= diff
+    Settings.AI_SPEED *= diff
 
 
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения"""
-    [carrier.new_position(game_objects.board.cell_size,
+    for sprite in Settings.ALL_SPRITES_FOR_SURE:
+        try:
+            sprite.new_position(game_objects.board.cell_size,
                           game_objects.board.top, game_objects.board.left)
-     for carrier in Settings.CARRIER_GROP]
-    [carrier.new_position(game_objects.board.cell_size,
-                          game_objects.board.top, game_objects.board.left)
-     for carrier in Settings.PLAYER_AIRCRAFT]
-    [carrier.new_position(game_objects.board.cell_size,
-                          game_objects.board.top, game_objects.board.left)
-     for carrier in Settings.PLAYER_MISSILES]
-    [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
-     obj not in Settings.CARRIER_GROP and obj not in Settings.PLAYER_AIRCRAFT
-     and obj not in Settings.PLAYER_MISSILES]
-    game_objects.cell_size = Settings.CELL_SIZE
+        except TypeError:
+            print(sprite)
+
     ALL_SPRITES_FOR_SURE.update()
+    camera.new_position(game_objects.board.cell_size,
+                          game_objects.board.top, game_objects.board.left)
+    calculate_speed(game_objects.cell_size)
+    game_objects.cell_size = Settings.CELL_SIZE
 
 
 def delete_save(save):
@@ -218,6 +215,9 @@ def show_setting_screen(flag=True):
                         # пределим новое разрешение и размер клетки
                         WIDTH, HEIGHT = map(int, event.text.split('X'))
                         Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
+                        if Settings.P_HEIGHT != HEIGHT and \
+                                Settings.P_WIDTH != WIDTH:
+                            calculate_speed(Settings.CELL_SIZE)
                         Settings.CELL_SIZE = WIDTH // 20
                         # Обновим элементы интерфейса
                         rebase_elements()
@@ -235,9 +235,6 @@ def show_setting_screen(flag=True):
                         # объектов
                         if game_objects is not None:
                             update_objects()
-                        if Settings.P_HEIGHT != HEIGHT and \
-                                Settings.P_WIDTH != WIDTH:
-                            calculate_speed()
                         if not Settings.IS_FULLSCREEN:
                             move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -736,9 +733,7 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
-        global screen
         alpha = 0
-        zoom = None
         arrow_pressed = False
         Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
             Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
@@ -773,7 +768,15 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        zoom = pygame.transform.smoothscale(screen, (Settings.WIDTH + 6, Settings.HEIGHT + 6))
+                        Settings.CELL_SIZE += 3
+                        camera.overall_shift_x = event.pos[0]
+                        camera.overall_shift_y = event.pos[1]
+                        update_objects()
+                    if event.button == 5:
+                        Settings.CELL_SIZE = max(Settings.CELL_SIZE - 3, 10)
+                        camera.overall_shift_x = event.pos[0]
+                        camera.overall_shift_y = event.pos[1]
+                        update_objects()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
@@ -789,16 +792,16 @@ class Run:
                         camera.overall_shift_y = 0
                         self.centered = True
                     if event.key == pygame.K_UP:
-                        camera.dy += 20
+                        camera.dy += Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_DOWN:
-                        camera.dy -= 20
+                        camera.dy -= Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_LEFT:
-                        camera.dx += 20
+                        camera.dx += Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_RIGHT:
-                        camera.dx -= 20
+                        camera.dx -= Settings.CELL_SIZE // 4
                         arrow_pressed = True
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_UP:
@@ -825,14 +828,14 @@ class Run:
 
             if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not \
                     arrow_pressed:
-                camera.dx = -20
+                camera.dx = -Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
-                camera.dx = 20
+                camera.dx = Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not \
                     arrow_pressed:
-                camera.dy = -20
+                camera.dy = -Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
-                camera.dy = 20
+                camera.dy = Settings.CELL_SIZE // 4
             else:
                 if not arrow_pressed:
                     camera.dx = 0
@@ -860,7 +863,7 @@ class Run:
                 screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
                     Settings.CELL_SIZE * self.board.width,
                     Settings.CELL_SIZE * self.board.height)),
-                            (camera.overall_shift_x, camera.overall_shift_y))
+                            (self.board.left, self.board.top))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -868,9 +871,6 @@ class Run:
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
                 Settings.ICONS_GROUP.draw(screen)
-                if zoom is not None:
-                    screen.blit(zoom, (0, 0))
-                    zoom = None
 
                 if not self.player.stop:
                     pygame.draw.circle(
@@ -917,7 +917,7 @@ if __name__ == '__main__':
     FPS = 60
 
     game_objects = None
-    calculate_speed()
+    calculate_speed(70)
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True

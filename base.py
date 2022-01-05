@@ -92,10 +92,10 @@ class Base(pygame.sprite.Sprite):
             else:
                 Settings.BASE_NUM_OF_REPAIR_PARTS += 1
 
-    def new_position(self):
+    def new_position(self, cell, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.rect.center = [self.x * self.size + self.size // 2,
-                            self.y * self.size + self.size // 2]
+        self.rect.topleft = [self.x * cell + left,
+                             self.y * cell + top]
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.mask = pygame.mask.from_surface(self.image)
@@ -182,7 +182,7 @@ class BaseIcon(pygame.sprite.Sprite):
         """Обновления положения"""
         self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
 
-    def new_position(self):
+    def new_position(self, cell, top, left):
         """обновление положеняи при изменении разрешения"""
         self.image = new_image_size(Base.ResourceType[self.resource][0])
         self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
@@ -212,7 +212,7 @@ class BaseBar(pygame.sprite.Sprite):
         self.rect.bottomleft = (self.parent.rect.topleft[0],
                                 self.parent.rect.topleft[1] - 10)
 
-    def new_position(self):
+    def new_position(self, *args):
         """Обновление позиции при изменении разрешения"""
         self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
         self.rect = self.image.get_rect(bottomleft=(

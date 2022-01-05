@@ -34,3 +34,7 @@ class Camera:
         obj.pos.y += self.dy
         if Settings.IS_PAUSE:
             self.apply_rect(obj)
+
+    def new_position(self, cell, top, left):
+        self.overall_shift_x *= Settings.CELL_SIZE / cell
+        self.overall_shift_y *= Settings.CELL_SIZE / cell
