@@ -24,8 +24,9 @@ class Base(pygame.sprite.Sprite):
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.state = state
         self.to_add = True
-        self.rect = self.image.get_rect(topleft=[
-            x * cell_size + parent.left, y * cell_size + parent.top])
+        self.rect = self.image.get_rect(center=[
+            x * cell_size + parent.left + cell_size // 2,
+            y * cell_size + parent.top + cell_size // 2])
         self.visibility = visibility
         self.ticks_to_capture = Settings.BASE_TICKS
         self.start_of_capture = 0
@@ -93,7 +94,8 @@ class Base(pygame.sprite.Sprite):
 
     def new_position(self):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.rect.topleft = [self.x * self.size, self.y * self.size]
+        self.rect.center = [self.x * self.size + self.size // 2,
+                            self.y * self.size + self.size // 2]
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.mask = pygame.mask.from_surface(self.image)
@@ -123,10 +125,10 @@ class SuperBase(Base):
                 Settings.NUM_OF_AIRCRAFT += Settings.BASE_NUM_OF_AIRCRAFT
                 Settings.NUM_OF_MISSILES += Settings.BASE_NUM_OF_MISSILES
                 Settings.OIL_VOLUME += Settings.BASE_OIL_VOLUME
-                hp_lack = (100 - player.current_health) // 10
-                if Settings.BASE_NUM_OF_REPAIR_PARTS >= hp_lack:
-                    Settings.BASE_NUM_OF_REPAIR_PARTS -= hp_lack
-                    player.current_health += hp_lack * 10
+                hp_lack = min((100 - player.current_health) // 10,
+                              Settings.BASE_NUM_OF_REPAIR_PARTS)
+                Settings.BASE_NUM_OF_REPAIR_PARTS -= hp_lack
+                player.current_health += hp_lack * 10
                 Settings.BASE_NUM_OF_AIRCRAFT = 0
                 Settings.BASE_NUM_OF_MISSILES = 0
                 Settings.BASE_OIL_VOLUME = 0

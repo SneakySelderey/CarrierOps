@@ -1,5 +1,4 @@
 import pygame
-from random import randint
 from Settings import PLAYER_IMAGE, PLAYER_SPRITE
 import Settings
 from carrier import Carrier

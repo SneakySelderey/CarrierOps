@@ -1,4 +1,4 @@
-from random import choice, randint
+from random import choice
 import sys
 import pygame.sprite
 from board import Board
@@ -13,6 +13,21 @@ from player import Player
 from AI import AI
 
 
+def calculate_speed():
+    """Функция для подсчета скорости движимых объектов после изменения
+    разрешения"""
+    diff = sum([Settings.P_WIDTH / Settings.WIDTH,
+                Settings.P_HEIGHT / Settings.HEIGHT])
+    Settings.PLAYER_SPEED = 2 * Settings.PLAYER_SPEED / diff
+    Settings.AIR_SPEED = 2 * Settings.AIR_SPEED / diff
+    Settings.MISSILE_SPEED = 2 * Settings.MISSILE_SPEED / diff
+    Settings.AI_SPEED = 2 * Settings.AI_SPEED / diff
+    print(Settings.PLAYER_SPEED)
+    print(Settings.AI_SPEED)
+    print(Settings.AIR_SPEED)
+    print(Settings.MISSILE_SPEED)
+
+
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения"""
@@ -22,6 +37,7 @@ def update_objects():
     [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
      obj not in Settings.CARRIER_GROP]
     game_objects.cell_size = Settings.CELL_SIZE
+    calculate_speed()
     ALL_SPRITES_FOR_SURE.update()
 
 
@@ -694,6 +710,7 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
+        calculate_speed()
         Settings.NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
             Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
         health_bar = pygame_gui.elements.UIScreenSpaceHealthBar(

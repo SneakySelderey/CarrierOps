@@ -1,4 +1,3 @@
-from random import randint
 from Settings import AI_IMAGE, AI_SPRITE
 import Settings
 from carrier import Carrier
@@ -24,8 +23,4 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
-
-        # if abs(self.destination[0] - self.rect.centerx) <= 10 and \
-        #         abs(self.destination[1] - self.rect.centery) <= 10:
-        #     self.stop = True
 

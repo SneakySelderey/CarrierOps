@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
-    MISSILE_FRIENDLY, PLAYER_SPRITE, MISSILE_SPEED, PLAYER_MISSILES, \
+    MISSILE_FRIENDLY, PLAYER_SPRITE, PLAYER_MISSILES, \
     ALL_SPRITES_FOR_SURE
 import Settings
 
@@ -42,7 +42,7 @@ class MissileFriendly(pygame.sprite.Sprite):
             self.total_ticks += 0.02
 
         if self.pos != self.activation:
-            self.pos += self.alpha * MISSILE_SPEED
+            self.pos += self.alpha * Settings.MISSILE_SPEED
             self.rect.center = self.pos.x, self.pos.y
 
         if abs(self.activation[0] - self.rect.centerx) <= 10 and \

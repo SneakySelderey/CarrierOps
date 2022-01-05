@@ -326,10 +326,10 @@ RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
                         resource_manager, 'settings', 'center')
 BASES_LOST = BasesLost()
 TITLE = Title()
-AIRCRAFT = Icon(PLANE_ICON, (0.2, 0.04), ICONS_GROUP)
-MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
+AIRCRAFT = Icon(PLANE_ICON, (0.15, 0.04), ICONS_GROUP)
+MISSILES = Icon(MISSILE_ICON, (0.22, 0.04), ICONS_GROUP)
 #GEARS = Icon(GEAR_ICON, (0.34, 0.04), ICONS_GROUP)
-OIL = Icon(OIL_ICON, (0.34, 0.04), ICONS_GROUP)
+OIL = Icon(OIL_ICON, (0.29, 0.04), ICONS_GROUP)
 AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT, campaign_manager)
 MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES, campaign_manager)
 #GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS, campaign_manager)
@@ -346,13 +346,13 @@ GEARS_BASE_CAPT = Label(24, 'REPAIR PARTS', 0.3, 0.8,
                         resource_manager, 'option', 'center')
 OIL_BASE_CAPT = Label(24, 'OIL VOLUME', 0.3, 0.6,
                       resource_manager, 'option', 'center')
-AIR_NUM = Label(24, f'{Settings.BASE_NUM_OF_AIRCRAFT}', 0.5, 0.2,
+AIR_NUM = Label(24, f'  {Settings.BASE_NUM_OF_AIRCRAFT}', 0.5, 0.2,
                 resource_manager, 'option', 'center')
-MIS_NUM = Label(24, f'{Settings.BASE_NUM_OF_MISSILES}', 0.5, 0.4,
+MIS_NUM = Label(24, f'  {Settings.BASE_NUM_OF_MISSILES}', 0.5, 0.4,
                 resource_manager, 'option', 'center')
-OIL_NUM = Label(24, f'{Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
+OIL_NUM = Label(24, f'  {Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
                 resource_manager, 'option', 'center')
-REP_NUM = Label(24, f'{Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
+REP_NUM = Label(24, f'  {Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
                 resource_manager, 'option', 'center')
 CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
 # Создание групп с элементами
