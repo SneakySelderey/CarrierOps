@@ -38,16 +38,11 @@ def calculate_speed(cell):
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения"""
-    for sprite in Settings.ALL_SPRITES_FOR_SURE:
-        try:
-            sprite.new_position(game_objects.board.cell_size,
-                          game_objects.board.top, game_objects.board.left)
-        except TypeError:
-            print(sprite)
-
+    [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
+                         game_objects.board.left) for sprite in
+        Settings.ALL_SPRITES_FOR_SURE]
     ALL_SPRITES_FOR_SURE.update()
-    camera.new_position(game_objects.board.cell_size,
-                          game_objects.board.top, game_objects.board.left)
+    camera.new_position()
     calculate_speed(game_objects.cell_size)
     game_objects.cell_size = Settings.CELL_SIZE
 
@@ -785,11 +780,7 @@ class Run:
                     if event.key == pygame.K_r:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
-                        camera.dx = camera.dy = 0
-                        camera.dx += -camera.overall_shift_x
-                        camera.dy += -camera.overall_shift_y
-                        camera.overall_shift_x = 0
-                        camera.overall_shift_y = 0
+                        camera.new_position()
                         self.centered = True
                     if event.key == pygame.K_UP:
                         camera.dy += Settings.CELL_SIZE // 4
