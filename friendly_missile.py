@@ -1,5 +1,5 @@
 import pygame
-from Settings import new_coords, ALL_SPRITES, new_image_size, EXPLOSION, \
+from Settings import ALL_SPRITES, new_image_size, EXPLOSION, \
     MISSILE_FRIENDLY, PLAYER_SPRITE, PLAYER_MISSILES, \
     ALL_SPRITES_FOR_SURE
 import Settings
@@ -71,9 +71,9 @@ class MissileFriendly(pygame.sprite.Sprite):
         self.radius = Settings.CELL_SIZE * 2
         if not self.activated:
             try:
-                x, y = new_coords(self.activation[0] - self.pos[0],
-                                  self.activation[1] - self.pos[1])
-                self.alpha = pygame.math.Vector2((x, y)).normalize()
+                self.alpha = pygame.math.Vector2(
+                    (self.activation[0] - self.pos[0],
+                     self.activation[1] - self.pos[1])).normalize()
             except ValueError:
                 self.total_ticks = 10
 

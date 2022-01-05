@@ -1,5 +1,5 @@
 from Settings import WHITE, MAIN_FONT, WINDOW_SIZE, get_user_data, \
-    get_bigger_rect, TITLE_GROUP, GAMEOVER_GROUP, ICONS_GROUP, PLANE_ICON, \
+    get_bigger_rect, ICONS_GROUP, PLANE_ICON, \
     MISSILE_ICON, OIL_ICON, GEAR_ICON, RESOURCES_BASE
 import pygame
 import pygame_gui
@@ -172,41 +172,6 @@ class Button(pygame_gui.elements.UIButton):
         return Button(self.title, pos1, pos2, self.d, manager, self.obj_id)
 
 
-class Title(pygame.sprite.Sprite):
-    """Класс с названием игры"""
-    def __init__(self):
-        super().__init__(TITLE_GROUP)
-        txt = MAIN_FONT.render('CARRIER OPERATIONS', True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = \
-            Settings.WIDTH // 2, Settings.HEIGHT // 5
-
-    def update(self, pos=(-1, -1)):
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, \
-                                               Settings.HEIGHT // 5
-        # сюда можно впихнуть пасхалку
-        if self.rect.collidepoint(pos[0], pos[1]):
-            pass
-
-
-class BasesLost(pygame.sprite.Sprite):
-    """Класс с надписью о том, что все базы захвачены противником"""
-    def __init__(self):
-        super().__init__(GAMEOVER_GROUP)
-        txt = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES", True, WHITE)
-        self.image = pygame.Surface(txt.get_size(), pygame.SRCALPHA, 32)
-        self.rect = txt.get_rect()
-        self.image.blit(txt, self.rect)
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
-            0.375 * Settings.HEIGHT)
-
-    def update(self, *pos):
-        self.rect.centerx, self.rect.centery = Settings.WIDTH // 2, int(
-            0.375 * Settings.HEIGHT)
-
-
 class Icon(pygame.sprite.Sprite):
     """Класс для иконок ресурсов"""
     def __init__(self, image, pos, group):
@@ -283,10 +248,13 @@ resource_manager = pygame_gui.UIManager(
 
 
 # Создание элементов интерфейса
+TITLE = Label(36, 'CARRIER OPERATIONS', 0.5, 0.2, menu_manager, 'settings')
 QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
 SETTINGS_BUTTON = Button('SETTINGS', 0.5, 0.625, 20, menu_manager)
 NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
 LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
+BASES_LOST = Label(36, "GAME OVER. YOU'VE LOST ALL THE BASES", 0.5, 0.375,
+                   gameover_manager, 'settings')
 MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
 RESUME_BUTTON = Button('RESUME', 0.5, 0.250, 20, game_manager)
@@ -324,8 +292,6 @@ USERS_LIST = OptionList(0.1, 0.25, user_data_manager)
 OK_BUTTON_LOAD = Button('OK', 0.5, 0.9, 10, load_manager)
 RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
                         resource_manager, 'settings', 'center')
-BASES_LOST = BasesLost()
-TITLE = Title()
 AIRCRAFT = Icon(PLANE_ICON, (0.20, 0.04), ICONS_GROUP)
 MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
 #GEARS = Icon(GEAR_ICON, (0.34, 0.04), ICONS_GROUP)
@@ -356,10 +322,10 @@ REP_NUM = Label(24, f'  {Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
                 resource_manager, 'option', 'center')
 CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
 # Создание групп с элементами
-LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
-          MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL, RESOURCES_LABEL,
-          AIRCRAFT_BASE_CAPT, MISSILES_BASE_CAPT, GEARS_BASE_CAPT,
-          OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
+LABELS = [TITLE, BASES_LOST, RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL,
+          EFFECTS_LABEL, MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL,
+          RESOURCES_LABEL, AIRCRAFT_BASE_CAPT, MISSILES_BASE_CAPT,
+          GEARS_BASE_CAPT, OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}

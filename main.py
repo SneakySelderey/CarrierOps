@@ -20,9 +20,9 @@ def move_window():
     """Функция для перемещения окна на середину экрана"""
     hwnd = win32gui.FindWindow(None, "CarrierOps")
     win32gui.MoveWindow(hwnd, (
-        screensize[0] - WIDTH) // 2, (
-                            screensize[1] - HEIGHT) // 2,
-                        WIDTH, HEIGHT, True)
+        screensize[0] - Settings.WIDTH) // 2, (
+                            screensize[1] - Settings.HEIGHT) // 2,
+                        Settings.WIDTH, Settings.HEIGHT, True)
 
 
 def calculate_speed(cell):
@@ -37,7 +37,7 @@ def calculate_speed(cell):
 
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
-    разрешения"""
+    разрешения/зуме"""
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
         Settings.ALL_SPRITES_FOR_SURE]
@@ -105,8 +105,6 @@ def rebase_elements():
             LOAD_ELEMENTS[i].update_element()
         except AttributeError:
             LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
-    GAMEOVER_GROUP.update()
-    TITLE_GROUP.update()
 
 
 def rebase_load_manager():
@@ -155,8 +153,6 @@ def show_menu_screen():
                     if event.ui_element == MENU_ELEMENTS['QUIT']:
                         terminate()
                     return list(MENU_ELEMENTS.values()).index(event.ui_element)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                TITLE_GROUP.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
@@ -167,7 +163,6 @@ def show_menu_screen():
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
         alpha = max(alpha - 10, 0)
-        TITLE_GROUP.draw(screen)
         # Обновление менеджера
         menu_manager.update(delta)
         menu_manager.draw_ui(screen)
@@ -176,13 +171,14 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface, screen
+    global help_surface, screen
     # Переменные для красивой картинки и эффекта затемнения
     alpha_up = 0
     alpha_down = 255
-    background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    background = pygame.transform.scale(SETTINGS_BACKGROUND, (
+        Settings.WIDTH, Settings.HEIGHT))
     background2 = screen if not flag else pygame.transform.scale(
-        MENU_BACKGROUND, (WIDTH, HEIGHT))
+        MENU_BACKGROUND, (Settings.WIDTH, Settings.HEIGHT))
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -195,35 +191,41 @@ def show_setting_screen(flag=True):
                     if event.ui_element == SETTINGS_ELEMENTS['FULLSCREEN']:
                         if event.ui_element.text == ' ':
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
-                                                             pygame.FULLSCREEN)
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT),
+                                pygame.FULLSCREEN)
                         else:
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text(' ')
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT))
                             move_window()
                         Settings.IS_FULLSCREEN = not Settings.IS_FULLSCREEN
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
                         # Сохраним старое разрешение
-                        Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
+                        Settings.P_WIDTH, Settings.P_HEIGHT = \
+                            Settings.WIDTH, Settings.HEIGHT
                         # пределим новое разрешение и размер клетки
-                        WIDTH, HEIGHT = map(int, event.text.split('X'))
-                        Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
+                        Settings.WIDTH, Settings.HEIGHT = map(
+                            int, event.text.split('X'))
                         if Settings.P_HEIGHT != HEIGHT and \
                                 Settings.P_WIDTH != WIDTH:
                             calculate_speed(Settings.CELL_SIZE)
                         Settings.CELL_SIZE = WIDTH // 20
                         # Обновим элементы интерфейса
                         rebase_elements()
-                        help_surface = pygame.transform.scale(help_surface,
-                                                              (WIDTH, HEIGHT))
+                        help_surface = pygame.transform.scale(
+                            help_surface, (Settings.WIDTH, Settings.HEIGHT))
                         background = pygame.transform.scale(
-                            SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+                            SETTINGS_BACKGROUND, (Settings.WIDTH,
+                                                  Settings.HEIGHT))
                         if not Settings.IS_FULLSCREEN:
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT))
                         else:
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
+                            screen = pygame.display.set_mode((Settings.WIDTH,
+                                                              Settings.HEIGHT),
                                                              pygame.FULLSCREEN)
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
                         # Если игра уже начата, обновим координаты всех
@@ -273,7 +275,7 @@ def show_gameover_screen():
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
     alpha = 255
     screen.fill(BLACK)
-    GAMEOVER_GROUP.draw(screen)
+    gameover_manager.draw_ui(screen)
     pygame.display.flip()
     clock.tick(5000)
     while True:
@@ -297,7 +299,6 @@ def show_gameover_screen():
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
         alpha = max(alpha - 0.5, 0)
-        GAMEOVER_GROUP.draw(screen)
         # Обновление менеджера
         gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
@@ -683,6 +684,7 @@ class Run:
                 if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
                     base.bar.visibility = True
             if base.bar.visibility and base.state == 'ai':
+                print('ttt', base.bar.visibility)
                 base.visibility = True
 
         # радиусы обнаружения и пуска ракет
@@ -711,7 +713,7 @@ class Run:
         self.ai.destination[0] += camera.dx
         self.ai.destination[1] += camera.dy
 
-        if not self.centered:
+        if not camera.centered:
             camera.overall_shift_x += camera.dx
             camera.overall_shift_y += camera.dy
         else:
@@ -724,7 +726,7 @@ class Run:
                     except AttributeError:
                         j.activation[0] += camera.dx
                         j.activation[1] += camera.dy
-        self.centered = False
+        camera.centered = False
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -781,7 +783,6 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
-                        self.centered = True
                     if event.key == pygame.K_UP:
                         camera.dy += Settings.CELL_SIZE // 4
                         arrow_pressed = True
@@ -872,7 +873,7 @@ class Run:
                 if Settings.IS_PAUSE:
                     text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                     screen.blit(text_pause, text_pause.get_rect(
-                        center=(WIDTH // 2, HEIGHT // 2)))
+                        center=(Settings.WIDTH // 2, Settings.HEIGHT // 2)))
 
                 if alpha == 255:
                     self.running = False

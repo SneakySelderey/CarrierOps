@@ -9,6 +9,7 @@ class Camera:
         self.dy = 0
         self.overall_shift_x = 0
         self.overall_shift_y = 0
+        self.centered = False
 
     def rebase(self):
         """Обновление данных камеры"""
@@ -44,3 +45,4 @@ class Camera:
                          0].rect.centery - Settings.HEIGHT // 2
         self.overall_shift_x = 0
         self.overall_shift_y = 0
+        self.centered = True

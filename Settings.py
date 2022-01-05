@@ -24,12 +24,6 @@ def get_bigger_rect(rect, d):
     return rect
 
 
-def new_coords(x, y):
-    """Функия для пересчета координат объекта при изменении разрешения.
-    Принимет координату при старом разрешении"""
-    return int(x / P_WIDTH * WIDTH), int(y / P_HEIGHT * HEIGHT)
-
-
 def new_image_size(img):
     """Функия для изменения размера изображеня"""
     return pygame.transform.scale(img, (
@@ -54,8 +48,6 @@ ALL_SPRITES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
-TITLE_GROUP = pygame.sprite.Group()
-GAMEOVER_GROUP = pygame.sprite.Group()
 AI_SPRITE = pygame.sprite.Group()
 PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()

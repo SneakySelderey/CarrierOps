@@ -1,6 +1,6 @@
 import pygame
 from math import sin, cos, atan2
-from Settings import new_coords, ALL_SPRITES, new_image_size, \
+from Settings import ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
     ALL_SPRITES_FOR_SURE
 import Settings
@@ -72,7 +72,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         player = list(PLAYER_SPRITE)[0]
         self.alpha = atan2(player.rect.centery - self.rect.centery,
                            player.rect.centerx - self.rect.centerx)
-        self.destination = player.rect.centerx, player.rect.centery
+        self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
             Settings.NUM_OF_AIRCRAFT += 1
