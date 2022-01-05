@@ -256,6 +256,9 @@ class IconText(pygame_gui.elements.UILabel):
 menu_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+map_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 gameover_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
@@ -355,6 +358,10 @@ OIL_NUM = Label(24, f'  {Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
 REP_NUM = Label(24, f'  {Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
                 resource_manager, 'option', 'center')
 CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
+SOLOMON_MAP = Button('SOLOMON ISLANDS', 0.5, 0.3, 20, map_manager)
+NORWEGIAN_SEA_MAP = Button('NORWEGIAN SEA', 0.5, 0.5, 20, map_manager)
+SOUTH_CHINA_SEA_MAP = Button('SOUTH CHINA SEA', 0.5, 0.7, 20, map_manager)
+BACK = Button('BACK', 0.5, 0.9, 20, map_manager)
 # Создание групп с элементами
 LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
           MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL, RESOURCES_LABEL,
@@ -362,6 +369,8 @@ LABELS = [RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL, EFFECTS_LABEL,
           OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
 MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
                  "LOAD": LOAD_SAVE_BUTTON, "SETTINGS": SETTINGS_BUTTON}
+MAP_ELEMENTS = {"BACK": BACK, "SOLOMON ISLANDS": SOLOMON_MAP, "NORWEGIAN SEA": NORWEGIAN_SEA_MAP,
+                "SOUTH CHINA SEA": SOUTH_CHINA_SEA_MAP}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
 IN_GAME_ELEMENTS = {"QUIT": QUIT_BUTTON_3, "RESUME": RESUME_BUTTON,
                     "MENU": MAIN_MENU_BUTTON_2, "LOAD": LOAD_SAVE_BUTTON_2,

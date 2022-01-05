@@ -7,7 +7,7 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand
+from maps import SolomonLand, NorwegLand
 from Settings import *
 import Settings
 import pygame_gui
@@ -172,6 +172,35 @@ def show_menu_screen():
         # Обновление менеджера
         menu_manager.update(delta)
         menu_manager.draw_ui(screen)
+        pygame.display.flip()
+
+
+def show_map_screen():
+    """Фукнция для отрисовки меню выбора карты и для работы с ним"""
+    [i.stop() for i in ALL_EFFECTS]
+    background = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+    alpha = 130
+    while True:
+        delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    return list(MAP_ELEMENTS.values()).index(event.ui_element)
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
+                                        choice(MENU_MUSIC))
+                pygame.mixer.music.play(fade_ms=5000)
+            map_manager.process_events(event)
+        # Красивая картинка
+        help_surface.fill((10, 10, 10, alpha))
+        screen.blit(background, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        alpha = max(alpha - 10, 0)
+        # Обновление менеджера
+        map_manager.update(delta)
+        map_manager.draw_ui(screen)
         pygame.display.flip()
 
 
@@ -509,7 +538,7 @@ def show_resources_menu():
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
-    def __init__(self):
+    def __init__(self, solomon_chosen, norweg_chosen, china_chosen):
         self.cell_size = Settings.CELL_SIZE
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
@@ -525,7 +554,12 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-        self.solomon_land = SolomonLand(True, self.board)
+        if solomon_chosen:
+            self.map = SolomonLand(True, self.board)
+        elif norweg_chosen:
+            self.map = NorwegLand(True, self.board)
+        elif china_chosen:
+            self.map = ChinaLand(True, self.board)
 
         self.board.add_bases()
         self.player = Player()
@@ -846,10 +880,18 @@ class Run:
                     show_setting_screen(False)
             else:
                 screen.fill(DEEPSKYBLUE4)
-                screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
-                    Settings.CELL_SIZE * self.board.width,
-                    Settings.CELL_SIZE * self.board.height)),
-                            (camera.overall_shift_x, camera.overall_shift_y))
+                if solomon_chosen:
+                    screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
+                        Settings.CELL_SIZE * self.board.width,
+                        Settings.CELL_SIZE * self.board.height)),
+                                (camera.overall_shift_x, camera.overall_shift_y))
+                elif norweg_chosen:
+                    screen.blit(pygame.transform.scale(Settings.NORWEG_WATER, (
+                        Settings.CELL_SIZE * self.board.width,
+                        Settings.CELL_SIZE * self.board.height)),
+                                (camera.overall_shift_x, camera.overall_shift_y))
+                elif china_chosen:
+                    pass
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -905,8 +947,8 @@ if __name__ == '__main__':
     game_objects = None
     calculate_speed()
     # Флаги, отвечающие за то, в каком меню находится пользователь
-    menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, True
+    menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, slides_run = \
+        False, False, False, False, False, False, True
     running = True
     # Создадим камеру
     camera = Camera()
@@ -923,10 +965,18 @@ if __name__ == '__main__':
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             clear_sprite_groups()
-            game_run = result == 1
+            solomon_chosen, norweg_chosen, china_chosen = False, False, False
+            map_choice_run = result == 1
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
+        elif map_choice_run:  # Экран выбора карты
+            result = show_map_screen()
+            solomon_chosen = result == 1
+            norweg_chosen = result == 2
+            china_chosen = result == 3
+            game_run = True
+            map_choice_run = False
         elif gameover_run:  # Экран после поражения
             pygame.mixer.music.fadeout(500)
             result = show_gameover_screen()
@@ -935,7 +985,7 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
-            game_objects = Run()
+            game_objects = Run(solomon_chosen, norweg_chosen, china_chosen)
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
