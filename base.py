@@ -119,6 +119,17 @@ class SuperBase(Base):
         player = list(Settings.PLAYER_SPRITE)[0]
         if pygame.sprite.collide_mask(self, player):
             self.start_of_capture = 1
+            if self.state == 'player':
+                Settings.NUM_OF_AIRCRAFT += Settings.BASE_NUM_OF_AIRCRAFT
+                Settings.NUM_OF_MISSILES += Settings.BASE_NUM_OF_MISSILES
+                Settings.OIL_VOLUME += Settings.BASE_OIL_VOLUME
+                hp_lack = (100 - player.current_health) // 10
+                if Settings.BASE_NUM_OF_REPAIR_PARTS >= hp_lack:
+                    Settings.BASE_NUM_OF_REPAIR_PARTS -= hp_lack
+                    player.current_health += hp_lack * 10
+                Settings.BASE_NUM_OF_AIRCRAFT = 0
+                Settings.BASE_NUM_OF_MISSILES = 0
+                Settings.BASE_OIL_VOLUME = 0
         for ai in Settings.AI_SPRITE:
             if pygame.sprite.collide_mask(self, ai) and not \
                     pygame.sprite.collide_mask(self, player):
