@@ -525,22 +525,20 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
+        self.solomon_land = SolomonLand(True)
+        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (
+            Settings.WIDTH * 2, Settings.HEIGHT * 2))
 
-        #self.board.add_bases()
+        self.board.add_bases()
         self.player = Player()
         self.destination_player = list(self.player.rect.center)
         self.ai = AI()
-        for i in range(10):
-            x = random.randint(0, self.cells_x - 1)
-            y = random.randint(0, self.cells_y - 1)
-            self.board.add_base(x, y)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
         self.overall_shift_x = 0
         self.overall_shift_y = 0
         self.centered = False
-        self.water = pygame.transform.scale(Settings.SOLOMON_WATER, (Settings.WIDTH * 2, Settings.HEIGHT * 2))
         self.list_all_sprites = [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
                                  Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
                                  Settings.AI_SPRITE, Settings.PLAYER_MISSILES, Settings.PLAYER_AIRCRAFT,
@@ -608,8 +606,9 @@ class Run:
         player_x, player_y = self.player.rect.center
 
         # отрисовка нужных и прятанье ненужных спрайтов
-        [pygame.sprite.Group([picture for picture in group if picture.visibility]).draw(screen)
-         for group in self.list_all_sprites]
+        [pygame.sprite.Group([picture for picture in group if
+                              picture.visibility]).draw(screen) for
+         group in self.list_all_sprites]
 
         # отрисовка спрайта противника
         player = list(Settings.PLAYER_SPRITE)[0]
@@ -617,17 +616,16 @@ class Run:
 
             # проверка на обнаружение ракетой
             missile_tracking = False
-            for missile in self.friendly_missiles:
+            for missile in Settings.PLAYER_MISSILES:
                 # если цель в радиусе обнаружения ракеты, то
                 # поднимается соответствующий флаг
                 missile_x, missile_y = missile.rect.center
-                # if hypot(missile_x - ai_x, missile_y - ai_y) <= Settings.CELL_SIZE * 2:
                 if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
                     missile_tracking = True
                 # если ракета исчерпала свой ресурс, она падает в море и
                 # спрайт удаляется
                 if missile.total_ticks >= 10:
-                    self.friendly_missiles.remove(missile)
+                    Settings.PLAYER_MISSILES.remove(missile)
                     Settings.ALL_SPRITES.remove(missile)
                     Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                 # отрисовка радиуса обнаружения ракеты
@@ -635,53 +633,25 @@ class Run:
                     missile.activation = list(missile.activation)
                     missile.activation[0] += camera.dx
                     missile.activation[1] += camera.dy
-                    pygame.draw.line(screen, BLUE,
-                                         (missile_x, missile_y),
-                                         (missile.activation[0],
-                                          missile.activation[1]))
-                pygame.draw.circle(screen, BLUE,
-                                   (missile_x, missile_y),
-                                   Settings.CELL_SIZE * 2, 1)
-        
-
-                # проверка на обнаружение самолетом
-            air_tracking = False
-            for aircraft in Settings.PLAYER_AIRCRAFT:
-                air_x, air_y = aircraft.rect.center
-                # если цель в радиусе обнаружения самолета, то
-                # поднимается соответствующий флаг
-                # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
-                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
-                    air_tracking = True
-                # если самолет исчерпала свой ресурс, он возвращается на авианосец
-                if aircraft.delete:
-                    Settings.PLAYER_AIRCRAFT.remove(aircraft)
-                    Settings.ALL_SPRITES.remove(aircraft)
-                    Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
-                # отрисовка радиуса обнаружения самолета
-                aircraft.destination = list(aircraft.destination)
-                aircraft.destination[0] += camera.dx
-                aircraft.destination[1] += camera.dy
-                pygame.draw.line(screen, BLUE,
-                                 (missile_x, missile_y),
-                                 (missile.activation[0],
-                                  missile.activation[1]))
+                    pygame.draw.line(screen, BLUE, (missile_x, missile_y),
+                                     (missile.activation[0],
+                                      missile.activation[1]))
                 pygame.draw.circle(screen, BLUE,
                                    (missile_x, missile_y),
                                    Settings.CELL_SIZE * 2, 1)
 
             # проверка на обнаружение самолетом
             air_tracking = False
-            for aircraft in self.friendly_aircraft:
+            for aircraft in Settings.PLAYER_AIRCRAFT:
                 air_x, air_y = aircraft.rect.center
                 # если цель в радиусе обнаружения самолета, то
                 # поднимается соответствующий флаг
-                # if hypot(air_x - ai_x, air_y - ai_y) <= Settings.CELL_SIZE * 3.5:
                 if pygame.sprite.collide_circle_ratio(0.47)(aircraft, ai):
                     air_tracking = True
-                # если самолет исчерпала свой ресурс, он возвращается на авианосец
+                # если самолет исчерпал свой ресурс, он возвращается на
+                # авианосец
                 if aircraft.delete:
-                    self.friendly_aircraft.remove(aircraft)
+                    Settings.PLAYER_AIRCRAFT.remove(aircraft)
                     Settings.ALL_SPRITES.remove(aircraft)
                     Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                 # отрисовка радиуса обнаружения самолета
@@ -696,10 +666,8 @@ class Run:
                                    (air_x, air_y),
                                    Settings.CELL_SIZE * 3.5, 1)
 
-            # dist_between_ai_player = hypot(ai_x - player_x, ai_y - player_y)
-            # if dist_between_ai_player <= Settings.CELL_SIZE * 4 or missile_tracking or air_tracking:
-            if pygame.sprite.collide_circle_ratio(0.5)(player,
-                                                       ai) or missile_tracking or air_tracking:
+            if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
+                    missile_tracking or air_tracking:
                 self.ai.visibility = True
                 pygame.draw.circle(screen, RED, (ai_x, ai_y),
                                    Settings.CELL_SIZE * 4, 1)
@@ -726,18 +694,18 @@ class Run:
                     self.play_contact_lost = False
 
         for base in self.board.bases:
-                base.bar.visibility = False
-                if base.start_of_capture in [0, 1] or \
-                        pygame.sprite.collide_circle_ratio(0.5)(player, base):
+            base.bar.visibility = False
+            if base.start_of_capture in [0, 1] or \
+                    pygame.sprite.collide_circle_ratio(0.5)(player, base):
+                base.bar.visibility = True
+            for aircraft in self.friendly_aircraft:
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
                     base.bar.visibility = True
-                for aircraft in self.friendly_aircraft:
-                    if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
-                        base.bar.visibility = True
-                for missile in self.friendly_missiles:
-                    if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
-                        base.bar.visibility = True
-                if base.bar.visibility and base.state == 'ai':
-                    base.visibility = True
+            for missile in self.friendly_missiles:
+                if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
+                    base.bar.visibility = True
+            if base.bar.visibility and base.state == 'ai':
+                base.visibility = True
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
@@ -862,8 +830,7 @@ class Run:
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
 
-            thread2 = Thread(target=game_objects.camera_update(), args=())
-            thread2.start()
+            self.camera_update()
 
             if pygame.mouse.get_pos()[
                 0] >= Settings.WIDTH - 50 and not arrow_pressed:
@@ -880,28 +847,8 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
-            screen.fill(DEEPSKYBLUE4)
-            screen.blit(self.water, (camera.overall_shift_x, camera.overall_shift_y))
-            self.fog_of_war()
-            self.move(self.destination_player, self.player, screen)
-            self.destination_ai()
-            self.board.update()
-            self.board.render(screen)
-            help_surface.fill((0, 0, 0, alpha))
-            help_surface.fill((0, 0, 0, alpha_menu))
-            screen.blit(help_surface, (0, 0))
-            Settings.BASES_SPRITES.update()
-
             if not (Settings.IS_PAUSE or self.defeat or self.menu):
                 Settings.ALL_SPRITES.update()
-                if not self.ai_detected:
-                    pass
-                    # self.ai.update()
-            if Settings.IS_PAUSE:
-                text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
-                screen.blit(text_pause, text_pause.get_rect(
-                    center=(WIDTH // 2, HEIGHT // 2)))
-                
             if self.resource_menu:
                 show_resources_menu()
                 self.resource_menu = False
@@ -918,15 +865,18 @@ class Run:
                 if result == 4:  # Если нажал на SETTINGS
                     show_setting_screen(False)
             else:
-                screen.fill(GRAY5)
+                screen.fill(DEEPSKYBLUE4)
+                screen.blit(self.water, (camera.overall_shift_x,
+                                         camera.overall_shift_y))
                 self.board.update()
                 self.board.render(screen)
-                [capt.update_text() for capt in CAPTIONS]
-                Settings.ALL_SPRITES.draw(screen)
-                Settings.ICONS_GROUP.draw(screen)
-                self.destination_ai()
                 self.fog_of_war()
-
+                self.destination_ai()
+                help_surface.fill((0, 0, 0, alpha))
+                screen.blit(help_surface, (0, 0))
+                Settings.BASES_SPRITES.update()
+                [capt.update_text() for capt in CAPTIONS]
+                Settings.ICONS_GROUP.draw(screen)
                 help_surface.blit(screen, (0, 0))
 
                 if not self.player.stop:
@@ -935,11 +885,6 @@ class Run:
                                        self.player.destination[1]),
                         Settings.CELL_SIZE // 7)
 
-                if not (Settings.IS_PAUSE or self.defeat or self.menu or
-                        self.resource_menu):
-                    Settings.ALL_SPRITES.update()
-                    if not self.ai_detected:
-                        self.ai.update()
                 if Settings.IS_PAUSE:
                     text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                     screen.blit(text_pause, text_pause.get_rect(

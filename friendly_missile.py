@@ -33,7 +33,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
-        self.activation = activation
+        self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
@@ -61,7 +61,7 @@ class MissileFriendly(pygame.sprite.Sprite):
         rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
         self.rect = rect
         self.pos = [*new_coords(self.pos[0], self.pos[1])]
-        self.activation = new_coords(*self.activation)
+        self.activation = list(new_coords(*self.activation))
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
         if not self.activated:
