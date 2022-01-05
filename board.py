@@ -15,8 +15,9 @@ class Board:
         self.left = 20
         self.top = 20
         self.cell_size = 30
-        self.cells = [(i, j) for i in range(self.width) for j in
-                      range(self.height)]
+        self.cells = {(i, j) for i in range(self.width) for j in
+                      range(self.height)}
+        self.used = set()
 
     def set_view(self, left, top, cell_size):
         """Метод, задающий отступ сетки и размер одной ячейки"""
@@ -41,14 +42,11 @@ class Board:
             base = SuperBase(x, y, mega[0], True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[0]
         while pygame.sprite.collide_mask(land, base) is not None:
-            #self.cells.remove((x, y))
-            x, y = choice(self.cells)
+            self.used.add((x, y))
+            x, y = choice(list(self.cells - self.used))
             base.x, base.y = x, y
             base.new_position()
-        #try:
-        #    self.cells.remove((x, y))
-        #except NameError:
-        #    pass
+        self.used.add((x, y))
         if mega and mega[0] == 'player':
             Settings.PLAYER_START = (x, y)
         elif mega and mega[0] == 'ai':
