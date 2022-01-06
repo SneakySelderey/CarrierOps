@@ -27,7 +27,7 @@ class MissileFriendly(pygame.sprite.Sprite):
                 activation[1] - player.rect.centery)).normalize()
             self.visibility = visibility
         except ValueError:
-            self.total_ticks = 10
+            self.total_ticks = 20
             self.alpha = pygame.math.Vector2(0, 0)
 
         # Флаги, ответственные за паттерн поиска ракеты
@@ -75,12 +75,12 @@ class MissileFriendly(pygame.sprite.Sprite):
                     (self.activation[0] - self.pos[0],
                      self.activation[1] - self.pos[1])).normalize()
             except ValueError:
-                self.total_ticks = 10
+                self.total_ticks = 20
 
     def missile_activation(self):
         """Обновление координат ракет при активации ГСН"""
         if self.activated:
-            if self.ticks >= 50:
+            if self.ticks >= 100:
                 self.total_ticks += 1
                 self.ticks = 0
                 if self.turn == 0:
@@ -97,7 +97,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
     def missile_tracking(self):
         """Обновление координат ракеты при захвате противника ГСН"""
-        if self.ticks2 >= 50:
+        if self.ticks2 >= 100:
             self.total_ticks += 1
             self.ticks2 = 0
         self.ticks2 += 1
