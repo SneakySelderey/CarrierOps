@@ -555,6 +555,7 @@ class Run:
         self.running = True
         self.ai_detected = False
         self.defeat = False
+        self.win = False
         self.menu = False
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
@@ -919,6 +920,8 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
+                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)):
+                    self.win = True
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
@@ -946,14 +949,17 @@ class Run:
 
                 pygame.display.flip()
 
-        # После поражения
+        # После поражения или победы
         while alpha > 0:
             help_surface.fill((0, 0, 0, alpha))
             screen.blit(help_surface, (0, 0))
             alpha -= 1
             pygame.display.flip()
             clock.tick(FPS)
-        return 1
+        if self.defeat:
+            return 1
+        elif self.win:
+            return 3
 
 
 if __name__ == '__main__':
