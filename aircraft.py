@@ -2,16 +2,16 @@ import pygame
 from math import sin, cos, atan2
 from Settings import ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
-    ALL_SPRITES_FOR_SURE
+    ALL_SPRITES_FOR_SURE, AIRCRAFT_FRIENDLY_SHEET
 import Settings
+from animated_sprite import AnimatedSprite
 
 
-class AircraftFriendly(pygame.sprite.Sprite):
+class AircraftFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт самолета"""
     def __init__(self, destination, visibility):
-        super().__init__(ALL_SPRITES, PLAYER_AIRCRAFT, ALL_SPRITES_FOR_SURE)
+        super().__init__(AIRCRAFT_FRIENDLY_SHEET, 7, 1, PLAYER_AIRCRAFT)
         player = list(PLAYER_SPRITE)[0]
-        self.image = new_image_size(AIRCRAFT_FRIENDLY)
         self.rect = self.image.get_rect(center=[player.rect.centerx,
                                                 player.rect.centery])
         self.pos = list(self.rect.center)

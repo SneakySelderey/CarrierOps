@@ -44,6 +44,7 @@ pygame.init()
 pygame.mixer.init()
 
 # Константы
+ANIMATED_SPRTIES = pygame.sprite.Group()
 ALL_SPRITES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
@@ -106,6 +107,7 @@ USER_DATA = get_user_data()
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
+UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -150,6 +152,7 @@ NORWEG_LAND = pygame.image.load('data/img/norwegian_sea_land.png').convert_alpha
 NORWEG_WATER = pygame.image.load('data/img/norwegian_sea_water.png').convert_alpha()
 CHINA_LAND = pygame.image.load('data/img/south_china_sea_land.png').convert_alpha()
 CHINA_WATER = pygame.image.load('data/img/south_china_sea_water.png').convert_alpha()
+AIRCRAFT_FRIENDLY_SHEET = pygame.image.load('data/sheets/friendly_aircraft_sheet.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
