@@ -3,6 +3,7 @@ from Settings import PLAYER_IMAGE, PLAYER_SPRITE, NEIGHBOURS
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
+import copy
 
 
 class Player(Carrier):
@@ -16,19 +17,17 @@ class Player(Carrier):
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
 
+        self.prev_pos = list(self.rect.center)
+
     def update(self):
         """Обновление позиции объекта"""
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
             if pygame.sprite.collide_mask(self, land):
-                for i in NEIGHBOURS:
-                    self.rect.center = self.rect.center[0] + i[0], \
-                                       self.rect.center[1] + i[1]
-                    self.pos = list(self.rect.center)
-                    if not pygame.sprite.collide_mask(self, land):
-                        break
+                self.pos = self.prev_pos
 
             if self.pos != self.destination and not self.stop:
+                self.prev_pos = list(copy.copy(self.pos))
                 # Обновление кооординат (из полярнйо системы в декартову)
                 self.pos[0] = self.pos[0] + Settings.PLAYER_SPEED * cos(
                     self.alpha)
