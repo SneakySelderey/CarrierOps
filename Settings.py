@@ -150,6 +150,7 @@ NORWEG_LAND = pygame.image.load('data/img/norwegian_sea_land.png').convert_alpha
 NORWEG_WATER = pygame.image.load('data/img/norwegian_sea_water.png').convert_alpha()
 CHINA_LAND = pygame.image.load('data/img/south_china_sea_land.png').convert_alpha()
 CHINA_WATER = pygame.image.load('data/img/south_china_sea_water.png').convert_alpha()
+VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
@@ -172,6 +173,7 @@ MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
 GAME_MUSIC = os.listdir(os.getcwd() + '/data/music/game/')
 BATTLE_MUSIC = os.listdir(os.getcwd() + '/data/music/battle/')
 GAMEOVER_MUSIC = os.listdir(os.getcwd() + '/data/music/gameover/')
+VICTORY_MUSIC = os.listdir(os.getcwd() + '/data/music/win/')
 GROUPS = [MENU_MUSIC, GAME_MUSIC, BATTLE_MUSIC, GAMEOVER_MUSIC]
 ALL_MUSIC = [track for group in GROUPS for track in group]
 

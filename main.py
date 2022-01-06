@@ -339,6 +339,42 @@ def show_gameover_screen():
         pygame.display.flip()
 
 
+def show_victory_screen():
+    """Функция для отрисовки и взаимодействия с экраном проигрыша"""
+    [i.stop() for i in ALL_EFFECTS]
+    background = pygame.transform.scale(VICTORY, (WIDTH, HEIGHT))
+    alpha = 255
+    screen.fill(BLACK)
+    win_manager.draw_ui(screen)
+    pygame.display.flip()
+    clock.tick(5000)
+    while True:
+        delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == WIN_ELEMENTS['QUIT']:
+                        terminate()
+                    if event.ui_element == WIN_ELEMENTS['MENU']:
+                        return 1
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/win/'
+                                        + choice(VICTORY_MUSIC))
+                pygame.mixer.music.play(fade_ms=3000)
+            win_manager.process_events(event)
+        # Создание красивой картинки и эффекта затемнения
+        help_surface.fill((0, 0, 0, alpha))
+        screen.blit(background, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        alpha = max(alpha - 0.5, 0)
+        # Обновление менеджера
+        win_manager.update(delta)
+        win_manager.draw_ui(screen)
+        pygame.display.flip()
+
+
 def show_in_game_menu():
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
     # Переменные для создания красивой картинки
@@ -920,7 +956,7 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
-                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)):
+                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)) + 1:
                     self.win = True
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
@@ -941,7 +977,7 @@ class Run:
 
                 if alpha == 255:
                     self.running = False
-                if self.defeat:
+                if self.defeat or self.win:
                     alpha = min(alpha + 10, 255)
 
                 campaign_manager.update(delta)
@@ -978,8 +1014,8 @@ if __name__ == '__main__':
     game_objects = None
     calculate_speed(80)
     # Флаги, отвечающие за то, в каком меню находится пользователь
-    menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, False, True
+    menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, victory_run, slides_run = \
+        False, False, False, False, False, False, False, True
     running = True
     # Создадим камеру
     camera = Camera()
@@ -1014,6 +1050,12 @@ if __name__ == '__main__':
             gameover_run = False
             game_objects = None
             menu_run = result == 1
+        elif victory_run:  # Экран после победы
+            pygame.mixer.music.fadeout(500)
+            result = show_victory_screen()
+            victory_run = False
+            game_objects = None
+            menu_run = result == 1
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
             game_objects = Run(solomon_chosen, norweg_chosen, china_chosen)
@@ -1021,6 +1063,7 @@ if __name__ == '__main__':
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
+            victory_run = result = 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1

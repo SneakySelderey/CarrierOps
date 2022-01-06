@@ -227,6 +227,9 @@ map_manager = pygame_gui.UIManager(
 gameover_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+win_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 game_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
@@ -259,15 +262,19 @@ QUIT_BUTTON_1 = Button('QUIT TO DESKTOP', 0.5, 0.75, 20, menu_manager)
 SETTINGS_BUTTON = Button('SETTINGS', 0.5, 0.625, 20, menu_manager)
 NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
 LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
-BASES_LOST = Label(36, "GAME OVER. YOU'VE LOST ALL THE BASES", 0.5, 0.375,
+BASES_LOST = Label(36, "GAME OVER. YOU'VE LOST ALL BASES", 0.5, 0.375,
                    gameover_manager, 'settings')
+BASES_CAPTURED = Label(36, "VICTORY. YOU'VE CAPTURED ALL BASES", 0.5, 0.375,
+                       win_manager, 'settings')
 MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
+QUIT_BUTTON_3 = QUIT_BUTTON_1.get_same(game_manager)
 RESUME_BUTTON = Button('RESUME', 0.5, 0.250, 20, game_manager)
 MAIN_MENU_BUTTON_2 = MAIN_MENU_BUTTON.get_same(game_manager, 0.5, 0.375)
+MAIN_MENU_BUTTON_WIN = MAIN_MENU_BUTTON.get_same(win_manager, 0.3, 0.9)
 LOAD_SAVE_BUTTON_2 = LOAD_SAVE_BUTTON.get_same(game_manager)
 SETTINGS_BUTTON_2 = SETTINGS_BUTTON.get_same(game_manager)
-QUIT_BUTTON_3 = QUIT_BUTTON_1.get_same(game_manager)
+QUIT_BUTTON_WIN = QUIT_BUTTON_1.get_same(win_manager, 0.6, 0.9)
 SETTINGS_LABEL = Label(36, 'SETTINGS', 0.5, 0.125,
                        settings_manager, 'settings', 'center')
 RESOLUTION_LABEL = Label(24, 'RESOLUTION', 0.6, 0.33,
@@ -332,7 +339,7 @@ NORWEGIAN_SEA_MAP = Button('NORWEGIAN SEA', 0.5, 0.5, 20, map_manager)
 SOUTH_CHINA_SEA_MAP = Button('SOUTH CHINA SEA', 0.5, 0.7, 20, map_manager)
 BACK = Button('BACK', 0.5, 0.9, 20, map_manager)
 # Создание групп с элементами
-LABELS = [TITLE, BASES_LOST, RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL,
+LABELS = [TITLE, BASES_LOST, BASES_CAPTURED, RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL,
           EFFECTS_LABEL, MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL,
           RESOURCES_LABEL, AIRCRAFT_BASE_CAPT, MISSILES_BASE_CAPT,
           GEARS_BASE_CAPT, OIL_BASE_CAPT, AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM]
@@ -341,6 +348,7 @@ MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
 MAP_ELEMENTS = {"BACK": BACK, "SOLOMON ISLANDS": SOLOMON_MAP, "NORWEGIAN SEA": NORWEGIAN_SEA_MAP,
                 "SOUTH CHINA SEA": SOUTH_CHINA_SEA_MAP}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
+WIN_ELEMENTS = {"QUIT": QUIT_BUTTON_WIN, "MENU": MAIN_MENU_BUTTON_WIN}
 IN_GAME_ELEMENTS = {"QUIT": QUIT_BUTTON_3, "RESUME": RESUME_BUTTON,
                     "MENU": MAIN_MENU_BUTTON_2, "LOAD": LOAD_SAVE_BUTTON_2,
                     "SETTINGS": SETTINGS_BUTTON_2}
