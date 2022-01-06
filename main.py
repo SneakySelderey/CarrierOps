@@ -7,7 +7,7 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from maps import SolomonLand, NorwegLand
+from maps import SolomonLand, NorwegLand, ChinaLand
 from Settings import *
 import Settings
 import pygame_gui
@@ -891,7 +891,10 @@ class Run:
                         Settings.CELL_SIZE * self.board.height)),
                                 (camera.overall_shift_x, camera.overall_shift_y))
                 elif china_chosen:
-                    pass
+                    screen.blit(pygame.transform.scale(Settings.CHINA_WATER, (
+                        Settings.CELL_SIZE * self.board.width,
+                        Settings.CELL_SIZE * self.board.height)),
+                                (camera.overall_shift_x, camera.overall_shift_y))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
