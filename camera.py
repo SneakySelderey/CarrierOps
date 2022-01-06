@@ -28,6 +28,11 @@ class Camera:
         """Сдвинуть самолет на смещенеи камеры"""
         obj.pos[0] += self.dx
         obj.pos[1] += self.dy
+        try:
+            obj.prev_pos[0] += self.dx
+            obj.prev_pos[1] += self.dy
+        except AttributeError:
+            pass
         self.apply_rect(obj)
 
     def apply_missiles(self, obj):
