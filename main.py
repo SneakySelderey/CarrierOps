@@ -584,10 +584,10 @@ class Run:
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
-        self.board = Board(self.cells_x, self.cells_y)
+        self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, self.cell_size)
 
-        # Флаги
+        # Флаги, переменные
         self.running = True
         self.ai_detected = False
         self.defeat = False
@@ -602,6 +602,13 @@ class Run:
             self.map = NorwegLand(True, self.board)
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
+
+        self.missiles_launched = 0
+        self.aircraft_launched = 0
+        self.bases_captured_by_player = 0
+        self.bases_captured_by_AI = 0
+        self.player_missiles_hit = 0
+        self.AI_missiles_hit = 0
 
         self.board.add_bases()
         self.player = Player()
@@ -630,12 +637,14 @@ class Run:
         Settings.PLAYER_MISSILES.add(MissileFriendly(
             destination, True))
         FIRE_VLS.play()
+        self.missiles_launched += 1
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
             destination, True))
         TAKEOFF.play()
+        self.aircraft_launched += 1
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -683,6 +692,7 @@ class Run:
                     Settings.PLAYER_MISSILES.remove(missile)
                     Settings.ALL_SPRITES.remove(missile)
                     Settings.ALL_SPRITES_FOR_SURE.remove(missile)
+                    self.player_missiles_hit += 1
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
                     missile.activation = list(missile.activation)

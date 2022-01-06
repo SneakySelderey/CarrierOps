@@ -15,7 +15,7 @@ class Base(pygame.sprite.Sprite):
                     'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES],
                     'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
 
-    def __init__(self, x, y, state, visibility, cell_size, parent):
+    def __init__(self, x, y, state, visibility, cell_size, parent, run):
         super().__init__(ALL_SPRITES_FOR_SURE, ALL_SPRITES, BASES_SPRITES,
                          ALWAYS_UPDATE)
         self.x, self.y = x, y
@@ -38,6 +38,7 @@ class Base(pygame.sprite.Sprite):
             self.resource_type = random_resource_type()
             self.ico = BaseIcon(self)
             self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
+        self.run = run
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -77,6 +78,10 @@ class Base(pygame.sprite.Sprite):
 
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
+            if self.state == 'friendly':
+                self.run.bases_captured_by_player += 1
+            elif self.state == 'hostile':
+                self.run.bases_captured_by_AI += 1
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,

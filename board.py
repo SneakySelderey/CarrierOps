@@ -6,7 +6,7 @@ from random import sample, choice
 
 class Board:
     """Класс, ответственный за отрисовку поля"""
-    def __init__(self, width, height):
+    def __init__(self, width, height, run):
         self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
@@ -37,7 +37,7 @@ class Board:
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
         if not mega:
-            base = Base(x, y, 'neutral', True, self.cell_size, self)
+            base = Base(x, y, 'neutral', True, self.cell_size, self, self.run)
         else:
             base = SuperBase(x, y, mega[0], True, self.cell_size, self)
         land = list(Settings.BACKGROUND_MAP)[0]
