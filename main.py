@@ -1080,7 +1080,7 @@ if __name__ == '__main__':
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
-            victory_run = result = 3
+            victory_run = result == 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
