@@ -1,6 +1,6 @@
 import pygame
 from math import sin, cos, atan2
-from Settings import new_coords, ALL_SPRITES, new_image_size, \
+from Settings import ALL_SPRITES, new_image_size, \
     AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
     ALL_SPRITES_FOR_SURE
 import Settings
@@ -47,14 +47,19 @@ class AircraftFriendly(pygame.sprite.Sprite):
             else:
                 self.aircraft_tracking()
 
-    def new_position(self):
+    def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(AIRCRAFT_FRIENDLY)
-        rect = self.image.get_rect()
-        rect.x, rect.y = new_coords(self.rect.x, self.rect.y)
-        self.rect = rect
-        self.pos = [*new_coords(self.pos[0], self.pos[1])]
-        self.destination = list(new_coords(*self.destination))
+        c_x = (self.rect.centerx - left) / cell_size
+        c_y = (self.rect.centery - top) / cell_size
+        self.rect = self.image.get_rect(
+            center=(left + c_x * Settings.CELL_SIZE,
+                    top + c_y * Settings.CELL_SIZE))
+        self.pos = list(self.rect.center)
+        dest_x = (self.destination[0] - left) / cell_size
+        dest_y = (self.destination[1] - top) / cell_size
+        self.destination = [left + dest_x * Settings.CELL_SIZE,
+                            top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
         self.radius = Settings.CELL_SIZE * 3.5
@@ -67,7 +72,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
         player = list(PLAYER_SPRITE)[0]
         self.alpha = atan2(player.rect.centery - self.rect.centery,
                            player.rect.centerx - self.rect.centerx)
-        self.destination = player.rect.centerx, player.rect.centery
+        self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
         if pygame.sprite.collide_mask(self, player):
             Settings.NUM_OF_AIRCRAFT += 1

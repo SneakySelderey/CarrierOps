@@ -9,9 +9,11 @@ class Camera:
         self.dy = 0
         self.overall_shift_x = 0
         self.overall_shift_y = 0
+        self.centered = False
 
     def rebase(self):
         """Обновление данных камеры"""
+        self.centered = False
         self.dx = 0
         self.dy = 0
         self.overall_shift_x = 0
@@ -34,3 +36,14 @@ class Camera:
         obj.pos.y += self.dy
         if Settings.IS_PAUSE:
             self.apply_rect(obj)
+
+    def new_position(self):
+        """Функция для обновления положения - центровка по игроку"""
+        self.dx = self.dy = 0
+        self.dx -= list(Settings.PLAYER_SPRITE)[
+                         0].rect.centerx - Settings.WIDTH // 2
+        self.dy -= list(Settings.PLAYER_SPRITE)[
+                         0].rect.centery - Settings.HEIGHT // 2
+        self.overall_shift_x = 0
+        self.overall_shift_y = 0
+        self.centered = True

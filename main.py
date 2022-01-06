@@ -20,32 +20,31 @@ def move_window():
     """Функция для перемещения окна на середину экрана"""
     hwnd = win32gui.FindWindow(None, "CarrierOps")
     win32gui.MoveWindow(hwnd, (
-        screensize[0] - WIDTH) // 2, (
-                            screensize[1] - HEIGHT) // 2,
-                        WIDTH, HEIGHT, True)
+        screensize[0] - Settings.WIDTH) // 2, (
+                            screensize[1] - Settings.HEIGHT) // 2,
+                        Settings.WIDTH, Settings.HEIGHT, True)
 
 
-def calculate_speed():
+def calculate_speed(cell):
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
-    diff = sum([Settings.P_WIDTH / Settings.WIDTH,
-                Settings.P_HEIGHT / Settings.HEIGHT])
-    Settings.PLAYER_SPEED = 2 * Settings.PLAYER_SPEED / diff
-    Settings.AIR_SPEED = 2 * Settings.AIR_SPEED / diff
-    Settings.MISSILE_SPEED = 2 * Settings.MISSILE_SPEED / diff
-    Settings.AI_SPEED = 2 * Settings.AI_SPEED / diff
+    diff = 80 / cell
+    Settings.PLAYER_SPEED = 1.5 / diff
+    Settings.AIR_SPEED = 2.5 / diff
+    Settings.MISSILE_SPEED = 2 / diff
+    Settings.AI_SPEED = 1 / diff
 
 
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
-    разрешения"""
-    [carrier.new_position(game_objects.board.cell_size,
-                          game_objects.board.top, game_objects.board.left)
-     for carrier in Settings.CARRIER_GROP]
-    [obj.new_position() for obj in Settings.ALL_SPRITES_FOR_SURE if
-     obj not in Settings.CARRIER_GROP]
+    разрешения/зуме"""
+    [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
+                         game_objects.board.left) for sprite in
+        Settings.ALL_SPRITES_FOR_SURE]
+    camera.new_position()
+    Settings.ALWAYS_UPDATE.update()
+    calculate_speed(game_objects.cell_size)
     game_objects.cell_size = Settings.CELL_SIZE
-    ALL_SPRITES_FOR_SURE.update()
 
 
 def delete_save(save):
@@ -78,6 +77,11 @@ def give_tooltip(num):
             manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
+    elif num == 3:
+        pygame_gui.elements.UITextEntryLine(
+            manager=user_data_manager,
+            relative_rect=pygame.Rect(100, 100, 100, 100)
+        )
 
 
 def rebase_elements():
@@ -106,8 +110,6 @@ def rebase_elements():
             LOAD_ELEMENTS[i].update_element()
         except AttributeError:
             LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
-    GAMEOVER_GROUP.update()
-    TITLE_GROUP.update()
 
 
 def rebase_load_manager():
@@ -156,8 +158,6 @@ def show_menu_screen():
                     if event.ui_element == MENU_ELEMENTS['QUIT']:
                         terminate()
                     return list(MENU_ELEMENTS.values()).index(event.ui_element)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                TITLE_GROUP.update(event.pos)
             if event.type == MUSIC_END:
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
@@ -168,7 +168,6 @@ def show_menu_screen():
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
         alpha = max(alpha - 10, 0)
-        TITLE_GROUP.draw(screen)
         # Обновление менеджера
         menu_manager.update(delta)
         menu_manager.draw_ui(screen)
@@ -177,13 +176,14 @@ def show_menu_screen():
 
 def show_setting_screen(flag=True):
     """Функция для отрисовки и взаимодеййствия с окном настроек"""
-    global WIDTH, HEIGHT, help_surface, screen
+    global help_surface, screen
     # Переменные для красивой картинки и эффекта затемнения
     alpha_up = 0
     alpha_down = 255
-    background = pygame.transform.scale(SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+    background = pygame.transform.scale(SETTINGS_BACKGROUND, (
+        Settings.WIDTH, Settings.HEIGHT))
     background2 = screen if not flag else pygame.transform.scale(
-        MENU_BACKGROUND, (WIDTH, HEIGHT))
+        MENU_BACKGROUND, (Settings.WIDTH, Settings.HEIGHT))
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -196,41 +196,47 @@ def show_setting_screen(flag=True):
                     if event.ui_element == SETTINGS_ELEMENTS['FULLSCREEN']:
                         if event.ui_element.text == ' ':
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
-                                                             pygame.FULLSCREEN)
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT),
+                                pygame.FULLSCREEN)
                         else:
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text(' ')
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT))
                             move_window()
                         Settings.IS_FULLSCREEN = not Settings.IS_FULLSCREEN
                 if event.user_type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                     if event.ui_element == SETTINGS_ELEMENTS['RESOLUTION']:
                         # Изменение размера окна
                         # Сохраним старое разрешение
-                        Settings.P_WIDTH, Settings.P_HEIGHT = WIDTH, HEIGHT
+                        Settings.P_WIDTH, Settings.P_HEIGHT = \
+                            Settings.WIDTH, Settings.HEIGHT
                         # пределим новое разрешение и размер клетки
-                        WIDTH, HEIGHT = map(int, event.text.split('X'))
-                        Settings.WIDTH, Settings.HEIGHT = WIDTH, HEIGHT
+                        Settings.WIDTH, Settings.HEIGHT = map(
+                            int, event.text.split('X'))
+                        if Settings.P_HEIGHT != HEIGHT and \
+                                Settings.P_WIDTH != WIDTH:
+                            calculate_speed(Settings.CELL_SIZE)
                         Settings.CELL_SIZE = WIDTH // 20
                         # Обновим элементы интерфейса
                         rebase_elements()
-                        help_surface = pygame.transform.scale(help_surface,
-                                                              (WIDTH, HEIGHT))
+                        help_surface = pygame.transform.scale(
+                            help_surface, (Settings.WIDTH, Settings.HEIGHT))
                         background = pygame.transform.scale(
-                            SETTINGS_BACKGROUND, (WIDTH, HEIGHT))
+                            SETTINGS_BACKGROUND, (Settings.WIDTH,
+                                                  Settings.HEIGHT))
                         if not Settings.IS_FULLSCREEN:
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+                            screen = pygame.display.set_mode(
+                                (Settings.WIDTH, Settings.HEIGHT))
                         else:
-                            screen = pygame.display.set_mode((WIDTH, HEIGHT),
+                            screen = pygame.display.set_mode((Settings.WIDTH,
+                                                              Settings.HEIGHT),
                                                              pygame.FULLSCREEN)
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
                         # Если игра уже начата, обновим координаты всех
                         # объектов
                         if game_objects is not None:
                             update_objects()
-                        if Settings.P_HEIGHT != HEIGHT and \
-                                Settings.P_WIDTH != WIDTH:
-                            calculate_speed()
                         if not Settings.IS_FULLSCREEN:
                             move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -274,7 +280,7 @@ def show_gameover_screen():
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
     alpha = 255
     screen.fill(BLACK)
-    GAMEOVER_GROUP.draw(screen)
+    gameover_manager.draw_ui(screen)
     pygame.display.flip()
     clock.tick(5000)
     while True:
@@ -298,7 +304,6 @@ def show_gameover_screen():
         screen.blit(background, (0, 0))
         screen.blit(help_surface, (0, 0))
         alpha = max(alpha - 0.5, 0)
-        GAMEOVER_GROUP.draw(screen)
         # Обновление менеджера
         gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
@@ -510,7 +515,7 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        self.cell_size = Settings.CELL_SIZE
+        self.cell_size = int(Settings.CELL_SIZE)
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
@@ -675,13 +680,13 @@ class Run:
         for base in self.board.bases:
             base.bar.visibility = False
             if base.start_of_capture in [0, 1] or \
-                    pygame.sprite.collide_circle_ratio(0.5)(player, base):
+                    pygame.sprite.collide_circle_ratio(1)(player, base):
                 base.bar.visibility = True
             for aircraft in self.friendly_aircraft:
-                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
+                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
                     base.bar.visibility = True
             for missile in self.friendly_missiles:
-                if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
+                if pygame.sprite.collide_circle_ratio(1)(missile, base):
                     base.bar.visibility = True
             if base.bar.visibility and base.state == 'ai':
                 base.visibility = True
@@ -712,7 +717,7 @@ class Run:
         self.ai.destination[0] += camera.dx
         self.ai.destination[1] += camera.dy
 
-        if not self.centered:
+        if not camera.centered:
             camera.overall_shift_x += camera.dx
             camera.overall_shift_y += camera.dy
         else:
@@ -725,7 +730,7 @@ class Run:
                     except AttributeError:
                         j.activation[0] += camera.dx
                         j.activation[1] += camera.dy
-        self.centered = False
+        camera.centered = False
 
     def main(self):
         """Функция с основным игровым циклом"""
@@ -743,9 +748,9 @@ class Run:
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+        pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
         Settings.ALL_SPRITES_FOR_SURE.update()
-        self.centered = False
         while self.running:
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -763,6 +768,18 @@ class Run:
                     if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
+                    if event.button == 4:
+                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 30
+                        camera.overall_shift_x = event.pos[0]
+                        camera.overall_shift_y = event.pos[1]
+                        update_objects()
+                    if event.button == 5:
+                        Settings.CELL_SIZE = max(
+                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
+                            10)
+                        camera.overall_shift_x = event.pos[0]
+                        camera.overall_shift_y = event.pos[1]
+                        update_objects()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
@@ -771,23 +788,18 @@ class Run:
                     if event.key == pygame.K_r:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
-                        camera.dx = camera.dy = 0
-                        camera.dx += -camera.overall_shift_x
-                        camera.dy += -camera.overall_shift_y
-                        camera.overall_shift_x = 0
-                        camera.overall_shift_y = 0
-                        self.centered = True
+                        camera.new_position()
                     if event.key == pygame.K_UP:
-                        camera.dy += 20
+                        camera.dy += Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_DOWN:
-                        camera.dy -= 20
+                        camera.dy -= Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_LEFT:
-                        camera.dx += 20
+                        camera.dx += Settings.CELL_SIZE // 4
                         arrow_pressed = True
                     if event.key == pygame.K_RIGHT:
-                        camera.dx -= 20
+                        camera.dx -= Settings.CELL_SIZE // 4
                         arrow_pressed = True
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_UP:
@@ -809,26 +821,28 @@ class Run:
                 campaign_manager.process_events(event)
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
+                if event.type == UPDATE_ALL_SPRITES and not (
+                    Settings.IS_PAUSE or self.menu or self.resource_menu or
+                        self.defeat):
+                    Settings.ALL_SPRITES_FOR_SURE.update()
 
             self.camera_update()
 
             if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not \
                     arrow_pressed:
-                camera.dx = -20
+                camera.dx = -Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
-                camera.dx = 20
+                camera.dx = Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not \
                     arrow_pressed:
-                camera.dy = -20
+                camera.dy = -Settings.CELL_SIZE // 4
             elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
-                camera.dy = 20
+                camera.dy = Settings.CELL_SIZE // 4
             else:
                 if not arrow_pressed:
                     camera.dx = 0
                     camera.dy = 0
 
-            if not (Settings.IS_PAUSE or self.defeat or self.menu):
-                Settings.ALL_SPRITES.update()
             if self.resource_menu:
                 show_resources_menu()
                 self.resource_menu = False
@@ -849,13 +863,14 @@ class Run:
                 screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
                     Settings.CELL_SIZE * self.board.width,
                     Settings.CELL_SIZE * self.board.height)),
-                            (camera.overall_shift_x, camera.overall_shift_y))
+                            (self.board.left, self.board.top))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
+                help_surface.blit(screen, (0, 0))
                 Settings.ICONS_GROUP.draw(screen)
 
                 if not self.player.stop:
@@ -867,7 +882,7 @@ class Run:
                 if Settings.IS_PAUSE:
                     text_pause = MAIN_FONT.render('PAUSE', True, WHITE)
                     screen.blit(text_pause, text_pause.get_rect(
-                        center=(WIDTH // 2, HEIGHT // 2)))
+                        center=(Settings.WIDTH // 2, Settings.HEIGHT // 2)))
 
                 if alpha == 255:
                     self.running = False
@@ -903,14 +918,13 @@ if __name__ == '__main__':
     FPS = 60
 
     game_objects = None
-    calculate_speed()
+    calculate_speed(80)
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
     running = True
     # Создадим камеру
     camera = Camera()
-
     # Основной мега-цикл
     while running:
         if slides_run:  # Слайды в начале игры
@@ -943,6 +957,8 @@ if __name__ == '__main__':
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
+            settings_run = False
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
+            load_run = False

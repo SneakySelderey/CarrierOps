@@ -24,12 +24,6 @@ def get_bigger_rect(rect, d):
     return rect
 
 
-def new_coords(x, y):
-    """Функия для пересчета координат объекта при изменении разрешения.
-    Принимет координату при старом разрешении"""
-    return int(x / P_WIDTH * WIDTH), int(y / P_HEIGHT * HEIGHT)
-
-
 def new_image_size(img):
     """Функия для изменения размера изображеня"""
     return pygame.transform.scale(img, (
@@ -54,8 +48,6 @@ ALL_SPRITES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
-TITLE_GROUP = pygame.sprite.Group()
-GAMEOVER_GROUP = pygame.sprite.Group()
 AI_SPRITE = pygame.sprite.Group()
 PLAYER_MISSILES = pygame.sprite.Group()
 PLAYER_AIRCRAFT = pygame.sprite.Group()
@@ -66,9 +58,10 @@ RESOURCES_BASE = pygame.sprite.Group()
 CARRIER_GROP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
+ALWAYS_UPDATE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
-AIR_SPEED = 2
+AIR_SPEED = 2.5
 MISSILE_SPEED = 2
 NUM_OF_MISSILES = 5
 NUM_OF_AIRCRAFT = 3
@@ -87,7 +80,6 @@ AI_SPEED = 1
 NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
-MAP = 'SOLOMON'
 NEIGHBOURS = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2),
               (2, -2)]
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
@@ -113,6 +105,7 @@ USER_DATA = get_user_data()
 # Events
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
+UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 
 # Цвета
 BLACK = pygame.Color('black')

@@ -23,7 +23,7 @@ class SolomonLand(pygame.sprite.Sprite):
     def update(self):
         """Обновление позиции карты"""
 
-    def new_position(self):
+    def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(SOLOMON_LAND, (
             Settings.CELL_SIZE * self.parent_board.width,
