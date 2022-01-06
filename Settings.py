@@ -146,6 +146,10 @@ RESOURCE_BACKGROUND = pygame.image.load('data/img/resource_menu_background.jpg')
 SOLOMON_LAND = pygame.image.load('data/img/solomon_land.png').convert_alpha()
 SOLOMON_WATER = pygame.image.load('data/img/solomon_water.png').convert_alpha()
 SOLOMON_WATERMASK = pygame.image.load('data/img/solomon_watermask_negate.png').convert_alpha()
+NORWEG_LAND = pygame.image.load('data/img/norwegian_sea_land.png').convert_alpha()
+NORWEG_WATER = pygame.image.load('data/img/norwegian_sea_water.png').convert_alpha()
+CHINA_LAND = pygame.image.load('data/img/south_china_sea_land.png').convert_alpha()
+CHINA_WATER = pygame.image.load('data/img/south_china_sea_water.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
