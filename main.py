@@ -917,10 +917,6 @@ if __name__ == '__main__':
 
     game_objects = None
     calculate_speed(80)
-    print(Settings.PLAYER_SPEED)
-    print(Settings.AI_SPEED)
-    print(Settings.MISSILE_SPEED)
-    print(Settings.AIR_SPEED)
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True

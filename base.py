@@ -57,7 +57,8 @@ class Base(pygame.sprite.Sprite):
         if self.prev_start != self.start_of_capture:
             self.to_add = True
 
-        if self.ticks_to_capture and self.start_of_capture:
+        if self.ticks_to_capture and self.start_of_capture and not \
+                Settings.IS_PAUSE:
             self.ticks_to_capture -= 1
         elif self.to_add:
             self.to_add = False
@@ -81,9 +82,9 @@ class Base(pygame.sprite.Sprite):
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
                              self.y * Settings.CELL_SIZE + self.parent.top]
 
-        if self.ticks_to_give_resource:
+        if self.ticks_to_give_resource and not Settings.IS_PAUSE:
             self.ticks_to_give_resource -= 1
-        elif self.state == 'friendly':
+        elif self.state == 'friendly' and not Settings.IS_PAUSE:
             self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
             if self.resource_type == 'oil':
                 Settings.BASE_OIL_VOLUME = min(
@@ -148,7 +149,8 @@ class SuperBase(Base):
         if prev_start != self.start_of_capture:
             self.to_add = True
 
-        if self.ticks_to_capture and self.start_of_capture:
+        if self.ticks_to_capture and self.start_of_capture and not \
+                Settings.IS_PAUSE:
             self.ticks_to_capture -= 1
         elif self.to_add:
             self.to_add = False
