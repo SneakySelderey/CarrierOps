@@ -899,17 +899,17 @@ class Run:
                     screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 elif norweg_chosen:
                     screen.blit(pygame.transform.scale(Settings.NORWEG_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 elif china_chosen:
                     screen.blit(pygame.transform.scale(Settings.CHINA_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -979,6 +979,7 @@ if __name__ == '__main__':
             slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            Settings.CELL_SIZE = Settings.WIDTH // 20
             Settings.IS_PAUSE = True
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()

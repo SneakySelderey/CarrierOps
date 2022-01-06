@@ -54,7 +54,7 @@ class NorwegLand(pygame.sprite.Sprite):
     def update(self):
         """Обновление позиции карты"""
 
-    def new_position(self):
+    def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(Settings.NORWEG_LAND, (
             Settings.CELL_SIZE * self.parent_board.width,
@@ -82,7 +82,7 @@ class ChinaLand(pygame.sprite.Sprite):
     def update(self):
         """Обновление позиции карты"""
 
-    def new_position(self):
+    def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(Settings.CHINA_LAND, (
             Settings.CELL_SIZE * self.parent_board.width,
