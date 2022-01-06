@@ -39,7 +39,7 @@ class MissileFriendly(pygame.sprite.Sprite):
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
         if not self.activated:
-            self.total_ticks += 0.02
+            self.total_ticks += 0.01
 
         if self.pos != self.activation:
             self.pos += self.alpha * Settings.MISSILE_SPEED
@@ -80,7 +80,7 @@ class MissileFriendly(pygame.sprite.Sprite):
     def missile_activation(self):
         """Обновление координат ракет при активации ГСН"""
         if self.activated:
-            if self.ticks >= 50:
+            if self.ticks >= 100:
                 self.total_ticks += 1
                 self.ticks = 0
                 if self.turn == 0:
@@ -97,7 +97,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
     def missile_tracking(self):
         """Обновление координат ракеты при захвате противника ГСН"""
-        if self.ticks2 >= 50:
+        if self.ticks2 >= 100:
             self.total_ticks += 1
             self.ticks2 = 0
         self.ticks2 += 1

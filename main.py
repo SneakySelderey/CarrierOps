@@ -803,7 +803,9 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 30
+                        Settings.CELL_SIZE = min(
+                            Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
+                            250)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
@@ -877,6 +879,10 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
+            if not (Settings.IS_PAUSE or self.menu or self.resource_menu or
+                    self.defeat):
+                [mis.update() for mis in set(Settings.PLAYER_MISSILES) | set(
+                    Settings.AI_MISSILES)]
             if self.resource_menu:
                 show_resources_menu()
                 self.resource_menu = False
@@ -899,17 +905,17 @@ class Run:
                     screen.blit(pygame.transform.scale(Settings.SOLOMON_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 elif norweg_chosen:
                     screen.blit(pygame.transform.scale(Settings.NORWEG_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 elif china_chosen:
                     screen.blit(pygame.transform.scale(Settings.CHINA_WATER, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (camera.overall_shift_x, camera.overall_shift_y))
+                                (self.board.left, self.board.top))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -979,6 +985,7 @@ if __name__ == '__main__':
             slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            Settings.CELL_SIZE = Settings.WIDTH // 20
             Settings.IS_PAUSE = True
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
