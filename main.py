@@ -28,11 +28,11 @@ def move_window():
 def calculate_speed(cell):
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
-    diff = Settings.CELL_SIZE / cell
-    Settings.PLAYER_SPEED *= diff
-    Settings.AIR_SPEED *= diff
-    Settings.MISSILE_SPEED *= diff
-    Settings.AI_SPEED *= diff
+    diff = 80 / cell
+    Settings.PLAYER_SPEED = 1.5 / diff
+    Settings.AIR_SPEED = 2 / diff
+    Settings.MISSILE_SPEED = 2 / diff
+    Settings.AI_SPEED = 1 / diff
 
 
 def update_objects():
@@ -41,8 +41,8 @@ def update_objects():
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
         Settings.ALL_SPRITES_FOR_SURE]
-    ALL_SPRITES_FOR_SURE.update()
     camera.new_position()
+    Settings.ALWAYS_UPDATE.update()
     calculate_speed(game_objects.cell_size)
     game_objects.cell_size = Settings.CELL_SIZE
 
@@ -77,6 +77,11 @@ def give_tooltip(num):
             manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
+    elif num == 3:
+        pygame_gui.elements.UITextEntryLine(
+            manager=user_data_manager,
+            relative_rect=pygame.Rect(100, 100, 100, 100)
+        )
 
 
 def rebase_elements():
@@ -684,7 +689,6 @@ class Run:
                 if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
                     base.bar.visibility = True
             if base.bar.visibility and base.state == 'ai':
-                print('ttt', base.bar.visibility)
                 base.visibility = True
 
         # радиусы обнаружения и пуска ракет
@@ -744,9 +748,9 @@ class Run:
             sprite_to_monitor=list(PLAYER_SPRITE)[0]
         )
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+        pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
         Settings.ALL_SPRITES_FOR_SURE.update()
-        self.centered = False
         while self.running:
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -765,12 +769,12 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        Settings.CELL_SIZE += 3
+                        Settings.CELL_SIZE += 1
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
                     if event.button == 5:
-                        Settings.CELL_SIZE = max(Settings.CELL_SIZE - 3, 10)
+                        Settings.CELL_SIZE = max(Settings.CELL_SIZE - 1, 10)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
@@ -815,6 +819,10 @@ class Run:
                 campaign_manager.process_events(event)
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
+                if event.type == UPDATE_ALL_SPRITES and not (
+                    Settings.IS_PAUSE or self.menu or self.resource_menu or
+                        self.defeat):
+                    Settings.ALL_SPRITES_FOR_SURE.update()
 
             self.camera_update()
 
@@ -833,8 +841,6 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
-            if not (Settings.IS_PAUSE or self.defeat or self.menu):
-                Settings.ALL_SPRITES.update()
             if self.resource_menu:
                 show_resources_menu()
                 self.resource_menu = False
@@ -862,6 +868,7 @@ class Run:
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
+                help_surface.blit(screen, (0, 0))
                 Settings.ICONS_GROUP.draw(screen)
 
                 if not self.player.stop:
@@ -909,7 +916,11 @@ if __name__ == '__main__':
     FPS = 60
 
     game_objects = None
-    calculate_speed(70)
+    calculate_speed(80)
+    print(Settings.PLAYER_SPEED)
+    print(Settings.AI_SPEED)
+    print(Settings.MISSILE_SPEED)
+    print(Settings.AIR_SPEED)
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, settings_run, game_run, load_run, gameover_run, slides_run = \
         False, False, False, False, False, True
@@ -949,6 +960,8 @@ if __name__ == '__main__':
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
+            settings_run = False
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
+            load_run = False

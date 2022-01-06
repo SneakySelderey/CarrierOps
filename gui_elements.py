@@ -233,6 +233,9 @@ settings_manager = pygame_gui.UIManager(
 load_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+save_name_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 user_data_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
@@ -294,11 +297,11 @@ RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
                         resource_manager, 'settings', 'center')
 AIRCRAFT = Icon(PLANE_ICON, (0.20, 0.04), ICONS_GROUP)
 MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
-#GEARS = Icon(GEAR_ICON, (0.34, 0.04), ICONS_GROUP)
 OIL = Icon(OIL_ICON, (0.34, 0.04), ICONS_GROUP)
-AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT, campaign_manager)
-MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES, campaign_manager)
-#GEARS_CAPTION = IconText(GEARS, Settings.NUM_OF_REPAIR_PARTS, campaign_manager)
+AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT,
+                            campaign_manager)
+MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES,
+                            campaign_manager)
 OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME, campaign_manager)
 AIRCRAFT_BASE = Icon(PLANE_ICON, (0.12, 0.2), RESOURCES_BASE)
 MISSILES_BASE = Icon(MISSILE_ICON, (0.12, 0.4), RESOURCES_BASE)

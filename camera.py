@@ -13,6 +13,7 @@ class Camera:
 
     def rebase(self):
         """Обновление данных камеры"""
+        self.centered = False
         self.dx = 0
         self.dy = 0
         self.overall_shift_x = 0

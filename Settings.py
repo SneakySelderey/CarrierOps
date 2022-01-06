@@ -58,6 +58,7 @@ RESOURCES_BASE = pygame.sprite.Group()
 CARRIER_GROP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
+ALWAYS_UPDATE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2
@@ -79,7 +80,6 @@ AI_SPEED = 1
 NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
-MAP = 'SOLOMON'
 NEIGHBOURS = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2),
               (2, -2)]
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
@@ -105,6 +105,7 @@ USER_DATA = get_user_data()
 # Events
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
+UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 
 # Цвета
 BLACK = pygame.Color('black')
