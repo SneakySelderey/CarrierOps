@@ -339,7 +339,7 @@ def show_gameover_screen():
         pygame.display.flip()
 
 
-def show_victory_screen():
+def show_victory_screen(run):
     """Функция для отрисовки и взаимодействия с экраном проигрыша"""
     [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(VICTORY, (WIDTH, HEIGHT))
@@ -348,6 +348,13 @@ def show_victory_screen():
     win_manager.draw_ui(screen)
     pygame.display.flip()
     clock.tick(5000)
+    gui_elements.MISSILES_LAUNCHED_LABEL.update_text('MISSILES LAUNCHED BY PLAYER: ' + str(run.missiles_launched))
+    gui_elements.AIRCRAFT_LAUNCHED_LABEL.update_text('AIRCRAFT LAUNCHED BY PLAYER: ' + str(run.aircraft_launched))
+    gui_elements.BASES_CAPTURED_BY_PLAYER_LABEL.update_text('BASES CAPTURED BY PLAYER: ' +
+                                                            str(run.bases_captured_by_player))
+    gui_elements.BASES_CAPTURED_BY_AI_LABEL.update_text('BASES CAPTURED BY AI: ' + str(run.bases_captured_by_AI))
+    gui_elements.PLAYER_MISSILES_HIT_LABEL.update_text('PLAYER MISSILES HIT: ' + str(run.player_missiles_hit))
+    gui_elements.AI_MISSILES_HIT_LABEL.update_text('AI MISSILES HIT: ' + str(run.AI_missiles_hit))
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -1062,7 +1069,7 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif victory_run:  # Экран после победы
             pygame.mixer.music.fadeout(500)
-            result = show_victory_screen()
+            result = show_victory_screen(game_objects)
             victory_run = False
             game_objects = None
             menu_run = result == 1

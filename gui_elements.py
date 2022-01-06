@@ -92,7 +92,7 @@ class Label(pygame_gui.elements.UILabel):
         относительно ширины и высоты, менеджер, id, и часть прямоугольника,
         которую задают x и y"""
         text = pygame.font.Font('data/font/Teletactile.ttf', font_size).render(
-            title, True, WHITE)
+            title + '         ', True, WHITE)
         x, y = int(Settings.WIDTH * pos1), int(Settings.HEIGHT * pos2)
         self.font_size = font_size
         self.title = title
@@ -264,7 +264,7 @@ NEW_GAME_BUTTON = Button('NEW CAMPAIGN', 0.5, 0.375, 20, menu_manager)
 LOAD_SAVE_BUTTON = Button('LOAD SAVE', 0.5, 0.5, 20, menu_manager)
 BASES_LOST = Label(36, "GAME OVER. YOU'VE LOST ALL BASES", 0.5, 0.375,
                    gameover_manager, 'settings')
-BASES_CAPTURED = Label(36, "VICTORY. YOU'VE CAPTURED ALL BASES", 0.5, 0.375,
+BASES_CAPTURED = Label(36, "VICTORY. YOU'VE CAPTURED ALL BASES", 0.5, 0.1,
                        win_manager, 'settings')
 MAIN_MENU_BUTTON = Button('MAIN MENU', 0.5, 0.625, 20, gameover_manager)
 QUIT_BUTTON_2 = QUIT_BUTTON_1.get_same(gameover_manager)
@@ -285,6 +285,19 @@ MUSIC_LABEL = Label(24, 'MUSIC', 0.2, 0.3,
                     settings_manager, 'option', 'topleft')
 EFFECTS_LABEL = Label(24, 'EFFECTS', 0.2, 0.37,
                       settings_manager, 'option', 'topleft')
+
+MISSILES_LAUNCHED_LABEL = Label(18, 'MISSILES LAUNCHED BY PLAYER:', 0.3, 0.3,
+                                win_manager, 'topleft')
+AIRCRAFT_LAUNCHED_LABEL = Label(18, 'AIRCRAFT LAUNCHED BY PLAYER:', 0.3, 0.5,
+                                win_manager, 'topleft')
+BASES_CAPTURED_BY_PLAYER_LABEL = Label(18, 'BASES CAPTURED BY PLAYER:', 0.3, 0.7,
+                                       win_manager, 'topleft')
+BASES_CAPTURED_BY_AI_LABEL = Label(18, 'BASES CAPTURED BY AI:', 0.7, 0.3,
+                                   win_manager, 'topleft')
+PLAYER_MISSILES_HIT_LABEL = Label(18, 'PLAYER MISSILES HIT:', 0.7, 0.5,
+                                  win_manager, 'topleft')
+AI_MISSILES_HIT_LABEL = Label(18, 'AI MISSILES HIT:', 0.7, 0.7,
+                              win_manager, 'topleft')
 
 OK_BUTTON = Button('OK', 0.5, 0.8, 10, settings_manager)
 DROP_DOWN_MENU = WindowSizesMenu(0.61, 0.43, 15, settings_manager)
@@ -348,7 +361,10 @@ MENU_ELEMENTS = {"QUIT": QUIT_BUTTON_1, "NEW_GAME": NEW_GAME_BUTTON,
 MAP_ELEMENTS = {"BACK": BACK, "SOLOMON ISLANDS": SOLOMON_MAP, "NORWEGIAN SEA": NORWEGIAN_SEA_MAP,
                 "SOUTH CHINA SEA": SOUTH_CHINA_SEA_MAP}
 GAMEOVER_ELEMENTS = {"QUIT": QUIT_BUTTON_2, "MENU": MAIN_MENU_BUTTON}
-WIN_ELEMENTS = {"QUIT": QUIT_BUTTON_WIN, "MENU": MAIN_MENU_BUTTON_WIN}
+WIN_ELEMENTS = {"QUIT": QUIT_BUTTON_WIN, "MENU": MAIN_MENU_BUTTON_WIN, "MISSILES_LAUNCHED": MISSILES_LAUNCHED_LABEL,
+                "AIRCRAFT_LAUNCHED": AIRCRAFT_LAUNCHED_LABEL, "BASES_CAPTURED_PLAYER": BASES_CAPTURED_BY_PLAYER_LABEL,
+                "BASES_CAPTURED_AI": BASES_CAPTURED_BY_AI_LABEL, "PLAYER_MISSILES_HIT": PLAYER_MISSILES_HIT_LABEL,
+                "AI_MISSILES_HIT": AI_MISSILES_HIT_LABEL}
 IN_GAME_ELEMENTS = {"QUIT": QUIT_BUTTON_3, "RESUME": RESUME_BUTTON,
                     "MENU": MAIN_MENU_BUTTON_2, "LOAD": LOAD_SAVE_BUTTON_2,
                     "SETTINGS": SETTINGS_BUTTON_2}

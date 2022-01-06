@@ -112,8 +112,8 @@ class Base(pygame.sprite.Sprite):
 
 class SuperBase(Base):
     """Класс для галвнйо базы"""
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, run):
+        super().__init__(*args, run)
         self.ticks_to_capture = Settings.BASE_TICKS
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append(self)
