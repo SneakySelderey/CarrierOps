@@ -7,7 +7,7 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from maps import SolomonLand, NorwegLand, ChinaLand
+from map_solomon import SolomonLand, NorwegLand, ChinaLand
 from Settings import *
 import Settings
 import pygame_gui
