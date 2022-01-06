@@ -769,13 +769,13 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 60
+                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 30
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
                     if event.button == 5:
                         Settings.CELL_SIZE = max(
-                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 60,
+                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
                             10)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
