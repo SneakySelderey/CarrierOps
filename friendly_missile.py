@@ -27,7 +27,7 @@ class MissileFriendly(pygame.sprite.Sprite):
                 activation[1] - player.rect.centery)).normalize()
             self.visibility = visibility
         except ValueError:
-            self.total_ticks = 20
+            self.total_ticks = 10
             self.alpha = pygame.math.Vector2(0, 0)
 
         # Флаги, ответственные за паттерн поиска ракеты
@@ -39,7 +39,7 @@ class MissileFriendly(pygame.sprite.Sprite):
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
         if not self.activated:
-            self.total_ticks += 0.02
+            self.total_ticks += 0.01
 
         if self.pos != self.activation:
             self.pos += self.alpha * Settings.MISSILE_SPEED
@@ -75,7 +75,7 @@ class MissileFriendly(pygame.sprite.Sprite):
                     (self.activation[0] - self.pos[0],
                      self.activation[1] - self.pos[1])).normalize()
             except ValueError:
-                self.total_ticks = 20
+                self.total_ticks = 10
 
     def missile_activation(self):
         """Обновление координат ракет при активации ГСН"""

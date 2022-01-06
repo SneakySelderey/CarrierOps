@@ -44,7 +44,6 @@ def update_objects():
     camera.new_position()
     Settings.ALWAYS_UPDATE.update()
     calculate_speed(game_objects.cell_size)
-    Settings.ALL_SPRITES_FOR_SURE.update()
     game_objects.cell_size = Settings.CELL_SIZE
 
 
