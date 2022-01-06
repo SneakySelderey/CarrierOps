@@ -44,6 +44,7 @@ def update_objects():
     camera.new_position()
     Settings.ALWAYS_UPDATE.update()
     calculate_speed(game_objects.cell_size)
+    Settings.ALL_SPRITES_FOR_SURE.update()
     game_objects.cell_size = Settings.CELL_SIZE
 
 
@@ -803,7 +804,9 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 30
+                        Settings.CELL_SIZE = min(
+                            Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
+                            250)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
@@ -877,6 +880,10 @@ class Run:
                     camera.dx = 0
                     camera.dy = 0
 
+            if not (Settings.IS_PAUSE or self.menu or self.resource_menu or
+                    self.defeat):
+                [mis.update() for mis in set(Settings.PLAYER_MISSILES) | set(
+                    Settings.AI_MISSILES)]
             if self.resource_menu:
                 show_resources_menu()
                 self.resource_menu = False
