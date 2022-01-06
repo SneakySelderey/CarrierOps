@@ -515,7 +515,7 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        self.cell_size = Settings.CELL_SIZE
+        self.cell_size = int(Settings.CELL_SIZE)
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
@@ -680,13 +680,13 @@ class Run:
         for base in self.board.bases:
             base.bar.visibility = False
             if base.start_of_capture in [0, 1] or \
-                    pygame.sprite.collide_circle_ratio(0.5)(player, base):
+                    pygame.sprite.collide_circle_ratio(1)(player, base):
                 base.bar.visibility = True
             for aircraft in self.friendly_aircraft:
-                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, base):
+                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
                     base.bar.visibility = True
             for missile in self.friendly_missiles:
-                if pygame.sprite.collide_circle_ratio(0.35)(missile, base):
+                if pygame.sprite.collide_circle_ratio(1)(missile, base):
                     base.bar.visibility = True
             if base.bar.visibility and base.state == 'ai':
                 base.visibility = True
@@ -769,12 +769,14 @@ class Run:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
                     if event.button == 4:
-                        Settings.CELL_SIZE += 1
+                        Settings.CELL_SIZE += 2 * Settings.CELL_SIZE / 60
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
                     if event.button == 5:
-                        Settings.CELL_SIZE = max(Settings.CELL_SIZE - 1, 10)
+                        Settings.CELL_SIZE = max(
+                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 60,
+                            10)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
@@ -923,7 +925,6 @@ if __name__ == '__main__':
     running = True
     # Создадим камеру
     camera = Camera()
-
     # Основной мега-цикл
     while running:
         if slides_run:  # Слайды в начале игры

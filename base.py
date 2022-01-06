@@ -60,7 +60,7 @@ class Base(pygame.sprite.Sprite):
         if self.ticks_to_capture and self.start_of_capture and not \
                 Settings.IS_PAUSE:
             self.ticks_to_capture -= 1
-        elif self.to_add:
+        elif self.to_add and not Settings.IS_PAUSE:
             self.to_add = False
             if self.start_of_capture == 1:
                 self.state = 'friendly' if self.state != 'ai' else 'player'
@@ -152,7 +152,7 @@ class SuperBase(Base):
         if self.ticks_to_capture and self.start_of_capture and not \
                 Settings.IS_PAUSE:
             self.ticks_to_capture -= 1
-        elif self.to_add:
+        elif self.to_add and not Settings.IS_PAUSE:
             self.to_add = False
             if self.start_of_capture == 1:
                 self.state = 'player'
