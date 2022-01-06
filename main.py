@@ -30,7 +30,7 @@ def calculate_speed(cell):
     разрешения"""
     diff = 80 / cell
     Settings.PLAYER_SPEED = 1.5 / diff
-    Settings.AIR_SPEED = 2 / diff
+    Settings.AIR_SPEED = 2.5 / diff
     Settings.MISSILE_SPEED = 2 / diff
     Settings.AI_SPEED = 1 / diff
 
