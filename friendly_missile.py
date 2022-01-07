@@ -1,19 +1,18 @@
 import pygame
 from Settings import ALL_SPRITES, new_image_size, EXPLOSION, \
     MISSILE_FRIENDLY, PLAYER_SPRITE, PLAYER_MISSILES, \
-    ALL_SPRITES_FOR_SURE
+    ALL_SPRITES_FOR_SURE, PLAYER_MISSILE_SHEET
 import Settings
+from animated_sprite import AnimatedSprite
 
 
-class MissileFriendly(pygame.sprite.Sprite):
+class MissileFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
     def __init__(self, activation, visibility):
-        super().__init__(ALL_SPRITES, PLAYER_MISSILES, ALL_SPRITES_FOR_SURE)
+        super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
         player = list(PLAYER_SPRITE)[0]
-        self.image = new_image_size(MISSILE_FRIENDLY)
-        self.rect = self.image.get_rect(center=[player.rect.centerx,
-                                                player.rect.centery])
+        self.rect.center = [player.rect.centerx, player.rect.centery]
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
         self.radius = Settings.CELL_SIZE * 2
@@ -56,7 +55,7 @@ class MissileFriendly(pygame.sprite.Sprite):
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(MISSILE_FRIENDLY)
+        self.image = new_image_size(self.frames[self.cur_frame])
         c_x = (self.rect.centerx - left) / cell_size
         c_y = (self.rect.centery - top) / cell_size
         self.rect = self.image.get_rect(
@@ -114,3 +113,9 @@ class MissileFriendly(pygame.sprite.Sprite):
                     break
         except ValueError:
             self.total_ticks = 10
+
+    def update_frame(self):
+        """Установка нового кадра"""
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
+            self.cur_frame + 1 != len(self.frames) else 7
+        self.image = new_image_size(self.frames[self.cur_frame])

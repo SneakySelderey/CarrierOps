@@ -49,7 +49,7 @@ class AircraftFriendly(AnimatedSprite):
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(AIRCRAFT_FRIENDLY)
+        self.image = new_image_size(self.frames[self.cur_frame])
         c_x = (self.rect.centerx - left) / cell_size
         c_y = (self.rect.centery - top) / cell_size
         self.rect = self.image.get_rect(

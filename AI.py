@@ -1,15 +1,15 @@
-from Settings import AI_IMAGE, AI_SPRITE, NEIGHBOURS
+from Settings import AI_IMAGE, AI_SPRITE, AI_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos
 import pygame
-import  copy
+import copy
 
 
 class AI(Carrier):
     """Класс авианосца игрока"""
     def __init__(self):
-        super().__init__(AI_SPRITE, AI_IMAGE)
+        super().__init__(AI_CARRIER_SHEET, AI_SPRITE)
         self.rect.center = [Settings.AI_START[0] * Settings.CELL_SIZE +
                             Settings.CELL_SIZE // 2, Settings.AI_START[1] *
                             Settings.CELL_SIZE + Settings.CELL_SIZE // 2]

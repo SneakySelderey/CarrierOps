@@ -152,7 +152,12 @@ NORWEG_LAND = pygame.image.load('data/img/norwegian_sea_land.png').convert_alpha
 NORWEG_WATER = pygame.image.load('data/img/norwegian_sea_water.png').convert_alpha()
 CHINA_LAND = pygame.image.load('data/img/south_china_sea_land.png').convert_alpha()
 CHINA_WATER = pygame.image.load('data/img/south_china_sea_water.png').convert_alpha()
-AIRCRAFT_FRIENDLY_SHEET = pygame.image.load('data/sheets/friendly_aircraft_sheet.png')
+AIRCRAFT_FRIENDLY_SHEET = pygame.image.load('data/sheets/friendly_aircraft_sheet.png').convert_alpha()
+AIRCRAFT_HOSTILE_SHEET = pygame.image.load('data/sheets/hostile_aircraft_sheet.png').convert_alpha()
+PLAYER_CARRIER_SHEET = pygame.image.load('data/sheets/player_carrier_sheet.png').convert_alpha()
+AI_CARRIER_SHEET = pygame.image.load('data/sheets/ai_carrier_sheet.png').convert_alpha()
+PLAYER_MISSILE_SHEET = pygame.image.load('data/sheets/friendly_missile_sheet.png').convert_alpha()
+HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

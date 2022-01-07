@@ -784,6 +784,7 @@ class Run:
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
+        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 100)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
             delta = clock.tick(FPS) / 1000.0
@@ -805,7 +806,7 @@ class Run:
                     if event.button == 4:
                         Settings.CELL_SIZE = min(
                             Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
-                            250)
+                            200)
                         camera.overall_shift_x = event.pos[0]
                         camera.overall_shift_y = event.pos[1]
                         update_objects()
@@ -861,6 +862,8 @@ class Run:
                     Settings.IS_PAUSE or self.menu or self.resource_menu or
                         self.defeat):
                     Settings.ALL_SPRITES_FOR_SURE.update()
+                if event.type == UPDATE_ANIMATED_SPRITES:
+                    [sprite.update_frame() for sprite in Settings.ANIMATED_SPRTIES]
 
             self.camera_update()
 
