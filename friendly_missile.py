@@ -119,6 +119,7 @@ class MissileFriendly(AnimatedSprite):
                     self.da_bomb = True
                     self.cut_sheet(EXPLOSION_SHEET, 6, 2)
                     self.rect.center = ai.rect.center
+                    Settings.PLAYER_MISSILES_HIT += 1
                     EXPLOSION.play()
                     break
         except ValueError:
