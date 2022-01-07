@@ -623,6 +623,7 @@ class Run:
         """Отрисовка тумана войны"""
         ai_x, ai_y = self.ai.rect.center
         player_x, player_y = self.player.rect.center
+        player = list(Settings.PLAYER_SPRITE)[0]
 
         # отрисовка нужных и прятанье ненужных спрайтов
         TO_DRAW.empty()
@@ -630,8 +631,21 @@ class Run:
          in group if sprite.visibility]
         TO_DRAW.draw(screen)
 
+        for base in self.board.bases:
+            base.bar.visibility = False
+            if base.start_of_capture in [0, 1] or \
+                    pygame.sprite.collide_circle_ratio(1)(player, base):
+                base.bar.visibility = True
+            for aircraft in self.friendly_aircraft:
+                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+                    base.bar.visibility = True
+            for missile in self.friendly_missiles:
+                if pygame.sprite.collide_circle_ratio(1)(missile, base):
+                    base.bar.visibility = True
+            if base.bar.visibility and base.state == 'ai':
+                base.visibility = True
+
         # отрисовка спрайта противника
-        player = list(Settings.PLAYER_SPRITE)[0]
         for ai in Settings.AI_SPRITE:
 
             # проверка на обнаружение ракетой
@@ -711,20 +725,6 @@ class Run:
                 if self.play_contact_lost:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
-
-        for base in self.board.bases:
-            base.bar.visibility = False
-            if base.start_of_capture in [0, 1] or \
-                    pygame.sprite.collide_circle_ratio(1)(player, base):
-                base.bar.visibility = True
-            for aircraft in self.friendly_aircraft:
-                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
-                    base.bar.visibility = True
-            for missile in self.friendly_missiles:
-                if pygame.sprite.collide_circle_ratio(1)(missile, base):
-                    base.bar.visibility = True
-            if base.bar.visibility and base.state == 'ai':
-                base.visibility = True
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
