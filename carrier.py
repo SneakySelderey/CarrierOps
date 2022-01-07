@@ -41,6 +41,7 @@ class Carrier(AnimatedSprite):
             center=(left + c_x * Settings.CELL_SIZE,
                     top + c_y * Settings.CELL_SIZE))
         self.pos = list(self.rect.center)
+        self.prev_pos = [self.pos[0], self.pos[1]]
         self.mask = pygame.mask.from_surface(self.image)
         dest_x = (self.destination[0] - left) / cell_size
         dest_y = (self.destination[1] - top) / cell_size

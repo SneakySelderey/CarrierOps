@@ -784,7 +784,7 @@ class Run:
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
-        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 100)
+        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
             delta = clock.tick(FPS) / 1000.0

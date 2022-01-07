@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_image_size, EXPLOSION, \
-    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET
+    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, EXPLOSION_SHEET
 import Settings
 from animated_sprite import AnimatedSprite
 
@@ -33,6 +33,7 @@ class MissileFriendly(AnimatedSprite):
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
+        self.da_bomb = False
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -115,8 +116,8 @@ class MissileFriendly(AnimatedSprite):
                         (ai.rect.centerx - self.rect.centerx,
                          ai.rect.centery - self.rect.centery)).normalize()
                 if pygame.sprite.collide_mask(self, ai):
-                    self.rect = self.rect.move(0, 1)
-                    self.total_ticks = 10
+                    self.da_bomb = True
+                    self.cut_sheet(EXPLOSION_SHEET, 6, 2)
                     EXPLOSION.play()
                     break
         except ValueError:
@@ -124,10 +125,17 @@ class MissileFriendly(AnimatedSprite):
 
     def update_frame(self):
         """Установка нового кадра"""
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
-            self.cur_frame + 1 != len(self.frames) else 7
-        if self.left:
-            self.image = pygame.transform.flip(new_image_size(
-                self.frames[self.cur_frame]), True, False)
+        if not self.da_bomb:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
+                self.cur_frame + 1 != len(self.frames) else 7
+            if self.left:
+                self.image = pygame.transform.flip(new_image_size(
+                    self.frames[self.cur_frame]), True, False)
+            else:
+                self.image = new_image_size(self.frames[self.cur_frame])
         else:
-            self.image = new_image_size(self.frames[self.cur_frame])
+            try:
+                self.cur_frame += 1
+                self.image = new_image_size(self.frames[self.cur_frame])
+            except IndexError:
+                self.total_ticks = 10
