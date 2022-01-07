@@ -109,7 +109,7 @@ class SuperBase(Base):
     """Класс для галвнйо базы"""
     def __init__(self, *args):
         super().__init__(*args)
-        self.ticks_to_capture = Settings.BASE_TICKS
+        self.ticks_to_capture = 0
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append(self)
             self.start_of_capture = 2

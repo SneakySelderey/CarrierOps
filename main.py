@@ -585,8 +585,7 @@ class Run:
                                  Settings.AI_MISSILES, Settings.AI_AIRCRAFT, 
                                  [base.ico for base in self.board.bases if
                                   base.state not in ['player', 'ai']],
-                                 [base.bar for base in self.board.bases if
-                                  base.state not in ['player', 'ai']]]
+                                 [base.bar for base in self.board.bases]]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
