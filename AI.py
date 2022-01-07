@@ -1,4 +1,4 @@
-from Settings import AI_IMAGE, AI_SPRITE, AI_CARRIER_SHEET
+from Settings import AI_SPRITE, AI_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos
@@ -20,6 +20,7 @@ class AI(Carrier):
 
     def update(self):
         """Обновление позиции объекта"""
+        self.left = self.prev_pos[0] > self.pos[0]
         land = list(Settings.BACKGROUND_MAP)[0]
         if pygame.sprite.collide_mask(self, land):
             self.pos = self.prev_pos

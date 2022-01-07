@@ -1,6 +1,5 @@
 import pygame
-from Settings import ALL_SPRITES, new_image_size, PLAYER_IMAGE, \
-    PLAYER_SPRITE, ALL_SPRITES_FOR_SURE, AI_SPRITE, AI_IMAGE, CARRIER_GROP, PLAYER_CARRIER_SHEET
+from Settings import new_image_size, PLAYER_CARRIER_SHEET
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
@@ -19,6 +18,8 @@ class Carrier(AnimatedSprite):
         self.visibility = True if sheet == PLAYER_CARRIER_SHEET else False
         self.health_capacity = 100
         self.current_health = 100
+        self.prev_pos = list(self.rect.center)
+        self.left = False
         self.mask = pygame.mask.from_surface(self.image)
 
     def new_destination(self, pos):
@@ -47,4 +48,18 @@ class Carrier(AnimatedSprite):
                             top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.pos[1],
                            self.destination[0] - self.pos[0])
+        if self.left:
+            self.image = pygame.transform.flip(new_image_size(
+                self.frames[self.cur_frame]), True, False)
+        else:
+            self.image = new_image_size(self.frames[self.cur_frame])
         self.radius = Settings.CELL_SIZE * 4
+
+    def update_frame(self):
+        """Установка нового кадра"""
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        if self.left:
+            self.image = pygame.transform.flip(new_image_size(
+                self.frames[self.cur_frame]), True, False)
+        else:
+            self.image = new_image_size(self.frames[self.cur_frame])

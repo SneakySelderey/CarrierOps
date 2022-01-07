@@ -1,8 +1,7 @@
 import pygame
-from math import sin, cos, atan2
-from Settings import ALL_SPRITES, new_image_size, \
-    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
-    ALL_SPRITES_FOR_SURE, AIRCRAFT_FRIENDLY_SHEET
+from math import sin, cos, atan2, degrees
+from Settings import new_image_size, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
+    AIRCRAFT_FRIENDLY_SHEET
 import Settings
 from animated_sprite import AnimatedSprite
 
@@ -18,6 +17,8 @@ class AircraftFriendly(AnimatedSprite):
         self.visibility = visibility
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
+        self.image = pygame.transform.rotate(self.image,
+                                             -degrees(self.alpha))
         self.total_ticks = 0  # Общее число тиков
         self.destination = list(destination)  # Направление движения
         self.stop = False  # Если самолет достиг точки направления
@@ -62,6 +63,8 @@ class AircraftFriendly(AnimatedSprite):
                             top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
+        self.image = pygame.transform.rotate(self.image,
+                                             -degrees(self.alpha) - 90)
         self.radius = Settings.CELL_SIZE * 3.5
 
     def aircraft_return(self):
@@ -82,7 +85,14 @@ class AircraftFriendly(AnimatedSprite):
         """Обновление координат при слежении за целью"""
         for ai in Settings.AI_SPRITE:
             if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
-                self.alpha = atan2(ai.rect.centery - self.rect.centery,
-                                   ai.rect.centerx - self.rect.centerx)
                 self.stop = False
+                if not pygame.sprite.collide_mask(self, ai):
+                    self.alpha = atan2(ai.rect.centery - self.rect.centery,
+                                       ai.rect.centerx - self.rect.centerx)
                 break
+
+    def update_frame(self):
+        """Установка нового кадра"""
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = pygame.transform.rotate(new_image_size(
+            self.frames[self.cur_frame]), -degrees(self.alpha)-90)

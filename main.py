@@ -43,7 +43,7 @@ def update_objects():
         Settings.ALL_SPRITES_FOR_SURE]
     camera.new_position()
     Settings.ALWAYS_UPDATE.update()
-    calculate_speed(game_objects.cell_size)
+    calculate_speed(Settings.CELL_SIZE)
     game_objects.cell_size = Settings.CELL_SIZE
 
 
@@ -125,8 +125,8 @@ def rebase_load_manager():
 
 def clear_sprite_groups():
     """Функция для очистки групп спрайтов"""
+    Settings.TO_DRAW.empty()
     Settings.ALL_SPRITES_FOR_SURE.empty()
-    Settings.ALL_SPRITES.empty()
     Settings.PLAYER_SPRITE.empty()
     Settings.AI_SPRITE.empty()
     Settings.BASES_SPRITES.empty()
@@ -568,7 +568,6 @@ class Run:
 
         self.board.add_bases()
         self.player = Player()
-        self.destination_player = list(self.player.rect.center)
         self.ai = AI()
         self.friendly_missiles = []
         self.hostile_missiles = []
@@ -624,9 +623,10 @@ class Run:
         player_x, player_y = self.player.rect.center
 
         # отрисовка нужных и прятанье ненужных спрайтов
-        [pygame.sprite.Group([picture for picture in group if
-                              picture.visibility]).draw(screen) for
-         group in self.list_all_sprites]
+        TO_DRAW.empty()
+        [TO_DRAW.add(sprite) for group in self.list_all_sprites for sprite
+         in group if sprite.visibility]
+        TO_DRAW.draw(screen)
 
         # отрисовка спрайта противника
         player = list(Settings.PLAYER_SPRITE)[0]
@@ -643,8 +643,8 @@ class Run:
                 # если ракета исчерпала свой ресурс, она падает в море и
                 # спрайт удаляется
                 if missile.total_ticks >= 10:
+                    Settings.ANIMATED_SPRTIES.remove(missile)
                     Settings.PLAYER_MISSILES.remove(missile)
-                    Settings.ALL_SPRITES.remove(missile)
                     Settings.ALL_SPRITES_FOR_SURE.remove(missile)
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
@@ -669,8 +669,8 @@ class Run:
                 # если самолет исчерпал свой ресурс, он возвращается на
                 # авианосец
                 if aircraft.delete:
+                    Settings.ANIMATED_SPRTIES.remove(aircraft)
                     Settings.PLAYER_AIRCRAFT.remove(aircraft)
-                    Settings.ALL_SPRITES.remove(aircraft)
                     Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
                 # отрисовка радиуса обнаружения самолета
                 aircraft.destination = list(aircraft.destination)
@@ -699,7 +699,6 @@ class Run:
                     self.play_new_contact = False
                     self.play_contact_lost = True
                     Settings.IS_PAUSE = True
-                    Settings.ALL_SPRITES.draw(screen)
 
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
@@ -794,7 +793,6 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.player.new_destination(event.pos)
-                        self.destination_player = list(event.pos)
                     if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
                             Settings.OIL_VOLUME:
                         self.aircraft_launch(event.pos)
@@ -803,7 +801,7 @@ class Run:
                     if event.button == 3 and Settings.NUM_OF_MISSILES:
                         self.missile_launch(event.pos)
                         Settings.NUM_OF_MISSILES -= 1
-                    if event.button == 4:
+                    if event.button == 4 and Settings.CELL_SIZE < 200:
                         Settings.CELL_SIZE = min(
                             Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
                             200)
@@ -863,7 +861,8 @@ class Run:
                         self.defeat):
                     Settings.ALL_SPRITES_FOR_SURE.update()
                 if event.type == UPDATE_ANIMATED_SPRITES:
-                    [sprite.update_frame() for sprite in Settings.ANIMATED_SPRTIES]
+                    [sprite.update_frame() for sprite in
+                     Settings.ANIMATED_SPRTIES]
 
             self.camera_update()
 

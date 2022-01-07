@@ -1,5 +1,5 @@
 import pygame
-from Settings import PLAYER_IMAGE, PLAYER_SPRITE, PLAYER_CARRIER_SHEET
+from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
@@ -16,11 +16,11 @@ class Player(Carrier):
                             Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
-
         self.prev_pos = list(self.rect.center)
 
     def update(self):
         """Обновление позиции объекта"""
+        self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
             if pygame.sprite.collide_mask(self, land):
