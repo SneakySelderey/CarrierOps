@@ -10,12 +10,10 @@ class Base(pygame.sprite.Sprite):
     """Класс, определяющий спрайт и местоположение базы-острова"""
     Images = {'friendly': BASE_FRIENDLY, 'neutral': BASE_NEUTRAL,
               'hostile': BASE_HOSTILE, 'player': PLAYER_BASE, 'ai': AI_BASE}
-    ResourceType = {'oil': [OIL_ICON, Settings.OIL_VOLUME],
-                    'repair': [GEAR_ICON, Settings.NUM_OF_REPAIR_PARTS],
-                    'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES],
-                    'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
+    ResourceType = {'oil': OIL_ICON, 'repair': GEAR_ICON,
+                    'missile': MISSILE_ICON, 'aircraft': PLANE_ICON}
 
-    def __init__(self, x, y, state, visibility, cell_size, parent, run):
+    def __init__(self, x, y, state, visibility, cell_size, parent):
         super().__init__(ALL_SPRITES_FOR_SURE, BASES_SPRITES,
                          ALWAYS_UPDATE)
         self.x, self.y = x, y
@@ -37,8 +35,7 @@ class Base(pygame.sprite.Sprite):
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
             self.ico = BaseIcon(self)
-            self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
-        self.run = run
+            self.ticks_to_give_resource = 0
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -64,13 +61,15 @@ class Base(pygame.sprite.Sprite):
         elif self.to_add and not Settings.IS_PAUSE:
             self.to_add = False
             if self.start_of_capture == 1:
-                self.state = 'friendly' if self.state != 'ai' else 'player'
+                self.state = 'friendly'
+                Settings.BASES_CAPT_PLAYER += 1
                 if base_grid in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.remove(base_grid)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:
-                self.state = 'hostile' if self.state != 'player' else 'ai'
+                self.state = 'hostile'
+                Settings.BASES_CAPT_AI += 1
                 if base_grid in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.remove(base_grid)
                 if base_grid not in Settings.HOSTILE_BASES:
@@ -78,10 +77,6 @@ class Base(pygame.sprite.Sprite):
 
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
-            if self.state == 'friendly':
-                self.run.bases_captured_by_player += 1
-            elif self.state == 'hostile':
-                self.run.bases_captured_by_AI += 1
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
@@ -112,8 +107,8 @@ class Base(pygame.sprite.Sprite):
 
 class SuperBase(Base):
     """Класс для галвнйо базы"""
-    def __init__(self, *args, run):
-        super().__init__(*args, run)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.ticks_to_capture = 0
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append((self.x, self.y))
@@ -161,12 +156,14 @@ class SuperBase(Base):
             self.to_add = False
             if self.start_of_capture == 1:
                 self.state = 'player'
+                Settings.BASES_CAPT_PLAYER += 1
                 if base_grid in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.remove(base_grid)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:
                 self.state = 'ai'
+                Settings.BASES_CAPT_AI += 1
                 if base_grid in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.remove(base_grid)
                 if base_grid not in Settings.HOSTILE_BASES:
@@ -185,7 +182,7 @@ class BaseIcon(pygame.sprite.Sprite):
         """Инициализация. Принимает базу"""
         super().__init__(ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
         self.resource = base.resource_type
-        self.image = new_image_size(Base.ResourceType[self.resource][0])
+        self.image = new_image_size(Base.ResourceType[self.resource])
         self.rect = self.image.get_rect(bottomleft=base.rect.topright)
         self.parent = base
         self.visibility = True
@@ -196,7 +193,7 @@ class BaseIcon(pygame.sprite.Sprite):
 
     def new_position(self, cell, top, left):
         """обновление положеняи при изменении разрешения"""
-        self.image = new_image_size(Base.ResourceType[self.resource][0])
+        self.image = new_image_size(Base.ResourceType[self.resource])
         self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
 
 

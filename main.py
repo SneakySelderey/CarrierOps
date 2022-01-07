@@ -31,7 +31,7 @@ def calculate_speed(cell):
     diff = 80 / cell
     Settings.PLAYER_SPEED = 1.5 / diff
     Settings.AIR_SPEED = 2.5 / diff
-    Settings.MISSILE_SPEED = 2 / diff
+    Settings.MISSILE_SPEED = 1 / diff
     Settings.AI_SPEED = 1 / diff
 
 
@@ -271,6 +271,8 @@ def show_setting_screen(flag=True):
                         # объектов
                         if game_objects is not None:
                             update_objects()
+                        else:
+                            calculate_speed(Settings.CELL_SIZE)
                         if not Settings.IS_FULLSCREEN:
                             move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -308,7 +310,7 @@ def show_setting_screen(flag=True):
         pygame.display.flip()
 
 
-def show_gameover_win_screen(run, gameover=True):
+def show_gameover_win_screen(gameover=True):
     """Функция для отрисовки и взаимодействия с экраном победы или поражения"""
     [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT)) \
@@ -322,17 +324,17 @@ def show_gameover_win_screen(run, gameover=True):
     pygame.display.flip()
     clock.tick(5000)
     gui_elements.MISSILES_LAUNCHED_LABEL_GO.update_text(
-        'MISSILES LAUNCHED BY PLAYER: ' + str(run.missiles_launched))
+        'MISSILES LAUNCHED BY PLAYER: ' + str(Settings.LAUNCHED_MISSILES))
     gui_elements.AIRCRAFT_LAUNCHED_LABEL_GO.update_text(
-        'AIRCRAFT LAUNCHED BY PLAYER: ' + str(run.aircraft_launched))
+        'AIRCRAFT LAUNCHED BY PLAYER: ' + str(Settings.LAUNCHED_AIRCRAFT))
     gui_elements.BASES_CAPTURED_BY_PLAYER_LABEL_GO.update_text(
-        'BASES CAPTURED BY PLAYER: ' + str(run.bases_captured_by_player))
+        'BASES CAPTURED BY PLAYER: ' + str(Settings.BASES_CAPT_PLAYER))
     gui_elements.BASES_CAPTURED_BY_AI_LABEL_GO.update_text(
-        'BASES CAPTURED BY AI: ' + str(run.bases_captured_by_AI))
+        'BASES CAPTURED BY AI: ' + str(Settings.BASES_CAPT_AI))
     gui_elements.PLAYER_MISSILES_HIT_LABEL_GO.update_text(
-        'PLAYER MISSILES HIT: ' + str(run.player_missiles_hit))
+        'PLAYER MISSILES HIT: ' + str(Settings.PLAYER_MISSILES_HIT))
     gui_elements.AI_MISSILES_HIT_LABEL_GO.update_text(
-        'AI MISSILES HIT: ' + str(run.AI_missiles_hit))
+        'AI MISSILES HIT: ' + str(Settings.AI_MISSILES_HIT))
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -597,13 +599,6 @@ class Run:
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
 
-        self.missiles_launched = 0
-        self.aircraft_launched = 0
-        self.bases_captured_by_player = 0
-        self.bases_captured_by_AI = 0
-        self.player_missiles_hit = 0
-        self.AI_missiles_hit = 0
-
         self.board.add_bases()
         self.player = Player()
         self.ai = AI()
@@ -631,14 +626,14 @@ class Run:
         [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
          for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
-        self.missiles_launched += 1
+        Settings.LAUNCHED_MISSILES += 1
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
             destination, True))
         TAKEOFF.play()
-        self.aircraft_launched += 1
+        Settings.LAUNCHED_AIRCRAFT += 1
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -701,7 +696,6 @@ class Run:
                     Settings.ANIMATED_SPRTIES.remove(missile)
                     Settings.PLAYER_MISSILES.remove(missile)
                     Settings.ALL_SPRITES_FOR_SURE.remove(missile)
-                    self.player_missiles_hit += 1
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
                     missile.activation = list(missile.activation)
@@ -959,8 +953,9 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
-                if len(list(Settings.FRIENDLY_BASES)) == len(
-                        list(Settings.BASES_SPRITES)):
+                if len([i for i in Settings.BASES_SPRITES if i.state in [
+                            'player', 'friendly']]) == len(
+                        Settings.BASES_SPRITES):
                     self.win = True
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
@@ -1053,13 +1048,13 @@ if __name__ == '__main__':
             map_choice_run = False
         elif gameover_run:  # Экран после поражения
             pygame.mixer.music.fadeout(500)
-            result = show_gameover_win_screen(game_objects)
+            result = show_gameover_win_screen()
             gameover_run = False
             game_objects = None
             menu_run = result == 1
         elif victory_run:  # Экран после победы
             pygame.mixer.music.fadeout(500)
-            result = show_gameover_win_screen(game_objects, False)
+            result = show_gameover_win_screen(False)
             victory_run = False
             game_objects = None
             menu_run = result == 1

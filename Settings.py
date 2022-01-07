@@ -38,12 +38,13 @@ Saves.Date, PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON
 Saves.Path = PathsOfSaves.ID""").fetchall()}
 
 
+# Для параметров экрана
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
 pygame.mixer.init()
 
-# Константы
+# Группы спрайтосв
 TO_DRAW = pygame.sprite.Group()
 ANIMATED_SPRTIES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
@@ -62,6 +63,8 @@ MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
+
+# Числовые и булевые значения значения
 AIR_SPEED = 2.5
 MISSILE_SPEED = 1
 NUM_OF_MISSILES = 5
@@ -81,6 +84,15 @@ AI_SPEED = 1
 NUM_OF_BASES = 1
 PLAYER_START = None
 AI_START = None
+# Для подсчета результатов
+LAUNCHED_MISSILES = 0
+LAUNCHED_AIRCRAFT = 0
+PLAYER_MISSILES_HIT = 0
+AI_MISSILES_HIT = 0
+BASES_CAPT_PLAYER = 0
+BASES_CAPT_AI = 0
+
+# Для экрана
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
