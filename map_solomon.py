@@ -20,9 +20,6 @@ class SolomonLand(pygame.sprite.Sprite):
         Settings.ALL_SPRITES_FOR_SURE.add(self)
         Settings.BACKGROUND_MAP.add(self)
 
-    def update(self):
-        """Обновление позиции карты"""
-
     def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(SOLOMON_LAND, (
@@ -51,9 +48,6 @@ class NorwegLand(pygame.sprite.Sprite):
         Settings.ALL_SPRITES_FOR_SURE.add(self)
         Settings.BACKGROUND_MAP.add(self)
 
-    def update(self):
-        """Обновление позиции карты"""
-
     def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""
         self.image = pygame.transform.scale(Settings.NORWEG_LAND, (
@@ -78,9 +72,6 @@ class ChinaLand(pygame.sprite.Sprite):
         self.parent_board = board
         Settings.ALL_SPRITES_FOR_SURE.add(self)
         Settings.BACKGROUND_MAP.add(self)
-
-    def update(self):
-        """Обновление позиции карты"""
 
     def new_position(self, cell, top, left):
         """Обновление положения карты при изменении разрешения"""

@@ -44,7 +44,8 @@ pygame.init()
 pygame.mixer.init()
 
 # Константы
-ALL_SPRITES = pygame.sprite.Group()
+TO_DRAW = pygame.sprite.Group()
+ANIMATED_SPRTIES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
 BASES_SPRITES = pygame.sprite.Group()
 PLAYER_SPRITE = pygame.sprite.Group()
@@ -80,8 +81,6 @@ AI_SPEED = 1
 NUM_OF_BASES = 1
 PLAYER_START = None
 AI_START = None
-NEIGHBOURS = [(0, -2), (0, 2), (2, 0), (-2, 0), (2, 2), (-2, -2), (-2, 2),
-              (2, -2)]
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
@@ -106,6 +105,7 @@ USER_DATA = get_user_data()
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
+UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -129,15 +129,9 @@ OIL_ICON = pygame.transform.scale(pygame.image.load('data/img/oil.png'),
                                    (40, 40))
 PLAYER_BASE = pygame.image.load('data/img/base_player.png').convert_alpha()
 AI_BASE = pygame.image.load('data/img/base_ai.png').convert_alpha()
-PLAYER_IMAGE = pygame.image.load('data/img/Player_cursor.png').convert_alpha()
-AI_IMAGE = pygame.image.load('data/img/AI_cursor.png').convert_alpha()
-AI_HIDDEN = pygame.image.load('data/img/AI_cursor_hidden.png').convert_alpha()
 BASE_FRIENDLY = pygame.image.load('data/img/base_friendly.png').convert_alpha()
 BASE_HOSTILE = pygame.image.load('data/img/base_hostile.png').convert_alpha()
 BASE_NEUTRAL = pygame.image.load('data/img/base_neutral.png').convert_alpha()
-MISSILE_FRIENDLY = pygame.image.load('data/img/missile_friendly.png').convert_alpha()
-MISSILE_HOSTILE = pygame.image.load('data/img/missile_hostile.png').convert_alpha()
-AIRCRAFT_FRIENDLY = pygame.image.load('data/img/friendly_aircraft.png').convert_alpha()
 MENU_BACKGROUND = pygame.image.load('data/img/menu_background.png').convert_alpha()
 GAMEOVER_SCREEN = pygame.image.load('data/img/gameover_background.png').convert_alpha()
 SETTINGS_BACKGROUND = pygame.image.load('data/img/settings_background.png').convert_alpha()
@@ -150,6 +144,13 @@ NORWEG_LAND = pygame.image.load('data/img/norwegian_sea_land.png').convert_alpha
 NORWEG_WATER = pygame.image.load('data/img/norwegian_sea_water.png').convert_alpha()
 CHINA_LAND = pygame.image.load('data/img/south_china_sea_land.png').convert_alpha()
 CHINA_WATER = pygame.image.load('data/img/south_china_sea_water.png').convert_alpha()
+AIRCRAFT_FRIENDLY_SHEET = pygame.image.load('data/sheets/friendly_aircraft_sheet.png').convert_alpha()
+AIRCRAFT_HOSTILE_SHEET = pygame.image.load('data/sheets/hostile_aircraft_sheet.png').convert_alpha()
+PLAYER_CARRIER_SHEET = pygame.image.load('data/sheets/player_carrier_sheet.png').convert_alpha()
+AI_CARRIER_SHEET = pygame.image.load('data/sheets/ai_carrier_sheet.png').convert_alpha()
+PLAYER_MISSILE_SHEET = pygame.image.load('data/sheets/friendly_missile_sheet.png').convert_alpha()
+HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png').convert_alpha()
+EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
 VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
 
 # Звуки

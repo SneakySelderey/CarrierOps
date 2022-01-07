@@ -1,6 +1,6 @@
 import pygame
-from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, ALL_SPRITES, \
-    BASES_SPRITES, ALL_SPRITES_FOR_SURE, random_resource_type, OIL_ICON, \
+from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
+    random_resource_type, OIL_ICON, \
     GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED, \
     PLAYER_BASE, AI_BASE, BASES_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE
 import Settings
@@ -15,8 +15,8 @@ class Base(pygame.sprite.Sprite):
                     'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES],
                     'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
 
-    def __init__(self, x, y, state, visibility, cell_size, parent, run):
-        super().__init__(ALL_SPRITES_FOR_SURE, ALL_SPRITES, BASES_SPRITES,
+    def __init__(self, x, y, state, visibility, cell_size, parent):
+        super().__init__(ALL_SPRITES_FOR_SURE, BASES_SPRITES,
                          ALWAYS_UPDATE)
         self.x, self.y = x, y
         self.size = cell_size
@@ -114,7 +114,7 @@ class SuperBase(Base):
     """Класс для галвнйо базы"""
     def __init__(self, *args, run):
         super().__init__(*args, run)
-        self.ticks_to_capture = Settings.BASE_TICKS
+        self.ticks_to_capture = 0
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
@@ -183,7 +183,7 @@ class BaseIcon(pygame.sprite.Sprite):
     """Класс для иконки ресурса рядом с базой"""
     def __init__(self, base):
         """Инициализация. Принимает базу"""
-        super().__init__(ALL_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
+        super().__init__(ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
         self.resource = base.resource_type
         self.image = new_image_size(Base.ResourceType[self.resource][0])
         self.rect = self.image.get_rect(bottomleft=base.rect.topright)
@@ -204,7 +204,7 @@ class BaseBar(pygame.sprite.Sprite):
     """Класс для полоски захвата базы"""
     def __init__(self, base):
         """Инициализация. Принимает базу"""
-        super().__init__(ALL_SPRITES_FOR_SURE, ALL_SPRITES, ALWAYS_UPDATE)
+        super().__init__(ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
         self.parent = base
         self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
         self.rect = self.image.get_rect(bottomleft=(base.rect.topleft[0],

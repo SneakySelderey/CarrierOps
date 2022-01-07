@@ -1,5 +1,5 @@
 import pygame
-from Settings import PLAYER_IMAGE, PLAYER_SPRITE, NEIGHBOURS
+from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
@@ -9,18 +9,18 @@ import copy
 class Player(Carrier):
     """Класс авианосца игрока"""
     def __init__(self):
-        super().__init__(PLAYER_SPRITE, PLAYER_IMAGE)
+        super().__init__(PLAYER_CARRIER_SHEET, PLAYER_SPRITE)
         self.rect.center = [Settings.PLAYER_START[0] * Settings.CELL_SIZE +
                             Settings.CELL_SIZE // 2,
                             Settings.PLAYER_START[1] * Settings.CELL_SIZE +
                             Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
-
         self.prev_pos = list(self.rect.center)
 
     def update(self):
         """Обновление позиции объекта"""
+        self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
             if pygame.sprite.collide_mask(self, land):

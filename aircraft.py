@@ -1,23 +1,24 @@
 import pygame
-from math import sin, cos, atan2
-from Settings import ALL_SPRITES, new_image_size, \
-    AIRCRAFT_FRIENDLY, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
-    ALL_SPRITES_FOR_SURE
+from math import sin, cos, atan2, degrees
+from Settings import new_image_size, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
+    AIRCRAFT_FRIENDLY_SHEET
 import Settings
+from animated_sprite import AnimatedSprite
 
 
-class AircraftFriendly(pygame.sprite.Sprite):
+class AircraftFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт самолета"""
     def __init__(self, destination, visibility):
-        super().__init__(ALL_SPRITES, PLAYER_AIRCRAFT, ALL_SPRITES_FOR_SURE)
+        super().__init__(AIRCRAFT_FRIENDLY_SHEET, 7, 1, PLAYER_AIRCRAFT)
         player = list(PLAYER_SPRITE)[0]
-        self.image = new_image_size(AIRCRAFT_FRIENDLY)
         self.rect = self.image.get_rect(center=[player.rect.centerx,
                                                 player.rect.centery])
         self.pos = list(self.rect.center)
         self.visibility = visibility
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
+        self.image = pygame.transform.rotate(self.image,
+                                             -degrees(self.alpha))
         self.total_ticks = 0  # Общее число тиков
         self.destination = list(destination)  # Направление движения
         self.stop = False  # Если самолет достиг точки направления
@@ -49,7 +50,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.image = new_image_size(AIRCRAFT_FRIENDLY)
+        self.image = new_image_size(self.frames[self.cur_frame])
         c_x = (self.rect.centerx - left) / cell_size
         c_y = (self.rect.centery - top) / cell_size
         self.rect = self.image.get_rect(
@@ -62,6 +63,8 @@ class AircraftFriendly(pygame.sprite.Sprite):
                             top + dest_y * Settings.CELL_SIZE]
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
+        self.image = pygame.transform.rotate(self.image,
+                                             -degrees(self.alpha) - 90)
         self.radius = Settings.CELL_SIZE * 3.5
 
     def aircraft_return(self):
@@ -74,7 +77,7 @@ class AircraftFriendly(pygame.sprite.Sprite):
                            player.rect.centerx - self.rect.centerx)
         self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
-        if pygame.sprite.collide_mask(self, player):
+        if pygame.sprite.collide_rect(self, player):
             Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
 
@@ -82,7 +85,14 @@ class AircraftFriendly(pygame.sprite.Sprite):
         """Обновление координат при слежении за целью"""
         for ai in Settings.AI_SPRITE:
             if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
-                self.alpha = atan2(ai.rect.centery - self.rect.centery,
-                                   ai.rect.centerx - self.rect.centerx)
                 self.stop = False
+                if not pygame.sprite.collide_mask(self, ai):
+                    self.alpha = atan2(ai.rect.centery - self.rect.centery,
+                                       ai.rect.centerx - self.rect.centerx)
                 break
+
+    def update_frame(self):
+        """Установка нового кадра"""
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = pygame.transform.rotate(new_image_size(
+            self.frames[self.cur_frame]), -degrees(self.alpha)-90)
