@@ -90,13 +90,14 @@ def rebase_elements():
     bars_manager.clear_and_reset()
     [label.update_element() for label in LABELS]
     [element.update_element() for element in MENU_ELEMENTS.values()]
+    [element.update_element() for element in MAP_ELEMENTS.values()]
     for i in SETTINGS_ELEMENTS:
         if i == 'MUSIC':
             gui_elements.SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
-                rect=LABELS[4].rect)
+                rect=LABELS[6].rect)
         elif i == 'EFFECTS':
             gui_elements.SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
-                rect=LABELS[3].rect)
+                rect=LABELS[5].rect)
         else:
             try:
                 gui_elements.SETTINGS_ELEMENTS[i].update_element()
@@ -1002,7 +1003,8 @@ if __name__ == '__main__':
             solomon_chosen = result == 1
             norweg_chosen = result == 2
             china_chosen = result == 3
-            game_run = True
+            game_run = result != 0
+            menu_run = result == 0
             map_choice_run = False
         elif gameover_run:  # Экран после поражения
             pygame.mixer.music.fadeout(500)
