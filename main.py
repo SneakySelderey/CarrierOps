@@ -592,6 +592,8 @@ class Run:
         """Функция для запуска противокорабельной ракеты"""
         Settings.PLAYER_MISSILES.add(MissileFriendly(
             destination, True))
+        [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
+         for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
 
     def aircraft_launch(self, destination):
