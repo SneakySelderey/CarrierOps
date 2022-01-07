@@ -785,6 +785,7 @@ class Run:
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
+        camera.new_position()
         pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
@@ -807,15 +808,11 @@ class Run:
                         Settings.CELL_SIZE = min(
                             Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
                             200)
-                        camera.overall_shift_x = event.pos[0]
-                        camera.overall_shift_y = event.pos[1]
                         update_objects()
                     if event.button == 5:
                         Settings.CELL_SIZE = max(
                             Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
                             10)
-                        camera.overall_shift_x = event.pos[0]
-                        camera.overall_shift_y = event.pos[1]
                         update_objects()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
@@ -868,18 +865,16 @@ class Run:
 
             self.camera_update()
 
-            if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50 and not \
-                    arrow_pressed:
-                camera.dx = -Settings.CELL_SIZE // 4
-            elif pygame.mouse.get_pos()[0] <= 50 and not arrow_pressed:
-                camera.dx = Settings.CELL_SIZE // 4
-            elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50 and not \
-                    arrow_pressed:
-                camera.dy = -Settings.CELL_SIZE // 4
-            elif pygame.mouse.get_pos()[1] <= 50 and not arrow_pressed:
-                camera.dy = Settings.CELL_SIZE // 4
-            else:
-                if not arrow_pressed:
+            if not arrow_pressed:
+                if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50:
+                    camera.dx = -Settings.CELL_SIZE // 4
+                elif pygame.mouse.get_pos()[0] <= 50:
+                    camera.dx = Settings.CELL_SIZE // 4
+                elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50:
+                    camera.dy = -Settings.CELL_SIZE // 4
+                elif pygame.mouse.get_pos()[1] <= 50:
+                    camera.dy = Settings.CELL_SIZE // 4
+                else:
                     camera.dx = 0
                     camera.dy = 0
 
