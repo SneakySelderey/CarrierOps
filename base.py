@@ -15,7 +15,7 @@ class Base(pygame.sprite.Sprite):
                     'missile': [MISSILE_ICON, Settings.NUM_OF_MISSILES],
                     'aircraft': [PLANE_ICON, Settings.NUM_OF_AIRCRAFT]}
 
-    def __init__(self, x, y, state, visibility, cell_size, parent):
+    def __init__(self, x, y, state, visibility, cell_size, parent, run):
         super().__init__(ALL_SPRITES_FOR_SURE, BASES_SPRITES,
                          ALWAYS_UPDATE)
         self.x, self.y = x, y
