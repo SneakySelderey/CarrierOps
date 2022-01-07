@@ -105,6 +105,7 @@ def rebase_elements():
                     SETTINGS_ELEMENTS[i].get_same()
     [element.update_element() for element in IN_GAME_ELEMENTS.values()]
     [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
+    [element.update_element() for element in WIN_ELEMENTS.values()]
     for i in LOAD_ELEMENTS:
         try:
             LOAD_ELEMENTS[i].update_element()
