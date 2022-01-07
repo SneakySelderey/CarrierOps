@@ -41,7 +41,7 @@ class MissileFriendly(AnimatedSprite):
         """Обновление координат ракеты при полете к точке активации ГСН"""
         self.left = self.prev_pos[0] < self.pos.x
         if not self.activated:
-            self.total_ticks += 0.01
+            self.total_ticks += 0.02
 
         if self.pos != self.activation:
             self.prev_pos = [self.pos.x, self.pos.y]
