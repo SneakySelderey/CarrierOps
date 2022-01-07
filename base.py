@@ -116,12 +116,12 @@ class SuperBase(Base):
         super().__init__(*args, run)
         self.ticks_to_capture = Settings.BASE_TICKS
         if self.state == 'ai':
-            Settings.HOSTILE_BASES.append(self)
+            Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
             self.visibility = False
         else:
             self.start_of_capture = 1
-            Settings.FRIENDLY_BASES.append(self)
+            Settings.FRIENDLY_BASES.append((self.x, self.y))
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""

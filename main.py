@@ -136,6 +136,8 @@ def clear_sprite_groups():
     Settings.AI_MISSILES.empty()
     Settings.AI_AIRCRAFT.empty()
     Settings.BACKGROUND_MAP.empty()
+    Settings.FRIENDLY_BASES.clear()
+    Settings.HOSTILE_BASES.clear()
 
 
 def terminate():
@@ -981,7 +983,7 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
-                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)) + 1:
+                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)):
                     self.win = True
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
