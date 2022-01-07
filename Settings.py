@@ -60,6 +60,7 @@ CARRIER_GROP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
+BOARD = []
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 AIR_SPEED = 2.5
@@ -79,6 +80,7 @@ GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
 NUM_OF_BASES = 1
+N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 PLAYER_START = None
 AI_START = None
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
@@ -152,6 +154,7 @@ PLAYER_MISSILE_SHEET = pygame.image.load('data/sheets/friendly_missile_sheet.png
 HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png').convert_alpha()
 EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
 VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
+LAND_CHECK_IMG = pygame.image.load('data/img/land_check.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')

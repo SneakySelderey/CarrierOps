@@ -7,13 +7,15 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, NorwegLand, ChinaLand
+from map_solomon import SolomonLand, NorwegLand, ChinaLand, LandCheck
 from Settings import *
 import Settings
 import pygame_gui
 from player import Player
 from AI import AI
 import win32gui
+from collections import defaultdict, deque
+from pprint import pprint
 
 
 def move_window():
@@ -605,6 +607,11 @@ class Run:
         self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, self.cell_size)
 
+        for x in range(self.cells_y):
+            Settings.BOARD.append([])
+            for y in range(self.cells_x):
+                Settings.BOARD[x].append('.')
+
         # Флаги, переменные
         self.running = True
         self.ai_detected = False
@@ -620,6 +627,10 @@ class Run:
             self.map = NorwegLand(True, self.board)
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
+
+        LandCheck(True, self.board, self)
+        for i in Settings.BOARD:
+            print(" ".join([str(l).rjust(1) for l in i]))
 
         self.missiles_launched = 0
         self.aircraft_launched = 0
@@ -647,6 +658,40 @@ class Run:
                                  [base.ico for base in self.board.bases if
                                   base.state not in ['player', 'ai']],
                                  [base.bar for base in self.board.bases]]
+
+    def has_path(self, x1, y1, x2, y2):
+        g = defaultdict(list)
+        n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
+        for i in range(n):
+            for j in range(m):
+                g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+                             self.check(i + v[0], j + v[1], n, m)]
+        ans = self.bfs((x1, y1), g, (x2, y2))
+        return (x2, y2) in ans
+
+    def check(self, x, y, n, m):
+        return 0 <= x < n and 0 <= y < m
+
+    def bfs(self, start, g, end):
+        self.path = []
+        visited, queue = [start], deque([start])
+        p = {}
+        while queue:
+            vertex = queue.popleft()
+            if vertex == end:
+                break
+            for nr in g[vertex]:
+                if nr not in visited and self.board[nr[0]][nr[1]] != 1:
+                    visited.append(nr)
+                    queue.append(nr)
+                    p[nr] = vertex
+        if end in visited:
+            to = end
+            while to != start:
+                self.path.append(to)
+                to = p[to]
+            self.path.reverse()
+        return visited
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
