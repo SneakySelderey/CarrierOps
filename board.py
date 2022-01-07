@@ -6,7 +6,7 @@ from random import sample, choice
 
 class Board:
     """Класс, ответственный за отрисовку поля"""
-    def __init__(self, width, height):
+    def __init__(self, width, height, run):
         self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
@@ -18,6 +18,7 @@ class Board:
         self.cells = {(i, j) for i in range(self.width) for j in
                       range(self.height)}
         self.used = set()
+        self.run = run
 
     def set_view(self, left, top, cell_size):
         """Метод, задающий отступ сетки и размер одной ячейки"""
@@ -37,9 +38,9 @@ class Board:
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
         if not mega:
-            base = Base(x, y, 'neutral', True, self.cell_size, self)
+            base = Base(x, y, 'neutral', True, self.cell_size, self, self.run)
         else:
-            base = SuperBase(x, y, mega[0], True, self.cell_size, self)
+            base = SuperBase(x, y, mega[0], True, self.cell_size, self, run=self.run)
         land = list(Settings.BACKGROUND_MAP)[0]
         while pygame.sprite.collide_mask(land, base) is not None:
             self.used.add((x, y))

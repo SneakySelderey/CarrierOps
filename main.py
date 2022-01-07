@@ -106,6 +106,7 @@ def rebase_elements():
                     SETTINGS_ELEMENTS[i].get_same()
     [element.update_element() for element in IN_GAME_ELEMENTS.values()]
     [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
+    [element.update_element() for element in WIN_ELEMENTS.values()]
     for i in LOAD_ELEMENTS:
         try:
             LOAD_ELEMENTS[i].update_element()
@@ -136,6 +137,8 @@ def clear_sprite_groups():
     Settings.AI_MISSILES.empty()
     Settings.AI_AIRCRAFT.empty()
     Settings.BACKGROUND_MAP.empty()
+    Settings.FRIENDLY_BASES.clear()
+    Settings.HOSTILE_BASES.clear()
 
 
 def terminate():
@@ -304,7 +307,7 @@ def show_setting_screen(flag=True):
         pygame.display.flip()
 
 
-def show_gameover_screen():
+def show_gameover_screen(run):
     """Функция для отрисовки и взаимодействия с экраном проигрыша"""
     [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT))
@@ -313,6 +316,13 @@ def show_gameover_screen():
     gameover_manager.draw_ui(screen)
     pygame.display.flip()
     clock.tick(5000)
+    gui_elements.MISSILES_LAUNCHED_LABEL_GO.update_text('MISSILES LAUNCHED BY PLAYER: ' + str(run.missiles_launched))
+    gui_elements.AIRCRAFT_LAUNCHED_LABEL_GO.update_text('AIRCRAFT LAUNCHED BY PLAYER: ' + str(run.aircraft_launched))
+    gui_elements.BASES_CAPTURED_BY_PLAYER_LABEL_GO.update_text('BASES CAPTURED BY PLAYER: ' +
+                                                               str(run.bases_captured_by_player))
+    gui_elements.BASES_CAPTURED_BY_AI_LABEL_GO.update_text('BASES CAPTURED BY AI: ' + str(run.bases_captured_by_AI))
+    gui_elements.PLAYER_MISSILES_HIT_LABEL_GO.update_text('PLAYER MISSILES HIT: ' + str(run.player_missiles_hit))
+    gui_elements.AI_MISSILES_HIT_LABEL_GO.update_text('AI MISSILES HIT: ' + str(run.AI_missiles_hit))
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -337,6 +347,49 @@ def show_gameover_screen():
         # Обновление менеджера
         gameover_manager.update(delta)
         gameover_manager.draw_ui(screen)
+        pygame.display.flip()
+
+
+def show_victory_screen(run):
+    """Функция для отрисовки и взаимодействия с экраном проигрыша"""
+    [i.stop() for i in ALL_EFFECTS]
+    background = pygame.transform.scale(VICTORY, (WIDTH, HEIGHT))
+    alpha = 255
+    screen.fill(BLACK)
+    win_manager.draw_ui(screen)
+    pygame.display.flip()
+    clock.tick(5000)
+    gui_elements.MISSILES_LAUNCHED_LABEL.update_text('MISSILES LAUNCHED BY PLAYER: ' + str(run.missiles_launched))
+    gui_elements.AIRCRAFT_LAUNCHED_LABEL.update_text('AIRCRAFT LAUNCHED BY PLAYER: ' + str(run.aircraft_launched))
+    gui_elements.BASES_CAPTURED_BY_PLAYER_LABEL.update_text('BASES CAPTURED BY PLAYER: ' +
+                                                            str(run.bases_captured_by_player))
+    gui_elements.BASES_CAPTURED_BY_AI_LABEL.update_text('BASES CAPTURED BY AI: ' + str(run.bases_captured_by_AI))
+    gui_elements.PLAYER_MISSILES_HIT_LABEL.update_text('PLAYER MISSILES HIT: ' + str(run.player_missiles_hit))
+    gui_elements.AI_MISSILES_HIT_LABEL.update_text('AI MISSILES HIT: ' + str(run.AI_missiles_hit))
+    while True:
+        delta = clock.tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == WIN_ELEMENTS['QUIT']:
+                        terminate()
+                    if event.ui_element == WIN_ELEMENTS['MENU']:
+                        return 1
+            if event.type == MUSIC_END:
+                pygame.mixer.music.load(os.getcwd() + '/data/music/win/'
+                                        + choice(VICTORY_MUSIC))
+                pygame.mixer.music.play(fade_ms=3000)
+            win_manager.process_events(event)
+        # Создание красивой картинки и эффекта затемнения
+        help_surface.fill((0, 0, 0, alpha))
+        screen.blit(background, (0, 0))
+        screen.blit(help_surface, (0, 0))
+        alpha = max(alpha - 0.5, 0)
+        # Обновление менеджера
+        win_manager.update(delta)
+        win_manager.draw_ui(screen)
         pygame.display.flip()
 
 
@@ -549,13 +602,14 @@ class Run:
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
-        self.board = Board(self.cells_x, self.cells_y)
+        self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, self.cell_size)
 
-        # Флаги
+        # Флаги, переменные
         self.running = True
         self.ai_detected = False
         self.defeat = False
+        self.win = False
         self.menu = False
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
@@ -566,6 +620,13 @@ class Run:
             self.map = NorwegLand(True, self.board)
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
+
+        self.missiles_launched = 0
+        self.aircraft_launched = 0
+        self.bases_captured_by_player = 0
+        self.bases_captured_by_AI = 0
+        self.player_missiles_hit = 0
+        self.AI_missiles_hit = 0
 
         self.board.add_bases()
         self.player = Player()
@@ -594,12 +655,14 @@ class Run:
         [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
          for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
+        self.missiles_launched += 1
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
             destination, True))
         TAKEOFF.play()
+        self.aircraft_launched += 1
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
@@ -662,6 +725,7 @@ class Run:
                     Settings.ANIMATED_SPRTIES.remove(missile)
                     Settings.PLAYER_MISSILES.remove(missile)
                     Settings.ALL_SPRITES_FOR_SURE.remove(missile)
+                    self.player_missiles_hit += 1
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
                     missile.activation = list(missile.activation)
@@ -918,6 +982,8 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
+                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)):
+                    self.win = True
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
@@ -937,7 +1003,7 @@ class Run:
 
                 if alpha == 255:
                     self.running = False
-                if self.defeat:
+                if self.defeat or self.win:
                     alpha = min(alpha + 10, 255)
 
                 campaign_manager.update(delta)
@@ -945,14 +1011,17 @@ class Run:
 
                 pygame.display.flip()
 
-        # После поражения
+        # После поражения или победы
         while alpha > 0:
             help_surface.fill((0, 0, 0, alpha))
             screen.blit(help_surface, (0, 0))
             alpha -= 1
             pygame.display.flip()
             clock.tick(FPS)
-        return 1
+        if self.defeat:
+            return 1
+        elif self.win:
+            return 3
 
 
 if __name__ == '__main__':
@@ -971,8 +1040,8 @@ if __name__ == '__main__':
     game_objects = None
     calculate_speed(80)
     # Флаги, отвечающие за то, в каком меню находится пользователь
-    menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, slides_run = \
-        False, False, False, False, False, False, True
+    menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, victory_run, slides_run = \
+        False, False, False, False, False, False, False, True
     running = True
     # Создадим камеру
     camera = Camera()
@@ -1004,8 +1073,14 @@ if __name__ == '__main__':
             map_choice_run = False
         elif gameover_run:  # Экран после поражения
             pygame.mixer.music.fadeout(500)
-            result = show_gameover_screen()
+            result = show_gameover_screen(game_objects)
             gameover_run = False
+            game_objects = None
+            menu_run = result == 1
+        elif victory_run:  # Экран после победы
+            pygame.mixer.music.fadeout(500)
+            result = show_victory_screen(game_objects)
+            victory_run = False
             game_objects = None
             menu_run = result == 1
         elif game_run:  # Игра
@@ -1015,6 +1090,7 @@ if __name__ == '__main__':
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
+            victory_run = result == 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1

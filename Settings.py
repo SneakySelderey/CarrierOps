@@ -78,7 +78,7 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
-NUM_OF_BASES = 10
+NUM_OF_BASES = 1
 PLAYER_START = None
 AI_START = None
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
@@ -151,6 +151,7 @@ AI_CARRIER_SHEET = pygame.image.load('data/sheets/ai_carrier_sheet.png').convert
 PLAYER_MISSILE_SHEET = pygame.image.load('data/sheets/friendly_missile_sheet.png').convert_alpha()
 HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png').convert_alpha()
 EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
+VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
@@ -173,6 +174,7 @@ MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
 GAME_MUSIC = os.listdir(os.getcwd() + '/data/music/game/')
 BATTLE_MUSIC = os.listdir(os.getcwd() + '/data/music/battle/')
 GAMEOVER_MUSIC = os.listdir(os.getcwd() + '/data/music/gameover/')
+VICTORY_MUSIC = os.listdir(os.getcwd() + '/data/music/win/')
 GROUPS = [MENU_MUSIC, GAME_MUSIC, BATTLE_MUSIC, GAMEOVER_MUSIC]
 ALL_MUSIC = [track for group in GROUPS for track in group]
 

@@ -38,6 +38,7 @@ class Base(pygame.sprite.Sprite):
             self.resource_type = random_resource_type()
             self.ico = BaseIcon(self)
             self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
+        self.run = run
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -77,6 +78,10 @@ class Base(pygame.sprite.Sprite):
 
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
+            if self.state == 'friendly':
+                self.run.bases_captured_by_player += 1
+            elif self.state == 'hostile':
+                self.run.bases_captured_by_AI += 1
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
@@ -107,16 +112,16 @@ class Base(pygame.sprite.Sprite):
 
 class SuperBase(Base):
     """Класс для галвнйо базы"""
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, run):
+        super().__init__(*args, run)
         self.ticks_to_capture = 0
         if self.state == 'ai':
-            Settings.HOSTILE_BASES.append(self)
+            Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
             self.visibility = False
         else:
             self.start_of_capture = 1
-            Settings.FRIENDLY_BASES.append(self)
+            Settings.FRIENDLY_BASES.append((self.x, self.y))
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
