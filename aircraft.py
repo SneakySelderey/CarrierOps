@@ -77,7 +77,7 @@ class AircraftFriendly(AnimatedSprite):
                            player.rect.centerx - self.rect.centerx)
         self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
-        if pygame.sprite.collide_mask(self, player):
+        if pygame.sprite.collide_rect(self, player):
             Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
 

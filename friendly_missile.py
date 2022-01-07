@@ -118,6 +118,7 @@ class MissileFriendly(AnimatedSprite):
                 if pygame.sprite.collide_mask(self, ai):
                     self.da_bomb = True
                     self.cut_sheet(EXPLOSION_SHEET, 6, 2)
+                    self.rect.center = ai.rect.center
                     EXPLOSION.play()
                     break
         except ValueError:
