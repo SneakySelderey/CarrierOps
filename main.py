@@ -1,3 +1,4 @@
+import copy
 from random import choice
 import sys
 import pygame.sprite
@@ -630,8 +631,13 @@ class Run:
             self.map = ChinaLand(True, self.board)
 
         LandCheck(False, self.board, self)
-        for i in Settings.BOARD:
-            print(" ".join([str(l).rjust(1) for l in i]))
+
+        self.g = defaultdict(list)
+        n, m = self.board.height, self.board.width
+        for i in range(n):
+            for j in range(m):
+                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+                                  self.check(i + v[0], j + v[1], n, m)]
 
         self.missiles_launched = 0
         self.aircraft_launched = 0
@@ -661,13 +667,13 @@ class Run:
                                  [base.bar for base in self.board.bases]]
 
     def has_path(self, x1, y1, x2, y2):
-        g = defaultdict(list)
+        self.g = defaultdict(list)
         n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
         for i in range(n):
             for j in range(m):
-                g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
                              self.check(i + v[0], j + v[1], n, m)]
-        ans = self.bfs((x1, y1), g, (x2, y2))
+        ans = self.bfs((x1, y1), self.g, (x2, y2))
         return (x2, y2) in ans
 
     def check(self, x, y, n, m):
@@ -682,7 +688,7 @@ class Run:
             if vertex == end:
                 break
             for nr in g[vertex]:
-                if nr not in visited and self.board[nr[0]][nr[1]] != 1:
+                if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
                     visited.append(nr)
                     queue.append(nr)
                     p[nr] = vertex
@@ -692,7 +698,7 @@ class Run:
                 self.path.append(to)
                 to = p[to]
             self.path.reverse()
-        return visited
+        return self.path
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -712,21 +718,31 @@ class Run:
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
-        distance = []
-        ai_pos_x = self.ai.rect.centerx // self.cell_size
-        ai_pos_y = self.ai.rect.centery // self.cell_size
-        for base in self.board.bases:
-            dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if base.start_of_capture != 2 and base.state != 'ai':
-                distance.append(
-                    (dist, [base.rect.centerx, base.rect.centery]))
-        try:
-            destination_ai = min(distance)
-            idx = distance.index(destination_ai)
-            self.ai.new_destination(distance[idx][1])
-        except ValueError:
-            self.defeat = True
-            [sound.stop() for sound in ALL_EFFECTS]
+        for ai in Settings.AI_SPRITE:
+            distance = []
+            ai_pos_x = ai.rect.centerx // self.cell_size
+            ai_pos_y = ai.rect.centery // self.cell_size
+            for base in self.board.bases:
+                dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+                if base.start_of_capture != 2 and base.state != 'ai':
+                    distance.append(
+                        (dist, [base.rect.centerx, base.rect.centery]))
+            try:
+                destination_ai = min(distance)
+                idx = distance.index(destination_ai)
+
+                path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
+                                (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
+                                self.g, ((distance[idx][1][1] - self.board.top) // Settings.CELL_SIZE,
+                                         (distance[idx][1][0] - self.board.left) // Settings.CELL_SIZE))
+                path = (path[0][1], path[0][0])
+                ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
+                                    path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
+            except ValueError:
+                self.defeat = True
+                [sound.stop() for sound in ALL_EFFECTS]
+            except IndexError:
+                pass
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -832,7 +848,7 @@ class Run:
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
                     and not missile_tracking and not air_tracking:
-                self.ai.visibility = False
+                self.ai.visibility = True
                 self.ai_detected = False
                 self.play_new_contact = True
                 if self.play_contact_lost:
