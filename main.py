@@ -159,7 +159,7 @@ def load_save(title):
                 pass  # TODO: HOSTILE MISSILES
             for i, j in missile[1].items():
                 new_mis.__dict__[i] = j
-    #update_objects()
+    update_objects()
     game_objects.menu = False
     Settings.IS_PAUSE = True
     calculate_speed(Settings.CELL_SIZE)
@@ -1172,14 +1172,14 @@ if __name__ == '__main__':
     FPS = 60
     chosen_map = 'solomon'
 
-    game_objects = None
+    game_objects = Run()
     calculate_speed(Settings.CELL_SIZE)
     # Флаги, отвечающие за то, в каком меню находится пользователь
     menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, \
         victory_run, slides_run = False, False, False, False, False, False, \
         False, True
     running = True
-    new_game = True
+    new_game = False
     # Создадим камеру
     camera = Camera()
     # Основной мега-цикл
@@ -1192,10 +1192,9 @@ if __name__ == '__main__':
         if menu_run:  # Экран меню
             Settings.CELL_SIZE = Settings.WIDTH // 20
             Settings.IS_PAUSE = True
+            new_game = False
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
-            clear_sprite_groups()
-            set_standard_values()
             chosen_map = None
             map_choice_run = result == 1
             load_run = result == 2
@@ -1203,8 +1202,10 @@ if __name__ == '__main__':
             menu_run = False
         elif map_choice_run:  # Экран выбора карты
             result = show_map_screen()
+            clear_sprite_groups()
             chosen_map = 'solomon' if result == 1 else 'norweg' if \
                 result == 2 else 'china'
+            game_objects = Run()
             game_run = result != 0
             menu_run = result == 0
             map_choice_run = False
@@ -1224,6 +1225,8 @@ if __name__ == '__main__':
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
             if new_game:
+                clear_sprite_groups()
+                set_standard_values()
                 game_objects = Run()
             result = game_objects.main()
             game_run = False
