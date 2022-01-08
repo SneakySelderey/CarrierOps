@@ -95,6 +95,12 @@ def load_save(title):
     with shelve.open(get_user_data()[title][1]) as data:
         #print(list(data.items()))
         # Загрузим ресурсы
+        Settings.LAUNCHED_MISSILES = data['launched_missiles']
+        Settings.LAUNCHED_AIRCRAFT = data['launched_aircraft']
+        Settings.PLAYER_MISSILES_HIT = data['player_hit']
+        Settings.AI_MISSILES_HIT = data['ai_hit']
+        Settings.BASES_CAPT_PLAYER = data['player_captured']
+        Settings.BASES_CAPT_AI = data['ai_captured']
         Settings.OIL_VOLUME = data['player_oil']
         Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
         Settings.NUM_OF_MISSILES = data['player_missiles']
@@ -169,6 +175,12 @@ def create_save(title):
     "{title}", "{now}", {max_rows})''')
     CONNECTION.commit()
     with shelve.open(f'data/system/saves/{title}', 'c') as data:
+        data['launched_missiles'] = Settings.LAUNCHED_MISSILES
+        data['launched_aircraft'] = Settings.LAUNCHED_AIRCRAFT
+        data['player_hit'] = Settings.PLAYER_MISSILES_HIT
+        data['ai_hit'] = Settings.AI_MISSILES_HIT
+        data['player_captured'] = Settings.BASES_CAPT_PLAYER
+        data['ai_captured'] = Settings.BASES_CAPT_AI
         data['player_oil'] = Settings.OIL_VOLUME
         data['player_aircraft'] = Settings.NUM_OF_AIRCRAFT
         data['player_missiles'] = Settings.NUM_OF_MISSILES
