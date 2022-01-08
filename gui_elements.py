@@ -38,7 +38,7 @@ class OptionList(pygame_gui.elements.UISelectionList):
         rect.width = Settings.WIDTH * 0.5
         rect.height = Settings.HEIGHT * 0.5
         data = get_user_data()
-        data = ['    '.join([i, str(data[i][0])]) for i in data]
+        data = ['    '.join([str(i), str(data[i][0])]) for i in data]
         super().__init__(relative_rect=rect, manager=manager,
                          item_list=data, object_id='saves')
 
