@@ -14,7 +14,7 @@ class Map(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(Map.Pictures[chosen_map], (
             Settings.CELL_SIZE * board.width,
             Settings.CELL_SIZE * board.height))
-        self.rect = self.image.get_rect(topleft=(0, 0))
+        self.rect = self.image.get_rect(topleft=(board.left, board.top))
         self.visibility = visibility,
         self.parent_board = board
         self.chosen_map = chosen_map
@@ -32,5 +32,6 @@ class Map(pygame.sprite.Sprite):
     def data_to_save(self):
         """Возвращает значения, которые надо сохранить"""
         to_save = self.__dict__.copy()
-        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask'], \
+            to_save['parent_board']
         return to_save
