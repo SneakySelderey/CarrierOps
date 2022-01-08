@@ -621,6 +621,7 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
+        self.play_main_base_detection = True
         if solomon_chosen:
             self.map = SolomonLand(True, self.board)
         elif norweg_chosen:
@@ -752,6 +753,9 @@ class Run:
                     base.bar.visibility = True
             if base.bar.visibility and base.state == 'ai':
                 base.visibility = True
+                if self.play_main_base_detection:
+                    MAIN_BASE_DETECTION.play()
+                    self.play_main_base_detection = False
 
         # отрисовка спрайта противника
         for ai in Settings.AI_SPRITE:
