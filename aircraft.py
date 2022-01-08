@@ -96,3 +96,10 @@ class AircraftFriendly(AnimatedSprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = pygame.transform.rotate(new_image_size(
             self.frames[self.cur_frame]), -degrees(self.alpha)-90)
+
+    def data_to_save(self):
+        """Возвраащет значения для сохранения"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return 'friendly', to_save

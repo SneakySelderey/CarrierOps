@@ -39,6 +39,8 @@ class Camera:
         """Свинуть ракету на смещенеи камеры"""
         obj.pos.x += self.dx
         obj.pos.y += self.dy
+        obj.prev_pos[0] += self.dx
+        obj.prev_pos[1] += self.dx
         if Settings.IS_PAUSE:
             self.apply_rect(obj)
 
@@ -52,3 +54,7 @@ class Camera:
         self.overall_shift_x = 0
         self.overall_shift_y = 0
         self.centered = True
+
+    def data_to_save(self):
+        """Возвращает значения для сохранения"""
+        return list(self.__dict__.values())

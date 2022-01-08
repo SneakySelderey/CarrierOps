@@ -7,7 +7,7 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import SolomonLand, NorwegLand, ChinaLand
+from map_solomon import Map
 from Settings import *
 import Settings
 import pygame_gui
@@ -17,6 +17,16 @@ import win32gui
 from datetime import datetime
 import shelve
 from base import Base, SuperBase
+
+
+def give_sprites_to_check():
+    """Функция, возвращающая список групп спрайтов для проверки в методе
+    fog_of_war и camera_update"""
+    return [Settings.BACKGROUND_MAP, Settings.BASES_SPRITES,
+            Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
+            Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
+            Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
+            Settings.AI_AIRCRAFT]
 
 
 def set_standard_values():
@@ -51,11 +61,11 @@ def calculate_speed(cell):
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения/зуме"""
-    camera.new_position()
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
      Settings.ALL_SPRITES_FOR_SURE]
     Settings.ALWAYS_UPDATE.update()
+    camera.new_position()
     calculate_speed(Settings.CELL_SIZE)
     game_objects.cell_size = Settings.CELL_SIZE
 
@@ -75,8 +85,10 @@ def delete_save(save):
 def load_save(title):
     """Функция для загрузи сохранения"""
     # TODO: LOAD SAVE!!!
+    #clear_sprite_groups()
     with shelve.open(get_user_data()[title][1]) as data:
         print(list(data.items()))
+        # Загрузим ресурсы
         Settings.OIL_VOLUME = data['player_oil']
         Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
         Settings.NUM_OF_MISSILES = data['player_missiles']
@@ -85,21 +97,57 @@ def load_save(title):
         Settings.BASE_NUM_OF_MISSILES = data['base_missiles']
         Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
         Settings.CELL_SIZE = data['cell_size']
+        # Загрузим камеру
+        camera.dx, camera.dy, camera.overall_shift_x, camera.overall_shift_y, \
+            camera.centered = data['camera']
+        # Загрузим базы
         Settings.BASES_SPRITES.empty()
         for base in data['bases']:
-            rect, state, to_add, x, y, ticks_to_capt, start_capt, prev_start, \
-                visibility, show_bar, *resource = base[1:]
             if base[0] == 'base':
-                new = Base(x, y, state, visibility)
-                new.ticks_to_give_resource = resource[0]
-                new.resource_type = resource[1]
+                new_base = Base(base[1]['x'], base[1]['y'], base[1]['state'],
+                                base[1]['visibility'])
             else:
-                new = SuperBase(x, y, state, visibility)
-            new.to_add = to_add
-            new.prev_start = prev_start
-            new.start_of_capture = start_capt
-            new.ticks_to_capture = ticks_to_capt
-            new.show_bar = show_bar
+                new_base = SuperBase(base[1]['x'], base[1]['y'],
+                                     base[1]['state'], base[1]['visibility'])
+            for i, j in base[1].items():
+                new_base.__dict__[i] = j
+        # Загрузим игрока и ИИ
+        # Settings.CARRIER_GROUP.empty()
+        # Settings.PLAYER_SPRITE.empty()
+        # Settings.AI_SPRITE.empty()
+        # for carrier in data['carriers']:
+        #     new_carrier = Player() if carrier['obj'] == 'player' else AI()
+        #     for i, j in carrier.items():
+        #         new_carrier.__dict__[i] = j
+        #     if carrier['obj'] == 'player':
+        #         game_objects.player = new_carrier
+        #     else:
+        #         game_objects.ai = new_carrier
+
+        # Загрузим самолеты
+        Settings.PLAYER_AIRCRAFT.empty()
+        Settings.AI_AIRCRAFT.empty()
+        for aircraft in data['aircraft']:
+            if aircraft[0] == 'friendly':
+                new_air = AircraftFriendly(aircraft[1]['destination'],
+                                           aircraft[1]['visibility'])
+            else:
+                pass  # TODO: HOSTILE AIRCRAFT
+            for i, j in aircraft[1].items():
+                new_air.__dict__[i] = j
+
+        # Загрузим ракеты
+        Settings.PLAYER_MISSILES.empty()
+        Settings.AI_MISSILES.empty()
+        for missile in data['missiles']:
+            if missile[0] == 'friendly':
+                new_mis = MissileFriendly(missile[1]['activation'],
+                                          missile[1]['visibility'])
+            else:
+                pass  # TODO: HOSTILE MISSILES
+            for i, j in missile[1].items():
+                new_mis.__dict__[i] = j
+
     update_objects()
 
 
@@ -125,6 +173,13 @@ def create_save(title):
         data['cell_size'] = Settings.CELL_SIZE
         data['bases'] = [base.data_to_save() for base in
                          Settings.BASES_SPRITES]
+        data['carriers'] = [carrier.data_to_save() for carrier in
+                            Settings.CARRIER_GROUP]
+        data['camera'] = camera.data_to_save()
+        data['aircraft'] = [aircraft.data_to_save() for aircraft in set(
+            Settings.PLAYER_AIRCRAFT) | set(Settings.AI_AIRCRAFT)]
+        data['missiles'] = [missile.data_to_save() for missile in set(
+            Settings.PLAYER_MISSILES) | set(Settings.AI_MISSILES)]
 
     rebase_load_manager()
 
@@ -675,7 +730,6 @@ class Run:
 
         # Флаги, переменные
         self.running = True
-        self.ai_detected = False
         self.defeat = False
         self.win = False
         self.menu = False
@@ -683,29 +737,16 @@ class Run:
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
         if solomon_chosen:
-            self.map = SolomonLand(True, self.board)
+            self.map = Map(True, self.board, 'solomon')
         elif norweg_chosen:
-            self.map = NorwegLand(True, self.board)
+            self.map = Map(True, self.board, 'norweg')
         elif china_chosen:
-            self.map = ChinaLand(True, self.board)
+            self.map = Map(True, self.board, 'china')
 
         self.board.add_bases()
         self.player = Player()
         self.ai = AI()
-        self.friendly_missiles = []
-        self.hostile_missiles = []
-        self.friendly_aircraft = []
-        self.overall_shift_x = 0
-        self.overall_shift_y = 0
-        self.centered = False
-        self.list_all_sprites = [Settings.BACKGROUND_MAP,
-                                 Settings.BASES_SPRITES,
-                                 Settings.PLAYER_SPRITE,
-                                 Settings.MOVE_POINT_SPRITE,
-                                 Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
-                                 Settings.PLAYER_AIRCRAFT,
-                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT,
-                                 ]
+        print(self.__dict__)
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -728,7 +769,7 @@ class Run:
         distance = []
         ai_pos_x = self.ai.rect.centerx // self.cell_size
         ai_pos_y = self.ai.rect.centery // self.cell_size
-        for base in self.board.bases:
+        for base in Settings.BASES_SPRITES:
             dist = [ai_pos_x - base.x, ai_pos_y - base.y]
             if base.start_of_capture != 2 and base.state != 'ai':
                 distance.append(
@@ -744,25 +785,25 @@ class Run:
     def fog_of_war(self):
         """Отрисовка тумана войны"""
         ai_x, ai_y = self.ai.rect.center
-        player_x, player_y = self.player.rect.center
+        player_x, player_y = list(Settings.PLAYER_SPRITE)[0].rect.center
         player = list(Settings.PLAYER_SPRITE)[0]
 
         # отрисовка нужных и прятанье ненужных спрайтов
         TO_DRAW.empty()
-        [TO_DRAW.add(sprite) for group in self.list_all_sprites for sprite
-         in group if sprite.visibility]
+        [TO_DRAW.add(sprite) for group in give_sprites_to_check()
+         for sprite in group if sprite.visibility]
         TO_DRAW.draw(screen)
 
-        for base in self.board.bases:
+        for base in Settings.BASES_SPRITES:
             base.show_bar = False
             if base.start_of_capture in [0, 1] or \
-                    pygame.sprite.collide_circle_ratio(1)(player, base):
+                    pygame.sprite.collide_circle(player, base):
                 base.show_bar = True
-            for aircraft in self.friendly_aircraft:
-                if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
+            for aircraft in Settings.PLAYER_AIRCRAFT:
+                if pygame.sprite.collide_circle(aircraft, base):
                     base.show_bar = True
-            for missile in self.friendly_missiles:
-                if pygame.sprite.collide_circle_ratio(1)(missile, base):
+            for missile in Settings.PLAYER_MISSILES:
+                if pygame.sprite.collide_circle(missile, base):
                     base.show_bar = True
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
@@ -781,12 +822,9 @@ class Run:
                 # если ракета исчерпала свой ресурс, она падает в море и
                 # спрайт удаляется
                 if missile.total_ticks >= 10:
-                    Settings.ANIMATED_SPRTIES.remove(missile)
-                    Settings.PLAYER_MISSILES.remove(missile)
-                    Settings.ALL_SPRITES_FOR_SURE.remove(missile)
+                    missile.kill()
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
-                    missile.activation = list(missile.activation)
                     missile.activation[0] += camera.dx
                     missile.activation[1] += camera.dy
                     pygame.draw.line(screen, BLUE, (missile_x, missile_y),
@@ -807,11 +845,8 @@ class Run:
                 # если самолет исчерпал свой ресурс, он возвращается на
                 # авианосец
                 if aircraft.delete:
-                    Settings.ANIMATED_SPRTIES.remove(aircraft)
-                    Settings.PLAYER_AIRCRAFT.remove(aircraft)
-                    Settings.ALL_SPRITES_FOR_SURE.remove(aircraft)
+                    aircraft.kill()
                 # отрисовка радиуса обнаружения самолета
-                aircraft.destination = list(aircraft.destination)
                 aircraft.destination[0] += camera.dx
                 aircraft.destination[1] += camera.dy
                 pygame.draw.line(screen, BLUE,
@@ -827,7 +862,6 @@ class Run:
                 self.ai.visibility = True
                 pygame.draw.circle(screen, RED, (ai_x, ai_y),
                                    Settings.CELL_SIZE * 4, 1)
-                self.ai_detected = True
                 self.play_contact_lost = True
                 if self.play_new_contact:
                     if missile_tracking:
@@ -842,7 +876,6 @@ class Run:
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
                     and not missile_tracking and not air_tracking:
                 self.ai.visibility = False
-                self.ai_detected = False
                 self.play_new_contact = True
                 if self.play_contact_lost:
                     CONTACT_LOST.play()
@@ -856,7 +889,7 @@ class Run:
 
     def camera_update(self):
         # обновляем положение всех спрайтов
-        for group in self.list_all_sprites:
+        for group in give_sprites_to_check():
             for sprite in group:
                 if sprite in set(Settings.PLAYER_AIRCRAFT) | set(
                     Settings.AI_AIRCRAFT) | set(Settings.PLAYER_SPRITE) | set(

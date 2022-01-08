@@ -9,7 +9,7 @@ import inspect
 class Carrier(AnimatedSprite):
     """Класс, определяющий параметры и спрайт авианосца"""
     def __init__(self, sheet, group):
-        super().__init__(sheet, 20, 1, group)
+        super().__init__(sheet, 20, 1, group, Settings.CARRIER_GROUP)
         self.obj = 'player' if sheet == PLAYER_CARRIER_SHEET else 'ai'
         self.pos = list(self.rect.center)
         self.destination = self.pos
@@ -68,5 +68,7 @@ class Carrier(AnimatedSprite):
 
     def data_to_save(self):
         """Возвращает список тех занчений, которые можно сохранить"""
-        return [self.cur_frame, self.pos, self.rect, self.destination,
-                self.alpha, self.current_health, self.prev_pos]
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return to_save

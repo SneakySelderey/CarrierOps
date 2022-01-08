@@ -30,7 +30,6 @@ class Base(pygame.sprite.Sprite):
         self.prev_start = 0
         self.mask = pygame.mask.from_surface(self.image)
         self.show_bar = False
-        self.resource_type = None
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
             self.ticks_to_give_resource = 0
@@ -104,10 +103,9 @@ class Base(pygame.sprite.Sprite):
 
     def data_to_save(self):
         """Функуия, возвращающая список значений, которые можно сохранить"""
-        return ['base', self.rect, self.state, self.to_add, self.x, self.y,
-                self.ticks_to_capture, self.start_of_capture, self.prev_start,
-                self.visibility, self.show_bar, self.ticks_to_give_resource,
-                self.resource_type]
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        return 'base', to_save
 
 
 class SuperBase(Base):
@@ -182,6 +180,6 @@ class SuperBase(Base):
 
     def data_to_save(self):
         """Функуия, возвращающая список значений, которые можно сохранить"""
-        return ['super base', self.rect, self.state, self.to_add,
-                self.x, self.y, self.ticks_to_capture, self.start_of_capture,
-                self.prev_start, self.visibility, self.show_bar]
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        return 'super base', to_save

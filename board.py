@@ -10,7 +10,6 @@ class Board:
         self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
-        self.bases = []
         self.left = 20
         self.top = 20
         self.cell_size = 30
@@ -53,7 +52,6 @@ class Board:
             Settings.PLAYER_START = (x, y)
         elif mega and mega[0] == 'ai':
             Settings.AI_START = (x, y)
-        self.bases.append(base)
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""

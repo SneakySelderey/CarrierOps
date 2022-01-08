@@ -141,3 +141,10 @@ class MissileFriendly(AnimatedSprite):
                 self.image = new_image_size(self.frames[self.cur_frame])
             except IndexError:
                 self.total_ticks = 10
+
+    def data_to_save(self):
+        """Возвращает значения, которые надо сохоранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return 'friendly', to_save
