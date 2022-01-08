@@ -143,7 +143,7 @@ class MissileFriendly(AnimatedSprite):
                 self.total_ticks = 10
 
     def data_to_save(self):
-        """Возвращает значения, которые надо сохоранить"""
+        """Возвращает значения, которые надо сохранить"""
         to_save = self.__dict__.copy()
         del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
             to_save['mask']

@@ -29,5 +29,8 @@ class Map(pygame.sprite.Sprite):
         self.rect.topleft = (self.parent_board.left, self.parent_board.top)
         self.mask = pygame.mask.from_surface(self.image)
 
-    def new_chosen_map(self, name):
-        self.chosen_map = name
+    def data_to_save(self):
+        """Возвращает значения, которые надо сохранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        return to_save

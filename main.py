@@ -37,6 +37,12 @@ def set_standard_values():
     Settings.OIL_VOLUME = 100
     Settings.NUM_OF_AIRCRAFT = 3
     Settings.NUM_OF_MISSILES = 5
+    Settings.LAUNCHED_MISSILES = 0
+    Settings.LAUNCHED_AIRCRAFT = 0
+    Settings.PLAYER_MISSILES_HIT = 0
+    Settings.BASES_CAPT_AI = 0
+    Settings.BASES_CAPT_PLAYER = 0
+    Settings.AI_MISSILES_HIT = 0
 
 
 def move_window():
@@ -87,7 +93,7 @@ def load_save(title):
     # TODO: LOAD SAVE!!!
     #clear_sprite_groups()
     with shelve.open(get_user_data()[title][1]) as data:
-        print(list(data.items()))
+        #print(list(data.items()))
         # Загрузим ресурсы
         Settings.OIL_VOLUME = data['player_oil']
         Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
@@ -98,8 +104,8 @@ def load_save(title):
         Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
         Settings.CELL_SIZE = data['cell_size']
         # Загрузим камеру
-        camera.dx, camera.dy, camera.overall_shift_x, camera.overall_shift_y, \
-            camera.centered = data['camera']
+        for i, j in data['camera'].items():
+            camera.__dict__[i] = j
         # Загрузим базы
         Settings.BASES_SPRITES.empty()
         for base in data['bases']:
@@ -180,6 +186,7 @@ def create_save(title):
             Settings.PLAYER_AIRCRAFT) | set(Settings.AI_AIRCRAFT)]
         data['missiles'] = [missile.data_to_save() for missile in set(
             Settings.PLAYER_MISSILES) | set(Settings.AI_MISSILES)]
+        data['map'] = game_objects.map.data_to_save()
 
     rebase_load_manager()
 
@@ -761,19 +768,24 @@ class Run:
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
-        distance = []
-        ai_pos_x = self.ai.rect.centerx // self.cell_size
-        ai_pos_y = self.ai.rect.centery // self.cell_size
-        for base in Settings.BASES_SPRITES:
-            dist = [ai_pos_x - base.x, ai_pos_y - base.y]
-            if base.start_of_capture != 2 and base.state != 'ai':
-                distance.append(
-                    (dist, [base.rect.centerx, base.rect.centery]))
-        try:
-            destination_ai = min(distance)
-            idx = distance.index(destination_ai)
-            self.ai.new_destination(distance[idx][1])
-        except ValueError:
+        can_capture = False
+        for ai in Settings.AI_SPRITE:
+            distance = []
+            ai_pos_x = ai.rect.centerx // Settings.CELL_SIZE
+            ai_pos_y = ai.rect.centery // Settings.CELL_SIZE
+            for base in Settings.BASES_SPRITES:
+                dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+                if base.start_of_capture != 2 and base.state != 'ai':
+                    distance.append(
+                        (dist, [base.rect.centerx, base.rect.centery]))
+            try:
+                destination_ai = min(distance)
+                idx = distance.index(destination_ai)
+                ai.new_destination(distance[idx][1])
+                can_capture = True
+            except ValueError:
+                pass
+        if not can_capture:
             self.defeat = True
             [sound.stop() for sound in ALL_EFFECTS]
 
@@ -1171,9 +1183,10 @@ if __name__ == '__main__':
             game_run = result != 0
             menu_run = result == 0
             map_choice_run = False
-        elif gameover_run:  # Экран после поражения
+        elif gameover_run:  # Экран после игры
             pygame.mixer.music.fadeout(500)
             result = show_gameover_win_screen()
+            set_standard_values()
             gameover_run = False
             game_objects = None
             menu_run = result == 1

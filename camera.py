@@ -57,4 +57,4 @@ class Camera:
 
     def data_to_save(self):
         """Возвращает значения для сохранения"""
-        return list(self.__dict__.values())
+        return self.__dict__.copy()
