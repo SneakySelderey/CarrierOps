@@ -720,7 +720,7 @@ def show_resources_menu():
 class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
-    def __init__(self, solomon_chosen, norweg_chosen, china_chosen):
+    def __init__(self):
         self.cell_size = Settings.CELL_SIZE
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
@@ -736,12 +736,7 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
-        if solomon_chosen:
-            self.map = Map(True, self.board, 'solomon')
-        elif norweg_chosen:
-            self.map = Map(True, self.board, 'norweg')
-        elif china_chosen:
-            self.map = Map(True, self.board, 'china')
+        self.map = Map(True, self.board, chosen_map)
 
         self.board.add_bases()
         self.player = Player()
@@ -1072,22 +1067,12 @@ class Run:
             else:
                 screen.fill(DEEPSKYBLUE4)
 
-                if solomon_chosen:
-                    screen.blit(pygame.transform.scale(
-                        Settings.SOLOMON_WATER, (
-                            Settings.CELL_SIZE * self.board.width,
-                            Settings.CELL_SIZE * self.board.height)),
-                                (self.board.left, self.board.top))
-                elif norweg_chosen:
-                    screen.blit(pygame.transform.scale(Settings.NORWEG_WATER, (
+                map_to_draw = SOLOMON_WATER if chosen_map == 'solomon' else \
+                    NORWEG_WATER if chosen_map == 'norweg' else CHINA_WATER
+                screen.blit(pygame.transform.scale(map_to_draw, (
                         Settings.CELL_SIZE * self.board.width,
                         Settings.CELL_SIZE * self.board.height)),
-                                (self.board.left, self.board.top))
-                elif china_chosen:
-                    screen.blit(pygame.transform.scale(Settings.CHINA_WATER, (
-                        Settings.CELL_SIZE * self.board.width,
-                        Settings.CELL_SIZE * self.board.height)),
-                                (self.board.left, self.board.top))
+                            (self.board.left, self.board.top))
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
@@ -1153,13 +1138,14 @@ if __name__ == '__main__':
     game_objects = None
     calculate_speed(80)
     # Флаги, отвечающие за то, в каком меню находится пользователь
-    solomon_chosen, norweg_chosen, china_chosen = False, False, False
+    chosen_map = None
     menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, \
         victory_run, slides_run = False, False, False, False, False, False, \
         False, True
     running = True
     # Создадим камеру
     camera = Camera()
+    # Создадим карту
     # Основной мега-цикл
     while running:
         if slides_run:  # Слайды в начале игры
@@ -1173,16 +1159,15 @@ if __name__ == '__main__':
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             clear_sprite_groups()
-            solomon_chosen, norweg_chosen, china_chosen = False, False, False
+            chosen_map = None
             map_choice_run = result == 1
             load_run = result == 2
             settings_run = result == 3
             menu_run = False
         elif map_choice_run:  # Экран выбора карты
             result = show_map_screen()
-            solomon_chosen = result == 1
-            norweg_chosen = result == 2
-            china_chosen = result == 3
+            chosen_map = 'solomon' if result == 1 else 'norweg' if \
+                result == 2 else 'china'
             game_run = result != 0
             menu_run = result == 0
             map_choice_run = False
@@ -1200,7 +1185,7 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
-            game_objects = Run(solomon_chosen, norweg_chosen, china_chosen)
+            game_objects = Run()
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
