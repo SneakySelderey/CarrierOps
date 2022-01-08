@@ -110,6 +110,7 @@ def load_save(title):
         Settings.CELL_SIZE = data['cell_size']
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
+
         # Загрузим класс для игры
         chosen_map = data['map']['chosen_map']
         if game_objects is None:
@@ -123,16 +124,6 @@ def load_save(title):
         # Загузим карту
         Map(data['map']['visibility'], game_objects.board,
             data['map']['chosen_map'])
-        # Загрузим базы
-        for base in data['bases']:
-            if base[0] == 'base':
-                new_base = Base(base[1]['x'], base[1]['y'], base[1]['state'],
-                                base[1]['visibility'])
-            else:
-                new_base = SuperBase(base[1]['x'], base[1]['y'],
-                                     base[1]['state'], base[1]['visibility'])
-            for i, j in base[1].items():
-                new_base.__dict__[i] = j
         # Загрузим игрока и ИИ
         for carrier in data['carriers']:
             new_carrier = Player() if carrier['obj'] == 'player' else AI()
@@ -147,6 +138,18 @@ def load_save(title):
                 pass  # TODO: HOSTILE AIRCRAFT
             for i, j in aircraft[1].items():
                 new_air.__dict__[i] = j
+        # Загрузим базы
+        for base in data['bases']:
+            if base[0] == 'base':
+                new_base = Base(base[1]['x'], base[1]['y'],
+                                base[1]['state'],
+                                base[1]['visibility'])
+            else:
+                new_base = SuperBase(base[1]['x'], base[1]['y'],
+                                     base[1]['state'],
+                                     base[1]['visibility'])
+            for i, j in base[1].items():
+                new_base.__dict__[i] = j
         # Загрузим ракеты
         for missile in data['missiles']:
             if missile[0] == 'friendly':
