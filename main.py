@@ -55,12 +55,12 @@ def delete_save(save):
     rebase_load_manager()
 
 
-def load_save(save):
+def load_save(title):
     """Функция для загрузи сохранения"""
     # TODO: LOAD SAVE!!!
 
 
-def create_save():
+def create_save(title):
     """Функция для создания сохранения"""
     # TODO: CREATE SAVE
 
@@ -77,21 +77,17 @@ def give_tooltip(num):
             manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
-    elif num == 3:
-        pygame_gui.elements.UITextEntryLine(
-            manager=user_data_manager,
-            relative_rect=pygame.Rect(100, 100, 100, 100)
-        )
 
 
 def rebase_elements():
     """Функция для изменения всех элементов интерфейса"""
     user_data_manager.clear_and_reset()
+    text_type_manager.clear_and_reset()
     bars_manager.clear_and_reset()
     [label.update_element() for label in LABELS]
     [element.update_element() for element in MENU_ELEMENTS.values()]
     [element.update_element() for element in MAP_ELEMENTS.values()]
-    for i in SETTINGS_ELEMENTS:
+    for i in gui_elements.SETTINGS_ELEMENTS:
         if i == 'MUSIC':
             gui_elements.SETTINGS_ELEMENTS[i] = SETTINGS_ELEMENTS[i].get_same(
                 rect=LABELS[5].rect)
@@ -106,21 +102,24 @@ def rebase_elements():
                     SETTINGS_ELEMENTS[i].get_same()
     [element.update_element() for element in IN_GAME_ELEMENTS.values()]
     [element.update_element() for element in GAMEOVER_ELEMENTS.values()]
-    for i in LOAD_ELEMENTS:
+    for i in gui_elements.LOAD_ELEMENTS:
         try:
-            LOAD_ELEMENTS[i].update_element()
+            gui_elements.LOAD_ELEMENTS[i].update_element()
         except AttributeError:
-            LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
+            gui_elements.LOAD_ELEMENTS[i] = \
+                gui_elements.LOAD_ELEMENTS[i].get_same()
 
 
 def rebase_load_manager():
     """Функция для обновления элементов меню загрузки"""
     user_data_manager.clear_and_reset()
+    text_type_manager.clear_and_reset()
     for i in gui_elements.LOAD_ELEMENTS:
         try:
             gui_elements.LOAD_ELEMENTS[i].update_element()
         except AttributeError:
-            gui_elements.LOAD_ELEMENTS[i] = LOAD_ELEMENTS[i].get_same()
+            gui_elements.LOAD_ELEMENTS[i] = \
+                gui_elements.LOAD_ELEMENTS[i].get_same()
     [label.update_element() for label in LABELS]
 
 
@@ -461,15 +460,24 @@ def show_load_menu(from_main=True):
                                         (Settings.WIDTH, Settings.HEIGHT))
     background2 = screen if not from_main else pygame.transform.scale(
         MENU_BACKGROUND, (Settings.WIDTH, Settings.HEIGHT))
+    surf = pygame.Surface((int(Settings.WIDTH * 0.64),
+                           int(Settings.HEIGHT * 0.4)))
+    surf.set_alpha(128)
+    text = MAIN_FONT.render('TYPE THE NAME OF THE SAVE', True, WHITE)
     # Переменная для выбранного элемента в списке
     item_selected = None
+    to_type = False
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
             if event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.user_type == pygame_gui.UI_TEXT_ENTRY_FINISHED:
+                    create_save(event.text)
+                    to_type = False
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED and \
+                        not to_type:
                     if event.ui_element == LOAD_ELEMENTS['OK']:
                         return 1
                     if event.ui_element == LOAD_ELEMENTS['TO_DELETE']:
@@ -488,7 +496,7 @@ def show_load_menu(from_main=True):
                             give_tooltip(1)
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE']:
                         if not from_main:
-                            pass  # TODO: SAVE
+                            to_type = True
                         else:
                             rebase_load_manager()
                 if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
@@ -497,21 +505,29 @@ def show_load_menu(from_main=True):
                         # Выведем сообщение, если пользователь решил
                         # сохраниться, не начав игру
                         give_tooltip(2)
-                if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+                if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED and \
+                        not to_type:
                     rebase_load_manager()
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION:
+                        pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and \
+                        not to_type:
                     # Обновить выбранный элемент
                     item_selected = event.text.split('    ')[0]
                 if event.user_type == \
-                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION:
+                        pygame_gui.UI_SELECTION_LIST_DOUBLE_CLICKED_SELECTION \
+                        and not to_type:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return 1
+                    if not to_type:
+                        return 1
+                    else:
+                        to_type = False
+                        rebase_load_manager()
             load_manager.process_events(event)
             user_data_manager.process_events(event)
+            text_type_manager.process_events(event)
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -524,11 +540,21 @@ def show_load_menu(from_main=True):
             help_surface.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         screen.blit(help_surface, (0, 0))
+
         # Обновление менеджера
         load_manager.update(delta)
         load_manager.draw_ui(screen)
         user_data_manager.update(delta)
         user_data_manager.draw_ui(screen)
+        text_type_manager.update(delta)
+
+        if to_type:
+            screen.blit(surf, (Settings.WIDTH * 0.18,
+                               Settings.HEIGHT * 0.3))
+            screen.blit(text, text.get_rect(center=(Settings.WIDTH * 0.5,
+                                                    Settings.HEIGHT * 0.4)))
+            text_type_manager.draw_ui(screen)
+
         pygame.display.flip()
 
 
@@ -820,6 +846,7 @@ class Run:
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
         camera.new_position()
+        calculate_speed(Settings.CELL_SIZE)
         pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:

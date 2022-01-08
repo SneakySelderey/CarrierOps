@@ -8,6 +8,24 @@ import Settings
 """Создание элементов интерфейса"""
 
 
+class EntryLine(pygame_gui.elements.UITextEntryLine):
+    """Класс для строки ввода текста"""
+    def __init__(self, pos_x, pos_y, manager):
+        """Инициализация. Принимает позицию относительно ширины и высоты и
+        менеджер"""
+        self.manager = manager
+        self.pos = pos_x, pos_y
+        rect = pygame.Rect(Settings.WIDTH * pos_x, Settings.HEIGHT * pos_y,
+                           Settings.WIDTH * 0.6, 45)
+        super().__init__(manager=manager, relative_rect=rect)
+        pass
+
+    def get_same(self, manager=None):
+        """Функция для получения идентичной строки"""
+        manager = self.manager if manager is None else manager
+        return EntryLine(*self.pos, manager)
+
+
 class OptionList(pygame_gui.elements.UISelectionList):
     """Класс списка позиций"""
     def __init__(self, pos1, pos2, manager):
@@ -252,6 +270,9 @@ campaign_manager = pygame_gui.UIManager(
 resource_manager = pygame_gui.UIManager(
     (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
     'data/system/settings.json')
+text_type_manager = pygame_gui.UIManager(
+    (max(Settings.WIDTH, 1920), max(Settings.HEIGHT, 1080)),
+    'data/system/settings.json')
 
 
 # Создание элементов интерфейса
@@ -346,6 +367,8 @@ SOLOMON_MAP = Button('SOLOMON ISLANDS', 0.5, 0.3, 20, map_manager)
 NORWEGIAN_SEA_MAP = Button('NORWEGIAN SEA', 0.5, 0.5, 20, map_manager)
 SOUTH_CHINA_SEA_MAP = Button('SOUTH CHINA SEA', 0.5, 0.7, 20, map_manager)
 BACK = Button('BACK', 0.5, 0.9, 20, map_manager)
+TYPE_LINE = EntryLine(0.2, 0.5, text_type_manager)
+
 # Создание групп с элементами
 LABELS = [TITLE, RESOLUTION_LABEL, SETTINGS_LABEL, VOLUME_LABEL,
           EFFECTS_LABEL, MUSIC_LABEL, FULLSCREEN_LABEL, LOAD_LABEL,
@@ -368,4 +391,4 @@ SETTINGS_ELEMENTS = {"OK": OK_BUTTON, "RESOLUTION": DROP_DOWN_MENU,
                      'FULLSCREEN': FULLSCREEN_BUTTON}
 LOAD_ELEMENTS = {'TO_SAVE': TO_SAVE_BUTTON, 'TO_LOAD': TO_LOAD_BUTTON,
                  'LIST': USERS_LIST, 'TO_DELETE': TO_DELETE_BUTTON,
-                 'OK': OK_BUTTON_LOAD}
+                 'OK': OK_BUTTON_LOAD, 'TYPE': TYPE_LINE}
