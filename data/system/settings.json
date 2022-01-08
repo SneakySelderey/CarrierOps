@@ -293,5 +293,16 @@
              "shadow_width": "2",
              "padding": "6,4"
          }
-     }
+     },
+  "@selection_list_item":
+  {
+    "font":
+         {
+             "name":  "Teletacticle",
+             "size":  17,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         }
+  }
 }

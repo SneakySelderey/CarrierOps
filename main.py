@@ -90,11 +90,9 @@ def delete_save(save):
 
 def load_save(title):
     """Функция для загрузи сохранения"""
-    global chosen_map
+    global chosen_map, game_objects
     # TODO: LOAD SAVE!!!
-    #clear_sprite_groups()
     with shelve.open(get_user_data()[title][1]) as data:
-        #print(list(data.items()))
         # Загрузим ресурсы
         Settings.LAUNCHED_MISSILES = data['launched_missiles']
         Settings.LAUNCHED_AIRCRAFT = data['launched_aircraft']
@@ -113,18 +111,19 @@ def load_save(title):
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
         # Загрузим класс для игры
+        chosen_map = data['map']['chosen_map']
+        if game_objects is None:
+            game_objects = Run()
+        clear_sprite_groups()
         for i, j in data['game'].items():
             game_objects.__dict__[i] = j
         # Загрузим камеру
         for i, j in data['camera'].items():
             camera.__dict__[i] = j
         # Загузим карту
-        Settings.BACKGROUND_MAP.empty()
         Map(data['map']['visibility'], game_objects.board,
             data['map']['chosen_map'])
-        chosen_map = data['map']['chosen_map']
         # Загрузим базы
-        Settings.BASES_SPRITES.empty()
         for base in data['bases']:
             if base[0] == 'base':
                 new_base = Base(base[1]['x'], base[1]['y'], base[1]['state'],
@@ -135,16 +134,11 @@ def load_save(title):
             for i, j in base[1].items():
                 new_base.__dict__[i] = j
         # Загрузим игрока и ИИ
-        Settings.CARRIER_GROUP.empty()
-        Settings.PLAYER_SPRITE.empty()
-        Settings.AI_SPRITE.empty()
         for carrier in data['carriers']:
             new_carrier = Player() if carrier['obj'] == 'player' else AI()
             for i, j in carrier.items():
                 new_carrier.__dict__[i] = j
         # Загрузим самолеты
-        Settings.PLAYER_AIRCRAFT.empty()
-        Settings.AI_AIRCRAFT.empty()
         for aircraft in data['aircraft']:
             if aircraft[0] == 'friendly':
                 new_air = AircraftFriendly(aircraft[1]['destination'],
@@ -154,8 +148,6 @@ def load_save(title):
             for i, j in aircraft[1].items():
                 new_air.__dict__[i] = j
         # Загрузим ракеты
-        Settings.PLAYER_MISSILES.empty()
-        Settings.AI_MISSILES.empty()
         for missile in data['missiles']:
             if missile[0] == 'friendly':
                 new_mis = MissileFriendly(missile[1]['activation'],
@@ -164,11 +156,14 @@ def load_save(title):
                 pass  # TODO: HOSTILE MISSILES
             for i, j in missile[1].items():
                 new_mis.__dict__[i] = j
+    #update_objects()
+    game_objects.menu = False
+    Settings.IS_PAUSE = True
+    calculate_speed(Settings.CELL_SIZE)
 
 
 def create_save(title):
     """Функция для создания сохранения"""
-    # TODO: CREATE SAVE
     now = datetime.now().strftime('%H:%M %d.%m.%y')
     CONNECTION.execute(f'''INSERT INTO PathsOfSaves(Path) VALUES 
     ("data/system/saves/{title}")''')
@@ -270,6 +265,7 @@ def clear_sprite_groups():
     Settings.TO_DRAW.empty()
     Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.PLAYER_SPRITE.empty()
+    Settings.CARRIER_GROUP.empty()
     Settings.AI_SPRITE.empty()
     Settings.BASES_SPRITES.empty()
     Settings.PLAYER_MISSILES.empty()
@@ -633,7 +629,7 @@ def show_load_menu(from_main=True):
                     if event.ui_element == LOAD_ELEMENTS['TO_LOAD']:
                         if item_selected is not None:
                             load_save(item_selected)
-                            return 1
+                            return 2 if from_main else 1
                         else:
                             # Если пользователь не выбрал сохранение,
                             # выведем об этом сообещние
@@ -651,7 +647,8 @@ def show_load_menu(from_main=True):
                         # сохраниться, не начав игру
                         give_tooltip(2)
                 if event.user_type == pygame_gui.UI_BUTTON_ON_UNHOVERED and \
-                        not to_type:
+                        not to_type and event.ui_element != \
+                        LOAD_ELEMENTS['LIST']:
                     rebase_load_manager()
                 if event.user_type == \
                         pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and \
@@ -663,7 +660,7 @@ def show_load_menu(from_main=True):
                         and not to_type:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
-                    return 1
+                    return 2 if from_main else 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if not to_type:
@@ -748,7 +745,7 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        self.cell_size = Settings.CELL_SIZE
+        self.cell_size = int(Settings.CELL_SIZE)
         self.cells_x = Settings.WIDTH * 2 // self.cell_size
         self.cells_y = Settings.HEIGHT * 2 // self.cell_size
 
@@ -976,7 +973,6 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
-        player = list(Settings.PLAYER_SPRITE)[0]
         alpha = 0
         arrow_pressed = False
         pygame_gui.elements.UIScreenSpaceHealthBar(
@@ -992,6 +988,7 @@ class Run:
         pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
+            player = list(Settings.PLAYER_SPRITE)[0]
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1170,18 +1167,18 @@ if __name__ == '__main__':
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
     FPS = 60
+    chosen_map = 'solomon'
 
     game_objects = None
-    calculate_speed(80)
+    calculate_speed(Settings.CELL_SIZE)
     # Флаги, отвечающие за то, в каком меню находится пользователь
-    chosen_map = None
     menu_run, map_choice_run, settings_run, game_run, load_run, gameover_run, \
         victory_run, slides_run = False, False, False, False, False, False, \
         False, True
     running = True
+    new_game = True
     # Создадим камеру
     camera = Camera()
-    # Создадим карту
     # Основной мега-цикл
     while running:
         if slides_run:  # Слайды в начале игры
@@ -1195,6 +1192,7 @@ if __name__ == '__main__':
             pygame.mixer.music.fadeout(500)
             result = show_menu_screen()
             clear_sprite_groups()
+            set_standard_values()
             chosen_map = None
             map_choice_run = result == 1
             load_run = result == 2
@@ -1222,12 +1220,12 @@ if __name__ == '__main__':
             menu_run = result == 1
         elif game_run:  # Игра
             pygame.mixer.music.fadeout(500)
-            game_objects = Run()
+            if new_game:
+                game_objects = Run()
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
-            victory_run = result == 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
@@ -1235,4 +1233,6 @@ if __name__ == '__main__':
         elif load_run:  # Меню загрузки
             result = show_load_menu()
             menu_run = result == 1
+            game_run = result == 2
+            new_game = result != 2
             load_run = False
