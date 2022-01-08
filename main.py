@@ -110,6 +110,8 @@ def load_save(title):
         Settings.BASE_NUM_OF_MISSILES = data['base_missiles']
         Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
         Settings.CELL_SIZE = data['cell_size']
+        Settings.TOP = data['game']['board'].top
+        Settings.LEFT = data['game']['board'].left
         # Загрузим класс для игры
         for i, j in data['game'].items():
             game_objects.__dict__[i] = j
@@ -162,8 +164,6 @@ def load_save(title):
                 pass  # TODO: HOSTILE MISSILES
             for i, j in missile[1].items():
                 new_mis.__dict__[i] = j
-
-    #update_objects()
 
 
 def create_save(title):
@@ -625,6 +625,7 @@ def show_load_menu(from_main=True):
                     if event.ui_element == LOAD_ELEMENTS['TO_DELETE']:
                         if item_selected is not None:
                             delete_save(item_selected)
+                            item_selected = None
                         else:
                             # Если пользователь не выбрал сохранение,
                             # выведем об этом сообещние
@@ -632,6 +633,7 @@ def show_load_menu(from_main=True):
                     if event.ui_element == LOAD_ELEMENTS['TO_LOAD']:
                         if item_selected is not None:
                             load_save(item_selected)
+                            return 1
                         else:
                             # Если пользователь не выбрал сохранение,
                             # выведем об этом сообещние
@@ -641,7 +643,8 @@ def show_load_menu(from_main=True):
                             to_type = True
                         else:
                             rebase_load_manager()
-                if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED:
+                if event.user_type == pygame_gui.UI_BUTTON_ON_HOVERED and \
+                        not to_type:
                     if event.ui_element == LOAD_ELEMENTS['TO_SAVE'] and \
                             from_main:
                         # Выведем сообщение, если пользователь решил
@@ -660,6 +663,7 @@ def show_load_menu(from_main=True):
                         and not to_type:
                     # Загрузка сохранения
                     load_save(event.text.split('    ')[0])
+                    return 1
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if not to_type:
