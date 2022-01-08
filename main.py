@@ -629,7 +629,7 @@ class Run:
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
 
-        LandCheck(True, self.board, self)
+        LandCheck(False, self.board, self)
         for i in Settings.BOARD:
             print(" ".join([str(l).rjust(1) for l in i]))
 
