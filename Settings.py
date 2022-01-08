@@ -66,7 +66,7 @@ HOSTILE_BASES = []
 
 # Числовые и булевые значения значения
 AIR_SPEED = 2.5
-MISSILE_SPEED = 1
+MISSILE_SPEED = 2
 NUM_OF_MISSILES = 5
 NUM_OF_AIRCRAFT = 3
 OIL_VOLUME = 100
@@ -104,6 +104,7 @@ except ValueError:
 WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = 1600, 900
 CELL_SIZE = WIDTH // 20
+TOP, LEFT = 0, 0
 IS_FULLSCREEN = False
 IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
@@ -111,7 +112,6 @@ pygame.display.set_mode((WIDTH, HEIGHT))
 # Подлючение к БД
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
 CONNECTION.execute("PRAGMA foreign_keys = ON")
-USER_DATA = get_user_data()
 
 # Events
 MUSIC_END = pygame.USEREVENT + 1

@@ -2,7 +2,6 @@ import pygame
 import Settings
 from base import Base, SuperBase
 from random import sample, choice
-from Settings import new_image_size, BASE_FRIENDLY
 
 
 class Board:
@@ -15,6 +14,7 @@ class Board:
         self.left = 20
         self.top = 20
         self.cell_size = 30
+        Settings.TOP, Settings.LEFT = self.top, self.left
         self.cells = {(i, j) for i in range(self.width) for j in
                       range(self.height)}
         self.used = set()
@@ -25,6 +25,7 @@ class Board:
         self.left = left
         self.top = top
         self.cell_size = cell_size
+        Settings.TOP, Settings.LEFT = top, left
 
     def add_bases(self):
         """Функция для добавления баз"""
@@ -38,9 +39,9 @@ class Board:
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
         if not mega:
-            base = Base(x, y, 'neutral', True, self.cell_size, self)
+            base = Base(x, y, 'neutral', True)
         else:
-            base = SuperBase(x, y, mega[0], True, self.cell_size, self)
+            base = SuperBase(x, y, mega[0], True)
         land = list(Settings.BACKGROUND_MAP)[0]
         while pygame.sprite.collide_mask(land, base) is not None:
             self.used.add((x, y))

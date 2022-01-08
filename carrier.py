@@ -3,6 +3,7 @@ from Settings import new_image_size, PLAYER_CARRIER_SHEET
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
+import inspect
 
 
 class Carrier(AnimatedSprite):
@@ -64,3 +65,8 @@ class Carrier(AnimatedSprite):
                 self.frames[self.cur_frame]), True, False)
         else:
             self.image = new_image_size(self.frames[self.cur_frame])
+
+    def data_to_save(self):
+        """Возвращает список тех занчений, которые можно сохранить"""
+        return [self.cur_frame, self.pos, self.rect, self.destination,
+                self.alpha, self.current_health, self.prev_pos]

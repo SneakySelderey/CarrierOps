@@ -14,6 +14,19 @@ import pygame_gui
 from player import Player
 from AI import AI
 import win32gui
+from datetime import datetime
+import shelve
+from base import Base, SuperBase
+
+
+def set_standard_values():
+    """Функция для установки значений по умолчанию"""
+    Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
+        Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
+    Settings.NUM_OF_REPAIR_PARTS = 0
+    Settings.OIL_VOLUME = 100
+    Settings.NUM_OF_AIRCRAFT = 3
+    Settings.NUM_OF_MISSILES = 5
 
 
 def move_window():
@@ -31,17 +44,17 @@ def calculate_speed(cell):
     diff = 80 / cell
     Settings.PLAYER_SPEED = 1.5 / diff
     Settings.AIR_SPEED = 2.5 / diff
-    Settings.MISSILE_SPEED = 1 / diff
+    Settings.MISSILE_SPEED = 2 / diff
     Settings.AI_SPEED = 1 / diff
 
 
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения/зуме"""
+    camera.new_position()
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
-        Settings.ALL_SPRITES_FOR_SURE]
-    camera.new_position()
+     Settings.ALL_SPRITES_FOR_SURE]
     Settings.ALWAYS_UPDATE.update()
     calculate_speed(Settings.CELL_SIZE)
     game_objects.cell_size = Settings.CELL_SIZE
@@ -50,19 +63,70 @@ def update_objects():
 def delete_save(save):
     """Функция для удаления сохраннения из БД"""
     CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
-    WHERE Path = "{Settings.USER_DATA[save][1]}"''')
+    WHERE Path = "{get_user_data()[save][1]}"''')
     CONNECTION.commit()
+    system_files_to_delete = [file for file in os.listdir(
+        'data/system/saves') if save in file]
+    for file in system_files_to_delete:
+        os.remove(f'data/system/saves/{file}')
     rebase_load_manager()
 
 
 def load_save(title):
     """Функция для загрузи сохранения"""
     # TODO: LOAD SAVE!!!
+    with shelve.open(get_user_data()[title][1]) as data:
+        print(list(data.items()))
+        Settings.OIL_VOLUME = data['player_oil']
+        Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
+        Settings.NUM_OF_MISSILES = data['player_missiles']
+        Settings.BASE_OIL_VOLUME = data['base_oil']
+        Settings.BASE_NUM_OF_AIRCRAFT = data['base_aircraft']
+        Settings.BASE_NUM_OF_MISSILES = data['base_missiles']
+        Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
+        Settings.CELL_SIZE = data['cell_size']
+        Settings.BASES_SPRITES.empty()
+        for base in data['bases']:
+            rect, state, to_add, x, y, ticks_to_capt, start_capt, prev_start, \
+                visibility, show_bar, *resource = base[1:]
+            if base[0] == 'base':
+                new = Base(x, y, state, visibility)
+                new.ticks_to_give_resource = resource[0]
+                new.resource_type = resource[1]
+            else:
+                new = SuperBase(x, y, state, visibility)
+            new.to_add = to_add
+            new.prev_start = prev_start
+            new.start_of_capture = start_capt
+            new.ticks_to_capture = ticks_to_capt
+            new.show_bar = show_bar
+    update_objects()
 
 
 def create_save(title):
     """Функция для создания сохранения"""
     # TODO: CREATE SAVE
+    now = datetime.now().strftime('%H:%M %d.%m.%y')
+    CONNECTION.execute(f'''INSERT INTO PathsOfSaves(Path) VALUES 
+    ("data/system/saves/{title}")''')
+    max_rows = CONNECTION.execute('SELECT MAX(ID) '
+                                  'FROM PathsOfSaves').fetchone()[0]
+    CONNECTION.execute(f'''INSERT INTO Saves(Title, Date, Path) VALUES(
+    "{title}", "{now}", {max_rows})''')
+    CONNECTION.commit()
+    with shelve.open(f'data/system/saves/{title}', 'c') as data:
+        data['player_oil'] = Settings.OIL_VOLUME
+        data['player_aircraft'] = Settings.NUM_OF_AIRCRAFT
+        data['player_missiles'] = Settings.NUM_OF_MISSILES
+        data['base_oil'] = Settings.BASE_OIL_VOLUME
+        data['base_aircraft'] = Settings.BASE_NUM_OF_AIRCRAFT
+        data['base_missiles'] = Settings.BASE_NUM_OF_MISSILES
+        data['base_repair_parts'] = Settings.BASE_NUM_OF_REPAIR_PARTS
+        data['cell_size'] = Settings.CELL_SIZE
+        data['bases'] = [base.data_to_save() for base in
+                         Settings.BASES_SPRITES]
+
+    rebase_load_manager()
 
 
 def give_tooltip(num):
@@ -640,10 +704,8 @@ class Run:
                                  Settings.MOVE_POINT_SPRITE,
                                  Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
                                  Settings.PLAYER_AIRCRAFT,
-                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT, 
-                                 [base.ico for base in self.board.bases if
-                                  base.state not in ['player', 'ai']],
-                                 [base.bar for base in self.board.bases]]
+                                 Settings.AI_MISSILES, Settings.AI_AIRCRAFT,
+                                 ]
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -692,17 +754,17 @@ class Run:
         TO_DRAW.draw(screen)
 
         for base in self.board.bases:
-            base.bar.visibility = False
+            base.show_bar = False
             if base.start_of_capture in [0, 1] or \
                     pygame.sprite.collide_circle_ratio(1)(player, base):
-                base.bar.visibility = True
+                base.show_bar = True
             for aircraft in self.friendly_aircraft:
                 if pygame.sprite.collide_circle_ratio(1)(aircraft, base):
-                    base.bar.visibility = True
+                    base.show_bar = True
             for missile in self.friendly_missiles:
                 if pygame.sprite.collide_circle_ratio(1)(missile, base):
-                    base.bar.visibility = True
-            if base.bar.visibility and base.state == 'ai':
+                    base.show_bar = True
+            if base.show_bar and base.state == 'ai':
                 base.visibility = True
 
         # отрисовка спрайта противника
@@ -806,7 +868,9 @@ class Run:
                 else:
                     camera.apply_rect(sprite)
         self.board.top += camera.dy
+        Settings.TOP += camera.dy
         self.board.left += camera.dx
+        Settings.LEFT += camera.dx
         self.player.destination[0] += camera.dx
         self.player.destination[1] += camera.dy
         self.ai.destination[0] += camera.dx
@@ -827,16 +891,30 @@ class Run:
                         j.activation[1] += camera.dy
         camera.centered = False
 
+    def draw_icons_and_bars(self):
+        """Функция для отрисовки иконок у баз"""
+        for base in Settings.BASES_SPRITES:
+            # Отрисовка иконки ресурса
+            if base.state not in ['player', 'ai']:
+                ico = new_image_size(Base.ResourceType[base.resource_type])
+                rect = ico.get_rect(bottomleft=(
+                    Settings.LEFT + (base.x + 1) * Settings.CELL_SIZE,
+                    Settings.TOP + base.y * Settings.CELL_SIZE))
+                screen.blit(ico, rect)
+            # Отрисовка полоски захвата
+            if base.show_bar and base.ticks_to_capture:
+                image = pygame.Surface((int(
+                    Settings.CELL_SIZE - Settings.CELL_SIZE /
+                    Settings.BASE_TICKS
+                    * base.ticks_to_capture), 5))
+                image.fill(BLUE if base.start_of_capture == 1 else RED)
+                rect = image.get_rect(topleft=(base.rect.x, base.rect.y - 10))
+                screen.blit(image, rect)
+
     def main(self):
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
-        Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
-            Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
-        Settings.NUM_OF_REPAIR_PARTS = 0
-        Settings.OIL_VOLUME = 100
-        Settings.NUM_OF_AIRCRAFT = 3
-        Settings.NUM_OF_MISSILES = 5
         pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
@@ -989,6 +1067,7 @@ class Run:
                 [capt.update_text() for capt in CAPTIONS]
                 help_surface.blit(screen, (0, 0))
                 Settings.ICONS_GROUP.draw(screen)
+                self.draw_icons_and_bars()
 
                 if not self.player.stop:
                     pygame.draw.circle(
@@ -1026,6 +1105,7 @@ class Run:
 
 if __name__ == '__main__':
     # Создадим pygame-оболочку
+    set_standard_values()
     pygame.init()
     pygame.mixer.init()
     size = Settings.WIDTH, Settings.HEIGHT
