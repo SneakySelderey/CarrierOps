@@ -168,9 +168,10 @@ CLOCK = pygame.mixer.Sound('data/sound/Clock.wav')
 TALKING = pygame.mixer.Sound('data/sound/talking.wav')
 FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
 MORSE = pygame.mixer.Sound('data/sound/morse.wav')
+MAIN_BASE_DETECTION = pygame.mixer.Sound('data/sound/MainBaseDetected.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
 ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
-               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
+               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE, MAIN_BASE_DETECTION]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')
