@@ -5,6 +5,16 @@ import sqlite3
 from random import random
 
 
+def get_pos_in_field(center, cell, top, left):
+    """Возвращает положение объекта в сетке"""
+    return [(center[0] - left) / cell, (center[1] - top) / cell]
+
+
+def get_pos_in_coords(center, top, left):
+    """Возвраащет положение объекта в системе координат"""
+    return [left + center[0] * CELL_SIZE, top + center[1] * CELL_SIZE]
+
+
 def random_resource_type():
     """Функция дял случайного выбора типа базы в зависимости от соотношения"""
     n = random()
