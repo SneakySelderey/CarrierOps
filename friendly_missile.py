@@ -65,6 +65,8 @@ class MissileFriendly(AnimatedSprite):
         self.rect = self.image.get_rect(
             center=get_pos_in_coords((c_x, c_y), top, left))
         self.pos = pygame.math.Vector2(list(self.rect.center))
+        pr_x, pr_y = get_pos_in_field(self.prev_pos, cell_size, top, left)
+        self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
         act_x, act_y = get_pos_in_field(self.activation, cell_size, top, left)
         self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
