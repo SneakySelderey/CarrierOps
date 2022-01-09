@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, choices
 import sys
 import pygame.sprite
 from board import Board
@@ -16,6 +16,7 @@ from AI import AI
 import win32gui
 from datetime import datetime
 import shelve
+from string import ascii_letters, digits
 from base import Base, SuperBase
 
 
@@ -78,11 +79,13 @@ def update_objects():
 
 def delete_save(save):
     """Функция для удаления сохраннения из БД"""
+    path = get_user_data()[save][1]
     CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
-    WHERE Path = "{get_user_data()[save][1]}"''')
+    WHERE Path = "{path}"''')
     CONNECTION.commit()
+    hash_save = path.split('/')[-1]
     system_files_to_delete = [file for file in os.listdir(
-        'data/system/saves') if save in file]
+        'data/system/saves') if hash_save in file]
     for file in system_files_to_delete:
         os.remove(f'data/system/saves/{file}')
     rebase_load_manager()
@@ -92,6 +95,7 @@ def load_save(title):
     """Функция для загрузи сохранения"""
     global chosen_map, game_objects
     # TODO: LOAD SAVE!!!
+    title = int(title) if title.isdigit() else title
     with shelve.open(get_user_data()[title][1]) as data:
         # Загрузим ресурсы
         Settings.LAUNCHED_MISSILES = data['launched_missiles']
@@ -168,14 +172,15 @@ def load_save(title):
 def create_save(title):
     """Функция для создания сохранения"""
     now = datetime.now().strftime('%H:%M %d.%m.%y')
+    random_password = ''.join(choices(ascii_letters + digits, k=10))
     CONNECTION.execute(f'''INSERT INTO PathsOfSaves(Path) VALUES 
-    ("data/system/saves/{title}")''')
+    ("data/system/saves/{random_password}")''')
     max_rows = CONNECTION.execute('SELECT MAX(ID) '
                                   'FROM PathsOfSaves').fetchone()[0]
     CONNECTION.execute(f'''INSERT INTO Saves(Title, Date, Path) VALUES(
     "{title}", "{now}", {max_rows})''')
     CONNECTION.commit()
-    with shelve.open(f'data/system/saves/{title}', 'c') as data:
+    with shelve.open(f'data/system/saves/{random_password}', 'c') as data:
         data['launched_missiles'] = Settings.LAUNCHED_MISSILES
         data['launched_aircraft'] = Settings.LAUNCHED_AIRCRAFT
         data['player_hit'] = Settings.PLAYER_MISSILES_HIT
