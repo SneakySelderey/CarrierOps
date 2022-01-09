@@ -1,6 +1,7 @@
 import pygame
 from Settings import new_image_size, EXPLOSION, \
-    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, EXPLOSION_SHEET
+    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, EXPLOSION_SHEET, \
+    get_pos_in_coords, get_pos_in_field
 import Settings
 from animated_sprite import AnimatedSprite
 
@@ -60,16 +61,12 @@ class MissileFriendly(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x = (self.rect.centerx - left) / cell_size
-        c_y = (self.rect.centery - top) / cell_size
+        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
         self.rect = self.image.get_rect(
-            center=(left + c_x * Settings.CELL_SIZE,
-                    top + c_y * Settings.CELL_SIZE))
+            center=get_pos_in_coords((c_x, c_y), top, left))
         self.pos = pygame.math.Vector2(list(self.rect.center))
-        act_x = (self.activation[0] - left) / cell_size
-        act_y = (self.activation[1] - top) / cell_size
-        self.activation = [left + act_x * Settings.CELL_SIZE,
-                           top + act_y * Settings.CELL_SIZE]
+        act_x, act_y = get_pos_in_field(self.activation, cell_size, top, left)
+        self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
         if self.left:
