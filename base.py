@@ -80,6 +80,8 @@ class Base(pygame.sprite.Sprite):
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
             if self.state == 'friendly':
                 self.run.bases_captured_by_player += 1
+                for ai in list(Settings.AI_SPRITE):
+                    ai.missile_launch(self)
             elif self.state == 'hostile':
                 self.run.bases_captured_by_AI += 1
 

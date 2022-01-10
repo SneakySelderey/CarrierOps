@@ -1,4 +1,5 @@
 from Settings import AI_SPRITE, AI_CARRIER_SHEET
+from friendly_missile import MissileFriendly
 import Settings
 from carrier import Carrier
 from math import sin, cos
@@ -8,7 +9,7 @@ import copy
 
 class AI(Carrier):
     """Класс авианосца игрока"""
-    def __init__(self):
+    def __init__(self, run):
         super().__init__(AI_CARRIER_SHEET, AI_SPRITE)
         self.rect.center = [Settings.AI_START[0] * Settings.CELL_SIZE +
                             Settings.CELL_SIZE // 2, Settings.AI_START[1] *
@@ -17,6 +18,7 @@ class AI(Carrier):
         self.destination = list(self.rect.center)
 
         self.prev_pos = list(self.rect.center)
+        self.run = run
 
     def update(self):
         """Обновление позиции объекта"""
@@ -34,3 +36,5 @@ class AI(Carrier):
                 self.alpha)
             self.rect.center = self.pos
 
+    def missile_launch(self, base):
+        MissileFriendly(base.rect.center, True, self, base, self.run)

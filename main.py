@@ -646,7 +646,7 @@ class Run:
 
         self.board.add_bases()
         self.player = Player()
-        self.ai = AI()
+        self.ai = AI(self)
         self.friendly_missiles = []
         self.hostile_missiles = []
         self.friendly_aircraft = []
@@ -701,7 +701,7 @@ class Run:
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         Settings.PLAYER_MISSILES.add(MissileFriendly(
-            destination, True))
+            destination, True, list(Settings.PLAYER_SPRITE)[0], None, self))
         [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
          for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
@@ -782,13 +782,6 @@ class Run:
                 missile_x, missile_y = missile.rect.center
                 if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
                     missile_tracking = True
-                # если ракета исчерпала свой ресурс, она падает в море и
-                # спрайт удаляется
-                if missile.total_ticks >= 10:
-                    Settings.ANIMATED_SPRTIES.remove(missile)
-                    Settings.PLAYER_MISSILES.remove(missile)
-                    Settings.ALL_SPRITES_FOR_SURE.remove(missile)
-                    self.player_missiles_hit += 1
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
                     missile.activation = list(missile.activation)

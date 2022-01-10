@@ -8,9 +8,13 @@ from animated_sprite import AnimatedSprite
 class MissileFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, activation, visibility):
-        super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
-        player = list(PLAYER_SPRITE)[0]
+    def __init__(self, activation, visibility, obj, base, run):
+        if obj in Settings.PLAYER_SPRITE:
+            super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
+            player = list(PLAYER_SPRITE)[0]
+        else:
+            super().__init__(Settings.HOSTILE_MISSILE_SHEET, 15, 1, Settings.AI_MISSILES)
+            player = list(Settings.AI_SPRITE)[list(Settings.AI_SPRITE).index(obj)]
         self.rect.center = [player.rect.centerx, player.rect.centery]
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
@@ -36,9 +40,21 @@ class MissileFriendly(AnimatedSprite):
         self.da_bomb = False
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
+        self.obj = obj
+        self.base = base
+        self.run = run
 
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
+        # если ракета исчерпала свой ресурс, она падает в море и
+        # спрайт удаляется
+        if self.total_ticks >= 10:
+            Settings.ANIMATED_SPRTIES.remove(self)
+            Settings.PLAYER_MISSILES.remove(self)
+            Settings.AI_MISSILES.remove(self)
+            Settings.ALL_SPRITES_FOR_SURE.remove(self)
+            self.run.player_missiles_hit += 1
+
         self.left = self.prev_pos[0] < self.pos.x
         if not self.activated:
             self.total_ticks += 0.02
@@ -52,6 +68,10 @@ class MissileFriendly(AnimatedSprite):
                 abs(self.activation[1] - self.rect.centery) <= 10:
             #  Если ракета достигла цели
             self.activated = True
+
+        if self.base:
+            if pygame.sprite.collide_circle(self, self.base):
+                self.activated = True
 
         self.missile_activation()
         if self.activated:
@@ -110,17 +130,30 @@ class MissileFriendly(AnimatedSprite):
             self.ticks2 = 0
         self.ticks2 += 1
         try:
-            for ai in Settings.AI_SPRITE:
-                if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
-                    self.alpha = pygame.math.Vector2(
-                        (ai.rect.centerx - self.rect.centerx,
-                         ai.rect.centery - self.rect.centery)).normalize()
-                if pygame.sprite.collide_mask(self, ai):
-                    self.da_bomb = True
-                    self.cut_sheet(EXPLOSION_SHEET, 6, 2)
-                    self.rect.center = ai.rect.center
-                    EXPLOSION.play()
-                    break
+            if self.obj in Settings.PLAYER_SPRITE:
+                for ai in Settings.AI_SPRITE:
+                    if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
+                        self.alpha = pygame.math.Vector2(
+                            (ai.rect.centerx - self.rect.centerx,
+                             ai.rect.centery - self.rect.centery)).normalize()
+                    if pygame.sprite.collide_mask(self, ai):
+                        self.da_bomb = True
+                        self.cut_sheet(EXPLOSION_SHEET, 6, 2)
+                        self.rect.center = ai.rect.center
+                        EXPLOSION.play()
+                        break
+            else:
+                for player in Settings.PLAYER_SPRITE:
+                    if pygame.sprite.collide_circle_ratio(0.35)(self, player):
+                        self.alpha = pygame.math.Vector2(
+                            (player.rect.centerx - self.rect.centerx,
+                             player.rect.centery - self.rect.centery)).normalize()
+                    if pygame.sprite.collide_mask(self, player):
+                        self.da_bomb = True
+                        self.cut_sheet(EXPLOSION_SHEET, 6, 2)
+                        self.rect.center = player.rect.center
+                        EXPLOSION.play()
+                        break
         except ValueError:
             self.total_ticks = 10
 
