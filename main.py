@@ -1,4 +1,3 @@
-import copy
 from random import choice
 import sys
 import pygame.sprite
@@ -16,8 +15,7 @@ from player import Player
 from AI import AI
 import win32gui
 from collections import defaultdict, deque
-from pprint import pprint
-
+from math import hypot
 
 def move_window():
     """Функция для перемещения окна на середину экрана"""
@@ -724,17 +722,18 @@ class Run:
             ai_pos_y = ai.rect.centery // self.cell_size
             for base in self.board.bases:
                 dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+                true_dist = hypot(ai.rect.centerx - base.rect.centerx, ai.rect.centery - base.rect.centery)
                 if base.start_of_capture != 2 and base.state != 'ai':
                     distance.append(
-                        (dist, [base.rect.centerx, base.rect.centery]))
+                        (true_dist, dist, [base.rect.centerx, base.rect.centery]))
             try:
-                destination_ai = min(distance)
+                destination_ai = min(distance, key=lambda x: x[0])
                 idx = distance.index(destination_ai)
 
                 path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
                                 (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
-                                self.g, ((distance[idx][1][1] - self.board.top) // Settings.CELL_SIZE,
-                                         (distance[idx][1][0] - self.board.left) // Settings.CELL_SIZE))
+                                self.g, ((distance[idx][-1][1] - self.board.top) // Settings.CELL_SIZE,
+                                         (distance[idx][-1][0] - self.board.left) // Settings.CELL_SIZE))
                 path = (path[0][1], path[0][0])
                 ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
                                     path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
@@ -749,7 +748,7 @@ class Run:
         player_x, player_y = self.player.rect.center
         player = list(Settings.PLAYER_SPRITE)[0]
 
-        # отрисовка нужных и прятанье ненужных спрайтов
+        # отрисовка нужных и скрытие ненужных спрайтов
         TO_DRAW.empty()
         [TO_DRAW.add(sprite) for group in self.list_all_sprites for sprite
          in group if sprite.visibility]
