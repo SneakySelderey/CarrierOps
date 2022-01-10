@@ -24,11 +24,19 @@ class AircraftFriendly(AnimatedSprite):
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
+        self.to_return = False
         self.radius = Settings.CELL_SIZE * 3.5
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         """Обновление координат самолета при полете"""
+        land = list(Settings.BACKGROUND_MAP)[0]
+        if not all(
+                land.rect.collidepoint(point) for point in [
+                    self.rect.midleft, self.rect.midtop, self.rect.midright,
+                    self.rect.midbottom]) and not self.to_return:
+            self.stop = True
+
         if not self.delete:
             self.total_ticks += 1
 
@@ -74,6 +82,7 @@ class AircraftFriendly(AnimatedSprite):
                            player.rect.centerx - self.rect.centerx)
         self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
+        self.to_return = True
         if pygame.sprite.collide_rect(self, player):
             Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
