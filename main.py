@@ -739,10 +739,9 @@ class Run:
                 ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
                                     path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
             except ValueError:
-                self.defeat = True
-                [sound.stop() for sound in ALL_EFFECTS]
+                ai.new_destination(ai.pos)
             except IndexError:
-                pass
+                ai.new_destination(ai.pos)
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -1047,8 +1046,16 @@ class Run:
                 self.board.render(screen)
                 self.fog_of_war()
                 self.destination_ai()
-                if len(list(Settings.FRIENDLY_BASES)) == len(list(Settings.BASES_SPRITES)):
+                if len([i for i in Settings.BASES_SPRITES if i.state in [
+                    'player', 'friendly']]) == len(
+                      Settings.BASES_SPRITES):
                     self.win = True
+                    [sound.stop() for sound in ALL_EFFECTS]
+                if len([i for i in Settings.BASES_SPRITES if i.state in [
+                    'ai', 'hostile']]) == len(
+                      Settings.BASES_SPRITES):
+                    self.defeat = True
+                    [sound.stop() for sound in ALL_EFFECTS]
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
