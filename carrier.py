@@ -37,12 +37,10 @@ class Carrier(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
-        self.rect = self.image.get_rect(
-            center=get_pos_in_coords((c_x, c_y), top, left))
-        self.pos = list(self.rect.center)
         pr_x, pr_y = get_pos_in_field(self.prev_pos, cell_size, top, left)
         self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
+        self.rect = self.image.get_rect(center=self.prev_pos)
+        self.pos = list(self.rect.center)
         self.mask = pygame.mask.from_surface(self.image)
         dest_x, dest_y = get_pos_in_field(self.destination,
                                           cell_size, top, left)

@@ -1017,10 +1017,10 @@ class Run:
                             Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
                             200)
                         update_objects()
-                    if event.button == 5:
+                    if event.button == 5 and Settings.CELL_SIZE > 30:
                         Settings.CELL_SIZE = max(
                             Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
-                            10)
+                            30)
                         update_objects()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
