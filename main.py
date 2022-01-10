@@ -27,7 +27,7 @@ def give_sprites_to_check():
             Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
             Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
             Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
-            Settings.AI_AIRCRAFT]
+            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP]
 
 
 def set_standard_values():
@@ -271,6 +271,7 @@ def rebase_load_manager():
 def clear_sprite_groups():
     """Функция для очистки групп спрайтов"""
     Settings.TO_DRAW.empty()
+    Settings.EXPLOSION_GROUP.empty()
     Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.PLAYER_SPRITE.empty()
     Settings.CARRIER_GROUP.empty()
@@ -914,6 +915,9 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
+            elif len(ai.frames) == 12:
+                ai.visibility = True
+
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)
@@ -1067,7 +1071,8 @@ class Run:
                     Settings.IS_PAUSE or self.menu or self.resource_menu or
                         self.defeat):
                     Settings.ALL_SPRITES_FOR_SURE.update()
-                if event.type == UPDATE_ANIMATED_SPRITES:
+                if event.type == UPDATE_ANIMATED_SPRITES and not \
+                        Settings.IS_PAUSE:
                     [sprite.update_frame() for sprite in
                      Settings.ANIMATED_SPRTIES]
 

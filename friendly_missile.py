@@ -1,9 +1,9 @@
 import pygame
 from Settings import new_image_size, EXPLOSION, \
-    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, EXPLOSION_SHEET, \
+    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, \
     get_pos_in_coords, get_pos_in_field
 import Settings
-from animated_sprite import AnimatedSprite
+from animated_sprite import AnimatedSprite, Explosion
 
 
 class MissileFriendly(AnimatedSprite):
@@ -34,7 +34,6 @@ class MissileFriendly(AnimatedSprite):
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
-        self.da_bomb = False
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -71,6 +70,7 @@ class MissileFriendly(AnimatedSprite):
         self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
+        self.left = self.prev_pos[0] < self.pos.x
         if self.left:
             self.image = pygame.transform.flip(new_image_size(
                 self.frames[self.cur_frame]), True, False)
@@ -115,9 +115,7 @@ class MissileFriendly(AnimatedSprite):
                         (ai.rect.centerx - self.rect.centerx,
                          ai.rect.centery - self.rect.centery)).normalize()
                 if pygame.sprite.collide_mask(self, ai):
-                    self.da_bomb = True
-                    self.cut_sheet(EXPLOSION_SHEET, 6, 2)
-                    self.rect.center = ai.rect.center
+                    Explosion(ai)
                     Settings.PLAYER_MISSILES_HIT += 1
                     EXPLOSION.play()
                     break
@@ -126,20 +124,13 @@ class MissileFriendly(AnimatedSprite):
 
     def update_frame(self):
         """Установка нового кадра"""
-        if not self.da_bomb:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
-                self.cur_frame + 1 != len(self.frames) else 7
-            if self.left:
-                self.image = pygame.transform.flip(new_image_size(
-                    self.frames[self.cur_frame]), True, False)
-            else:
-                self.image = new_image_size(self.frames[self.cur_frame])
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
+            self.cur_frame + 1 != len(self.frames) else 7
+        if self.left:
+            self.image = pygame.transform.flip(new_image_size(
+                self.frames[self.cur_frame]), True, False)
         else:
-            try:
-                self.cur_frame += 1
-                self.image = new_image_size(self.frames[self.cur_frame])
-            except IndexError:
-                self.total_ticks = 10
+            self.image = new_image_size(self.frames[self.cur_frame])
 
     def data_to_save(self):
         """Возвращает значения, которые надо сохранить"""

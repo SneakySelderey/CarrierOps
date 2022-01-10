@@ -71,6 +71,7 @@ CARRIER_GROUP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
+EXPLOSION_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 

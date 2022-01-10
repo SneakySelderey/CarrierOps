@@ -1,6 +1,6 @@
 import pygame
 import Settings
-from Settings import new_image_size
+from Settings import new_image_size, EXPLOSION_SHEET
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -10,8 +10,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         группы спарйтов, где должен быть объект"""
         super().__init__(Settings.ALL_SPRITES_FOR_SURE,
                          Settings.ANIMATED_SPRTIES, *groups)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
+        self.frames = self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = new_image_size(self.frames[self.cur_frame])
 
@@ -20,7 +19,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
-        self.frames = [sheet.subsurface(pygame.Rect(
+        return [sheet.subsurface(pygame.Rect(
             (self.rect.w * i, self.rect.h * j), self.rect.size)) for j in
             range(rows) for i in range(columns)]
 
@@ -28,3 +27,22 @@ class AnimatedSprite(pygame.sprite.Sprite):
         """Установка нового кадра"""
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = new_image_size(self.frames[self.cur_frame])
+
+
+class Explosion(AnimatedSprite):
+    def __init__(self, carrier):
+        self.parent = carrier
+        self.visibility = True
+        super().__init__(EXPLOSION_SHEET, 6, 2, Settings.EXPLOSION_GROUP)
+        self.rect = self.image.get_rect(center=carrier.rect.center)
+
+    def update(self):
+        self.rect.center = self.parent.rect.center
+
+    def update_frame(self):
+        """Установка нового кадра"""
+        try:
+            self.cur_frame += 1
+            self.image = new_image_size(self.frames[self.cur_frame])
+        except IndexError:
+            self.kill()

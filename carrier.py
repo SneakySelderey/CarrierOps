@@ -4,7 +4,6 @@ from Settings import new_image_size, PLAYER_CARRIER_SHEET, get_pos_in_field, \
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
-import inspect
 
 
 class Carrier(AnimatedSprite):
