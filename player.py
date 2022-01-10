@@ -3,6 +3,7 @@ from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
+from animated_sprite import WaterParticle
 import copy
 
 
@@ -20,6 +21,8 @@ class Player(Carrier):
 
     def update(self):
         """Обновление позиции объекта"""
+        if not self.stop:
+            [WaterParticle(self) for _ in range(2)]
         self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]

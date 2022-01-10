@@ -72,6 +72,7 @@ BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
 EXPLOSION_GROUP = pygame.sprite.Group()
+PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 
@@ -129,6 +130,7 @@ MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
+UPDATE_PARTICLES = pygame.USEREVENT + 5
 
 # Цвета
 BLACK = pygame.Color('black')

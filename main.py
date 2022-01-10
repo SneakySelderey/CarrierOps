@@ -27,7 +27,8 @@ def give_sprites_to_check():
             Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
             Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
             Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
-            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP]
+            Settings.AI_AIRCRAFT, Settings.PARTICLES_GROUP,
+            Settings.EXPLOSION_GROUP]
 
 
 def set_standard_values():
@@ -997,7 +998,8 @@ class Run:
         camera.rebase()
         camera.new_position()
         calculate_speed(Settings.CELL_SIZE)
-        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
+        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 25)
+        pygame.time.set_timer(UPDATE_PARTICLES, 100)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
             player = list(Settings.PLAYER_SPRITE)[0]
@@ -1075,6 +1077,8 @@ class Run:
                         Settings.IS_PAUSE:
                     [sprite.update_frame() for sprite in
                      Settings.ANIMATED_SPRTIES]
+                if event.type == UPDATE_PARTICLES:
+                    Settings.PARTICLES_GROUP.update()
 
             self.camera_update()
 
