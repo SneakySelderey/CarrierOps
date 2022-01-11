@@ -17,6 +17,7 @@ import win32gui
 from collections import defaultdict, deque
 from math import hypot
 
+
 def move_window():
     """Функция для перемещения окна на середину экрана"""
     hwnd = win32gui.FindWindow(None, "CarrierOps")

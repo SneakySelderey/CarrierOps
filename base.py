@@ -4,6 +4,7 @@ from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
     GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED, \
     PLAYER_BASE, AI_BASE, BASES_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE
 import Settings
+from math import hypot
 
 
 class Base(pygame.sprite.Sprite):
@@ -81,7 +82,9 @@ class Base(pygame.sprite.Sprite):
             if self.state == 'friendly':
                 self.run.bases_captured_by_player += 1
                 for ai in list(Settings.AI_SPRITE):
-                    ai.missile_launch(self)
+                    if hypot(ai.rect.centerx - self.rect.centerx,
+                             ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                        ai.missile_launch(self)
             elif self.state == 'hostile':
                 self.run.bases_captured_by_AI += 1
 
