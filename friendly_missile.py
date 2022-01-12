@@ -3,7 +3,7 @@ from Settings import new_image_size, EXPLOSION, \
     PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, \
     get_pos_in_coords, get_pos_in_field
 import Settings
-from animated_sprite import AnimatedSprite, Explosion
+from animated_sprite import AnimatedSprite, Explosion, Particle
 
 
 class MissileFriendly(AnimatedSprite):
@@ -16,7 +16,7 @@ class MissileFriendly(AnimatedSprite):
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
         self.prev_pos = list(self.rect.center)
-        self.left = True
+        self.left = False
         self.radius = Settings.CELL_SIZE * 2
         # Таймеры
         self.ticks = 10
@@ -39,7 +39,7 @@ class MissileFriendly(AnimatedSprite):
 
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
-        self.left = self.prev_pos[0] < self.pos.x
+        self.left = self.prev_pos[0] > self.pos.x
         if not self.activated:
             self.total_ticks += 0.02
 
@@ -52,6 +52,8 @@ class MissileFriendly(AnimatedSprite):
                 abs(self.activation[1] - self.rect.centery) <= 10:
             #  Если ракета достигла цели
             self.activated = True
+
+        [Particle(self) for _ in range(15)]
 
         self.missile_activation()
         if self.activated:
@@ -70,8 +72,8 @@ class MissileFriendly(AnimatedSprite):
         self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
-        self.left = self.prev_pos[0] < self.pos.x
-        if self.left:
+        self.left = self.prev_pos[0] > self.pos.x
+        if not self.left:
             self.image = pygame.transform.flip(new_image_size(
                 self.frames[self.cur_frame]), True, False)
         else:
@@ -126,7 +128,7 @@ class MissileFriendly(AnimatedSprite):
         """Установка нового кадра"""
         self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
             self.cur_frame + 1 != len(self.frames) else 7
-        if self.left:
+        if not self.left:
             self.image = pygame.transform.flip(new_image_size(
                 self.frames[self.cur_frame]), True, False)
         else:

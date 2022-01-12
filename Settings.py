@@ -140,10 +140,10 @@ GRAY5 = pygame.Color('gray5')
 DEEPSKYBLUE4 = pygame.Color('deepskyblue4')
 GREY = pygame.Color('grey')
 BLUE = pygame.Color('blue')
-DARKBLUE = pygame.Color('darkblue')
-BRILLIANTBLUE = pygame.Color(62, 95, 138)
-DEEPBLUE = pygame.Color(0, 47, 85)
 RED = pygame.Color('red')
+WATER_COLORS = [pygame.Color('darkblue'), pygame.Color(62, 95, 138),
+                pygame.Color(0, 47, 85), BLUE]
+FIRE_COLORS = [RED, pygame.Color('yellow'), pygame.Color('orange'), GREY]
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения

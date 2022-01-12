@@ -27,8 +27,8 @@ def give_sprites_to_check():
             Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
             Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
             Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
-            Settings.AI_AIRCRAFT, Settings.PARTICLES_GROUP,
-            Settings.EXPLOSION_GROUP]
+            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP,
+            Settings.PARTICLES_GROUP]
 
 
 def set_standard_values():
@@ -81,6 +81,7 @@ def update_objects():
 
 def delete_save(save):
     """Функция для удаления сохраннения из БД"""
+    save = int(save) if save.isdigit() else save
     path = get_user_data()[save][1]
     CONNECTION.execute(f'''DELETE FROM PathsOfSaves 
     WHERE Path = "{path}"''')
@@ -96,7 +97,6 @@ def delete_save(save):
 def load_save(title):
     """Функция для загрузи сохранения"""
     global chosen_map, game_objects
-    # TODO: LOAD SAVE!!!
     title = int(title) if title.isdigit() else title
     with shelve.open(get_user_data()[title][1]) as data:
         # Загрузим ресурсы
@@ -1000,7 +1000,7 @@ class Run:
         camera.new_position()
         calculate_speed(Settings.CELL_SIZE)
         pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
-        pygame.time.set_timer(UPDATE_PARTICLES, 50)
+        pygame.time.set_timer(UPDATE_PARTICLES, 30)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
             player = list(Settings.PLAYER_SPRITE)[0]
@@ -1205,6 +1205,7 @@ if __name__ == '__main__':
             slides_run = False
         # Отрисока разных экранов
         if menu_run:  # Экран меню
+            set_standard_values()
             Settings.CELL_SIZE = Settings.WIDTH // 20
             Settings.IS_PAUSE = True
             new_game = False

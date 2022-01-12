@@ -3,7 +3,7 @@ from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
-from animated_sprite import WaterParticle
+from animated_sprite import Particle
 import copy
 
 
@@ -50,4 +50,4 @@ class Player(Carrier):
                                self.destination[0] - self.pos[0])
 
             if not self.stop:
-                [WaterParticle(self) for _ in range(2)]
+                [Particle(self) for _ in range(4)]
