@@ -1,7 +1,7 @@
 import pygame
 from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
     random_resource_type, OIL_ICON, \
-    GEAR_ICON, PLANE_ICON, MISSILE_ICON, new_image_size, BLUE, RED, \
+    GEAR_ICON, PLANE_ICON, MISSILE_ICON, \
     PLAYER_BASE, AI_BASE, BASES_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE
 import Settings
 
@@ -13,28 +13,25 @@ class Base(pygame.sprite.Sprite):
     ResourceType = {'oil': OIL_ICON, 'repair': GEAR_ICON,
                     'missile': MISSILE_ICON, 'aircraft': PLANE_ICON}
 
-    def __init__(self, x, y, state, visibility, cell_size, parent):
+    def __init__(self, x, y, state, visibility):
         super().__init__(ALL_SPRITES_FOR_SURE, BASES_SPRITES,
                          ALWAYS_UPDATE)
         self.x, self.y = x, y
-        self.size = cell_size
-        self.parent = parent
         self.image = pygame.transform.scale(Base.Images[state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.state = state
         self.to_add = True
-        self.rect = self.image.get_rect(center=[
-            x * cell_size + parent.left + cell_size // 2,
-            y * cell_size + parent.top + cell_size // 2])
+        self.rect = self.image.get_rect(topleft=[
+            x * Settings.CELL_SIZE + Settings.LEFT,
+            y * Settings.CELL_SIZE + Settings.TOP])
         self.visibility = visibility
         self.ticks_to_capture = Settings.BASE_TICKS
         self.start_of_capture = 0
         self.prev_start = 0
         self.mask = pygame.mask.from_surface(self.image)
-        self.bar = BaseBar(self)
+        self.show_bar = False
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
-            self.ico = BaseIcon(self)
             self.ticks_to_give_resource = 0
 
     def update(self):
@@ -79,8 +76,8 @@ class Base(pygame.sprite.Sprite):
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
 
         self.rect = self.image.get_rect()
-        self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
-                             self.y * Settings.CELL_SIZE + self.parent.top]
+        self.rect.topleft = [self.x * Settings.CELL_SIZE + Settings.LEFT,
+                             self.y * Settings.CELL_SIZE + Settings.TOP]
 
         if self.ticks_to_give_resource and not Settings.IS_PAUSE:
             self.ticks_to_give_resource -= 1
@@ -98,11 +95,17 @@ class Base(pygame.sprite.Sprite):
 
     def new_position(self, cell, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
-        self.rect.topleft = [self.x * cell + left,
-                             self.y * cell + top]
         self.image = pygame.transform.scale(Base.Images[self.state], (
             Settings.CELL_SIZE, Settings.CELL_SIZE))
+        self.rect = self.image.get_rect(topleft=[self.x * cell + left,
+                                                 self.y * cell + top])
         self.mask = pygame.mask.from_surface(self.image)
+
+    def data_to_save(self):
+        """Функуия, возвращающая список значений, которые можно сохранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        return 'base', to_save
 
 
 class SuperBase(Base):
@@ -172,57 +175,11 @@ class SuperBase(Base):
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
         self.rect = self.image.get_rect()
-        self.rect.topleft = [self.x * Settings.CELL_SIZE + self.parent.left,
-                             self.y * Settings.CELL_SIZE + self.parent.top]
+        self.rect.topleft = [self.x * Settings.CELL_SIZE + Settings.LEFT,
+                             self.y * Settings.CELL_SIZE + Settings.TOP]
 
-
-class BaseIcon(pygame.sprite.Sprite):
-    """Класс для иконки ресурса рядом с базой"""
-    def __init__(self, base):
-        """Инициализация. Принимает базу"""
-        super().__init__(ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
-        self.resource = base.resource_type
-        self.image = new_image_size(Base.ResourceType[self.resource])
-        self.rect = self.image.get_rect(bottomleft=base.rect.topright)
-        self.parent = base
-        self.visibility = True
-
-    def update(self):
-        """Обновления положения"""
-        self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
-
-    def new_position(self, cell, top, left):
-        """обновление положеняи при изменении разрешения"""
-        self.image = new_image_size(Base.ResourceType[self.resource])
-        self.rect = self.image.get_rect(bottomleft=self.parent.rect.topright)
-
-
-class BaseBar(pygame.sprite.Sprite):
-    """Класс для полоски захвата базы"""
-    def __init__(self, base):
-        """Инициализация. Принимает базу"""
-        super().__init__(ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE)
-        self.parent = base
-        self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
-        self.rect = self.image.get_rect(bottomleft=(base.rect.topleft[0],
-                                                    base.rect.topleft[1] - 10))
-        self.visibility = True
-
-    def update(self):
-        """Обновление полоски"""
-        if self.parent.start_of_capture and self.parent.ticks_to_capture:
-            self.image = pygame.Surface((int(
-                Settings.CELL_SIZE - Settings.CELL_SIZE / Settings.BASE_TICKS
-                * self.parent.ticks_to_capture), 5))
-            self.image.fill(BLUE if self.parent.start_of_capture == 1 else RED)
-        else:
-            self.image = pygame.Surface((Settings.CELL_SIZE, 10),
-                                        pygame.SRCALPHA)
-        self.rect.bottomleft = (self.parent.rect.topleft[0],
-                                self.parent.rect.topleft[1] - 10)
-
-    def new_position(self, cell, top, left):
-        """Обновление позиции при изменении разрешения"""
-        self.image = pygame.Surface((Settings.CELL_SIZE, 10), pygame.SRCALPHA)
-        self.rect = self.image.get_rect(bottomleft=(
-            self.parent.rect.topleft[0], self.parent.rect.topleft[1] - 10))
+    def data_to_save(self):
+        """Функуия, возвращающая список значений, которые можно сохранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['image'], to_save['mask']
+        return 'super base', to_save

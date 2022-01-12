@@ -1,5 +1,6 @@
 import pygame
-from Settings import new_image_size, PLAYER_CARRIER_SHEET
+from Settings import new_image_size, PLAYER_CARRIER_SHEET, get_pos_in_field, \
+    get_pos_in_coords
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
@@ -8,7 +9,7 @@ from animated_sprite import AnimatedSprite
 class Carrier(AnimatedSprite):
     """Класс, определяющий параметры и спрайт авианосца"""
     def __init__(self, sheet, group):
-        super().__init__(sheet, 20, 1, group)
+        super().__init__(sheet, 20, 1, group, Settings.CARRIER_GROUP)
         self.obj = 'player' if sheet == PLAYER_CARRIER_SHEET else 'ai'
         self.pos = list(self.rect.center)
         self.destination = self.pos
@@ -35,18 +36,14 @@ class Carrier(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x = (self.rect.centerx - left) / cell_size
-        c_y = (self.rect.centery - top) / cell_size
-        self.rect = self.image.get_rect(
-            center=(left + c_x * Settings.CELL_SIZE,
-                    top + c_y * Settings.CELL_SIZE))
+        pr_x, pr_y = get_pos_in_field(self.prev_pos, cell_size, top, left)
+        self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
+        self.rect = self.image.get_rect(center=self.prev_pos)
         self.pos = list(self.rect.center)
-        self.prev_pos = [self.pos[0], self.pos[1]]
         self.mask = pygame.mask.from_surface(self.image)
-        dest_x = (self.destination[0] - left) / cell_size
-        dest_y = (self.destination[1] - top) / cell_size
-        self.destination = [left + dest_x * Settings.CELL_SIZE,
-                            top + dest_y * Settings.CELL_SIZE]
+        dest_x, dest_y = get_pos_in_field(self.destination,
+                                          cell_size, top, left)
+        self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
         self.alpha = atan2(self.destination[1] - self.pos[1],
                            self.destination[0] - self.pos[0])
         if self.left:
@@ -64,3 +61,10 @@ class Carrier(AnimatedSprite):
                 self.frames[self.cur_frame]), True, False)
         else:
             self.image = new_image_size(self.frames[self.cur_frame])
+
+    def data_to_save(self):
+        """Возвращает список тех занчений, которые можно сохранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return to_save

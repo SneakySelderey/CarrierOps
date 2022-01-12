@@ -5,6 +5,16 @@ import sqlite3
 from random import random
 
 
+def get_pos_in_field(center, cell, top, left):
+    """Возвращает положение объекта в сетке"""
+    return [(center[0] - left) / cell, (center[1] - top) / cell]
+
+
+def get_pos_in_coords(center, top, left):
+    """Возвраащет положение объекта в системе координат"""
+    return [left + center[0] * CELL_SIZE, top + center[1] * CELL_SIZE]
+
+
 def random_resource_type():
     """Функция дял случайного выбора типа базы в зависимости от соотношения"""
     n = random()
@@ -57,16 +67,18 @@ AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
 ICONS_GROUP = pygame.sprite.Group()
 RESOURCES_BASE = pygame.sprite.Group()
-CARRIER_GROP = pygame.sprite.Group()
+CARRIER_GROUP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
+EXPLOSION_GROUP = pygame.sprite.Group()
+PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
 
 # Числовые и булевые значения значения
 AIR_SPEED = 2.5
-MISSILE_SPEED = 1
+MISSILE_SPEED = 2
 NUM_OF_MISSILES = 5
 NUM_OF_AIRCRAFT = 3
 OIL_VOLUME = 100
@@ -81,7 +93,7 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
-NUM_OF_BASES = 1
+NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
 # Для подсчета результатов
@@ -104,6 +116,7 @@ except ValueError:
 WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = 1600, 900
 CELL_SIZE = WIDTH // 20
+TOP, LEFT = 0, 0
 IS_FULLSCREEN = False
 IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
@@ -111,13 +124,13 @@ pygame.display.set_mode((WIDTH, HEIGHT))
 # Подлючение к БД
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
 CONNECTION.execute("PRAGMA foreign_keys = ON")
-USER_DATA = get_user_data()
 
 # Events
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
+UPDATE_PARTICLES = pygame.USEREVENT + 5
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -128,6 +141,9 @@ DEEPSKYBLUE4 = pygame.Color('deepskyblue4')
 GREY = pygame.Color('grey')
 BLUE = pygame.Color('blue')
 RED = pygame.Color('red')
+WATER_COLORS = [pygame.Color('darkblue'), pygame.Color(62, 95, 138),
+                pygame.Color(0, 47, 85), BLUE]
+FIRE_COLORS = [RED, pygame.Color('yellow'), pygame.Color('orange'), GREY]
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения

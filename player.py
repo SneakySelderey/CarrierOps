@@ -3,6 +3,7 @@ from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
+from animated_sprite import Particle
 import copy
 
 
@@ -23,7 +24,10 @@ class Player(Carrier):
         self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
-            if pygame.sprite.collide_mask(self, land):
+            if pygame.sprite.collide_mask(self, land) or not all(
+                land.rect.collidepoint(point) for point in [
+                    self.rect.midleft, self.rect.midtop, self.rect.midright,
+                    self.rect.midbottom]):
                 self.pos = self.prev_pos
 
             if self.pos != self.destination and not self.stop:
@@ -44,3 +48,6 @@ class Player(Carrier):
 
             self.alpha = atan2(self.destination[1] - self.pos[1],
                                self.destination[0] - self.pos[0])
+
+            if not self.stop:
+                [Particle(self) for _ in range(4)]
