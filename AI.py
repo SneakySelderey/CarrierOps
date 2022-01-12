@@ -2,6 +2,7 @@ from Settings import AI_SPRITE, AI_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos
+from animated_sprite import WaterParticle
 import pygame
 import copy
 
@@ -36,4 +37,7 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
+
+        if not self.stop and self.visibility:
+            [WaterParticle(self) for _ in range(2)]
 

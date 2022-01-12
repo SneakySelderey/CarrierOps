@@ -69,6 +69,7 @@ def calculate_speed(cell):
 def update_objects():
     """Функция для обновления координат игровых объектов при изменении
     разрешения/зуме"""
+    Settings.PARTICLES_GROUP.empty()
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
      Settings.ALL_SPRITES_FOR_SURE]
@@ -998,8 +999,8 @@ class Run:
         camera.rebase()
         camera.new_position()
         calculate_speed(Settings.CELL_SIZE)
-        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 25)
-        pygame.time.set_timer(UPDATE_PARTICLES, 100)
+        pygame.time.set_timer(UPDATE_ANIMATED_SPRITES, 150)
+        pygame.time.set_timer(UPDATE_PARTICLES, 50)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
             player = list(Settings.PLAYER_SPRITE)[0]

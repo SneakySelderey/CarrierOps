@@ -21,8 +21,6 @@ class Player(Carrier):
 
     def update(self):
         """Обновление позиции объекта"""
-        if not self.stop:
-            [WaterParticle(self) for _ in range(2)]
         self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
@@ -50,3 +48,6 @@ class Player(Carrier):
 
             self.alpha = atan2(self.destination[1] - self.pos[1],
                                self.destination[0] - self.pos[0])
+
+            if not self.stop:
+                [WaterParticle(self) for _ in range(2)]
