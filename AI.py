@@ -37,4 +37,4 @@ class AI(Carrier):
             self.rect.center = self.pos
 
     def missile_launch(self, base):
-        MissileFriendly(base.rect.center, True, self, base, self.run)
+        MissileFriendly(base.rect.center, False, self, base, self.run)

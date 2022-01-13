@@ -766,6 +766,14 @@ class Run:
             for missile in self.friendly_missiles:
                 if pygame.sprite.collide_circle_ratio(1)(missile, base):
                     base.bar.visibility = True
+            for missile in AI_MISSILES:
+                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
+                    missile.visibility = True
+                    if not missile.pause_checked:
+                        Settings.IS_PAUSE = True
+                        missile.pause_checked = True
+                else:
+                    missile.pause_checked = False
             if base.bar.visibility and base.state == 'ai':
                 base.visibility = True
                 if self.play_main_base_detection:
