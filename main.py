@@ -628,8 +628,9 @@ class Run:
             self.map = NorwegLand(True, self.board)
         elif china_chosen:
             self.map = ChinaLand(True, self.board)
-
         LandCheck(False, self.board, self)
+
+        self.AI_missiles_timer = 15
 
         self.g = defaultdict(list)
         n, m = self.board.height, self.board.width
@@ -833,6 +834,10 @@ class Run:
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
                     missile_tracking or air_tracking:
                 self.ai.visibility = True
+                if self.AI_missiles_timer >= 15:
+                    ai.missile_launch(player, False)
+                    self.AI_missiles_timer = 0
+                self.AI_missiles_timer += 0.02
                 pygame.draw.circle(screen, RED, (ai_x, ai_y),
                                    Settings.CELL_SIZE * 4, 1)
                 self.ai_detected = True

@@ -22,6 +22,7 @@ class MissileFriendly(AnimatedSprite):
         self.left = True
         self.radius = Settings.CELL_SIZE * 2
         self.pause_checked = False
+        self.activation_on_base = True
         # Таймеры
         self.ticks = 10
         self.ticks2 = 0
@@ -71,8 +72,12 @@ class MissileFriendly(AnimatedSprite):
             self.activated = True
 
         if self.base:
-            if pygame.sprite.collide_circle_ratio(2)(self, self.base):
-                self.activated = True
+            if self.activation_on_base:
+                if pygame.sprite.collide_circle_ratio(2)(self, self.base):
+                    self.activated = True
+            else:
+                if pygame.sprite.collide_circle_ratio(1)(self, self.base):
+                    self.activated = True
 
         self.missile_activation()
         if self.activated:
