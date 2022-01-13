@@ -1,0 +1,1 @@
+Legacy sounds folder contains old voiceover versions. You can change voiceovers in the game to the legacy version by copying and pasting files from legacy folder to sounds folder but be sure to copy current voiceover in separate folder.

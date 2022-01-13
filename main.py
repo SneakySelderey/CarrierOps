@@ -772,6 +772,7 @@ class Run:
                     if not missile.pause_checked:
                         Settings.IS_PAUSE = True
                         missile.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
                 else:
                     missile.pause_checked = False
             if base.bar.visibility and base.state == 'ai':

@@ -170,8 +170,9 @@ TALKING = pygame.mixer.Sound('data/sound/talking.wav')
 FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
 MORSE = pygame.mixer.Sound('data/sound/morse.wav')
 MAIN_BASE_DETECTION = pygame.mixer.Sound('data/sound/MainBaseDetected.wav')
+MISSILE_DETECTION = pygame.mixer.Sound('data/sound/MissileWarning.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, MISSILE_DETECTION,
                TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE, MAIN_BASE_DETECTION]
 
 # Музыка
