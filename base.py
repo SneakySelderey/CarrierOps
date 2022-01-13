@@ -168,6 +168,10 @@ class SuperBase(Base):
                 self.state = 'player'
                 if base_grid in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.remove(base_grid)
+                    for ai in list(Settings.AI_SPRITE):
+                        if hypot(ai.rect.centerx - self.rect.centerx,
+                                 ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                            ai.missile_launch(self)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:
