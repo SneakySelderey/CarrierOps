@@ -37,6 +37,8 @@ class MissileFriendly(AnimatedSprite):
             self.total_ticks = 10
             self.alpha = pygame.math.Vector2(0, 0)
 
+        self.explosion_sound = True
+
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
@@ -145,7 +147,9 @@ class MissileFriendly(AnimatedSprite):
                     if pygame.sprite.collide_mask(self, ai):
                         Explosion(ai)
                         Settings.PLAYER_MISSILES_HIT += 1
-                        EXPLOSION.play()
+                        if self.explosion_sound:
+                            EXPLOSION.play()
+                            self.explosion_sound = False
                         break
             else:
                 for player in Settings.PLAYER_SPRITE:
@@ -156,7 +160,9 @@ class MissileFriendly(AnimatedSprite):
                     if pygame.sprite.collide_mask(self, player):
                         Explosion(player)
                         Settings.AI_MISSILES_HIT += 1
-                        EXPLOSION.play()
+                        if self.explosion_sound:
+                            EXPLOSION.play()
+                            self.explosion_sound = False
                         break
         except ValueError:
             self.total_ticks = 10
