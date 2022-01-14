@@ -778,6 +778,7 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
+        self.play_main_base_detection = True
 
         self.g = defaultdict(list)
         n, m = self.board.height, self.board.width
