@@ -139,26 +139,26 @@ class MissileFriendly(AnimatedSprite):
         try:
             if self.obj in Settings.PLAYER_SPRITE:
                 for ai in Settings.AI_SPRITE:
-                if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
-                    self.alpha = pygame.math.Vector2(
-                        (ai.rect.centerx - self.rect.centerx,
-                         ai.rect.centery - self.rect.centery)).normalize()
-                if pygame.sprite.collide_mask(self, ai):
-                    Explosion(ai)
-                    Settings.PLAYER_MISSILES_HIT += 1
-                    EXPLOSION.play()
-                    break
+                    if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
+                        self.alpha = pygame.math.Vector2(
+                            (ai.rect.centerx - self.rect.centerx,
+                             ai.rect.centery - self.rect.centery)).normalize()
+                    if pygame.sprite.collide_mask(self, ai):
+                        Explosion(ai)
+                        Settings.PLAYER_MISSILES_HIT += 1
+                        EXPLOSION.play()
+                        break
             else:
                 for player in Settings.PLAYER_SPRITE:
                     if pygame.sprite.collide_circle_ratio(0.35)(self, player):
-                    self.alpha = pygame.math.Vector2(
-                        (player.rect.centerx - self.rect.centerx,
-                         player.rect.centery - self.rect.centery)).normalize()
-                if pygame.sprite.collide_mask(self, player):
-                    Explosion(player)
-                    Settings.AI_MISSILES_HIT += 1
-                    EXPLOSION.play()
-                    break
+                        self.alpha = pygame.math.Vector2(
+                            (player.rect.centerx - self.rect.centerx,
+                             player.rect.centery - self.rect.centery)).normalize()
+                    if pygame.sprite.collide_mask(self, player):
+                        Explosion(player)
+                        Settings.AI_MISSILES_HIT += 1
+                        EXPLOSION.play()
+                        break
         except ValueError:
             self.total_ticks = 10
 
