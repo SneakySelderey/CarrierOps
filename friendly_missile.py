@@ -9,7 +9,7 @@ from animated_sprite import AnimatedSprite, Explosion, Particle
 class MissileFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, activation, visibility, obj, base, run):
+    def __init__(self, activation, visibility, obj, base):
         if obj in Settings.PLAYER_SPRITE:
             super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
             player = list(PLAYER_SPRITE)[0]
@@ -44,7 +44,6 @@ class MissileFriendly(AnimatedSprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.obj = obj
         self.base = base
-        self.run = run
 
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
