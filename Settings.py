@@ -71,6 +71,7 @@ CARRIER_GROUP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
+BOARD = []
 EXPLOSION_GROUP = pygame.sprite.Group()
 PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
@@ -93,6 +94,8 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
+N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
+# N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
@@ -180,6 +183,7 @@ PLAYER_MISSILE_SHEET = pygame.image.load('data/sheets/friendly_missile_sheet.png
 HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png').convert_alpha()
 EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
 VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
+LAND_CHECK_IMG = pygame.image.load('data/img/land_check.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
@@ -193,9 +197,11 @@ CLOCK = pygame.mixer.Sound('data/sound/Clock.wav')
 TALKING = pygame.mixer.Sound('data/sound/talking.wav')
 FOOTSTEPS = pygame.mixer.Sound('data/sound/Footsteps.wav')
 MORSE = pygame.mixer.Sound('data/sound/morse.wav')
+MAIN_BASE_DETECTION = pygame.mixer.Sound('data/sound/MainBaseDetected.wav')
+MISSILE_DETECTION = pygame.mixer.Sound('data/sound/MissileWarning.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
-               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, MISSILE_DETECTION,
+               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE, MAIN_BASE_DETECTION]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')

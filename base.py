@@ -4,6 +4,7 @@ from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
     GEAR_ICON, PLANE_ICON, MISSILE_ICON, \
     PLAYER_BASE, AI_BASE, BASES_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE
 import Settings
+from math import hypot
 
 
 class Base(pygame.sprite.Sprite):
@@ -74,6 +75,14 @@ class Base(pygame.sprite.Sprite):
 
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
+            if self.state == 'friendly':
+                self.run.bases_captured_by_player += 1
+                for ai in list(Settings.AI_SPRITE):
+                    if hypot(ai.rect.centerx - self.rect.centerx,
+                             ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                        ai.missile_launch(self, True)
+            elif self.state == 'hostile':
+                self.run.bases_captured_by_AI += 1
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + Settings.LEFT,
@@ -162,6 +171,10 @@ class SuperBase(Base):
                 Settings.BASES_CAPT_PLAYER += 1
                 if base_grid in Settings.HOSTILE_BASES:
                     Settings.HOSTILE_BASES.remove(base_grid)
+                    for ai in list(Settings.AI_SPRITE):
+                        if hypot(ai.rect.centerx - self.rect.centerx,
+                                 ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                            ai.missile_launch(self, True)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:

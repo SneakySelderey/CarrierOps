@@ -14,6 +14,8 @@ import pygame_gui
 from player import Player
 from AI import AI
 import win32gui
+from collections import defaultdict, deque
+from math import hypot
 from datetime import datetime
 import shelve
 from string import ascii_letters, digits
@@ -763,6 +765,11 @@ class Run:
         self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, self.cell_size)
 
+        for x in range(self.cells_y):
+            Settings.BOARD.append([])
+            for y in range(self.cells_x):
+                Settings.BOARD[x].append('.')
+
         # Флаги, переменные
         self.running = True
         self.defeat = False
@@ -771,19 +778,64 @@ class Run:
         self.resource_menu = False
         self.play_new_contact, self.play_contact_lost = True, False
         self.battle = False
+
+        self.g = defaultdict(list)
+        n, m = self.board.height, self.board.width
+        for i in range(n):
+            for j in range(m):
+                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+                                  self.check(i + v[0], j + v[1], n, m)]
+
         Map(True, self.board, chosen_map)
         self.board.add_bases()
         Player()
         AI()
+        
+        self.AI_missiles_timer = 15
 
     def data_to_save(self):
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
 
+
+    def has_path(self, x1, y1, x2, y2):
+        self.g = defaultdict(list)
+        n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
+        for i in range(n):
+            for j in range(m):
+                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+                             self.check(i + v[0], j + v[1], n, m)]
+        ans = self.bfs((x1, y1), self.g, (x2, y2))
+        return (x2, y2) in ans
+
+    def check(self, x, y, n, m):
+        return 0 <= x < n and 0 <= y < m
+
+    def bfs(self, start, g, end):
+        self.path = []
+        visited, queue = [start], deque([start])
+        p = {}
+        while queue:
+            vertex = queue.popleft()
+            if vertex == end:
+                break
+            for nr in g[vertex]:
+                if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
+                    visited.append(nr)
+                    queue.append(nr)
+                    p[nr] = vertex
+        if end in visited:
+            to = end
+            while to != start:
+                self.path.append(to)
+                to = p[to]
+            self.path.reverse()
+        return self.path
+
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         Settings.PLAYER_MISSILES.add(MissileFriendly(
-            destination, True))
+            destination, True, list(Settings.PLAYER_SPRITE)[0], None, self))
         [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
          for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
@@ -798,7 +850,6 @@ class Run:
 
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
-        can_capture = False
         for ai in Settings.AI_SPRITE:
             distance = []
             ai_pos_x = ai.rect.centerx // Settings.CELL_SIZE
@@ -809,22 +860,28 @@ class Run:
                     distance.append(
                         (dist, [base.rect.centerx, base.rect.centery]))
             try:
-                destination_ai = min(distance)
+                destination_ai = min(distance, key=lambda x: x[0])
                 idx = distance.index(destination_ai)
-                ai.new_destination(distance[idx][1])
+
+                path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
+                                (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
+                                self.g, ((distance[idx][-1][1] - self.board.top) // Settings.CELL_SIZE,
+                                         (distance[idx][-1][0] - self.board.left) // Settings.CELL_SIZE))
+                path = (path[0][1], path[0][0])
+                ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
+                                    path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
                 can_capture = True
             except ValueError:
-                pass
-        if not can_capture:
-            self.defeat = True
-            [sound.stop() for sound in ALL_EFFECTS]
+                ai.new_destination(ai.pos)
+            except IndexError:
+                ai.new_destination(ai.pos)
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
         player_x, player_y = list(Settings.PLAYER_SPRITE)[0].rect.center
         player = list(Settings.PLAYER_SPRITE)[0]
 
-        # отрисовка нужных и прятанье ненужных спрайтов
+        # отрисовка нужных и скрытие ненужных спрайтов
         TO_DRAW.empty()
         [TO_DRAW.add(sprite) for group in give_sprites_to_check()
          for sprite in group if sprite.visibility]
@@ -841,8 +898,20 @@ class Run:
             for missile in Settings.PLAYER_MISSILES:
                 if pygame.sprite.collide_circle(missile, base):
                     base.show_bar = True
+            for missile in Settings.AI_MISSILES:
+                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
+                    missile.visibility = True
+                    if not missile.pause_checked:
+                        Settings.IS_PAUSE = True
+                        missile.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
+                else:
+                    missile.pause_checked = False
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
+                if self.play_main_base_detection:
+                    MAIN_BASE_DETECTION.play()
+                    self.play_main_base_detection = False
 
         # отрисовка спрайта противника
         for ai in Settings.AI_SPRITE:
@@ -855,10 +924,6 @@ class Run:
                 missile_x, missile_y = missile.rect.center
                 if pygame.sprite.collide_circle_ratio(0.35)(missile, ai):
                     missile_tracking = True
-                # если ракета исчерпала свой ресурс, она падает в море и
-                # спрайт удаляется
-                if missile.total_ticks >= 10:
-                    missile.kill()
                 # отрисовка радиуса обнаружения ракеты
                 if not missile.activated:
                     missile.activation[0] += camera.dx
@@ -896,6 +961,10 @@ class Run:
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
                     missile_tracking or air_tracking:
                 ai.visibility = True
+                if self.AI_missiles_timer >= 15:
+                    ai.missile_launch(player, False)
+                    self.AI_missiles_timer = 0
+                self.AI_missiles_timer += 0.02
                 pygame.draw.circle(screen, RED, ai.rect.center,
                                    Settings.CELL_SIZE * 4, 1)
                 self.play_contact_lost = True
@@ -1131,6 +1200,12 @@ class Run:
                             'player', 'friendly']]) == len(
                         Settings.BASES_SPRITES):
                     self.win = True
+                    [sound.stop() for sound in ALL_EFFECTS]
+                if len([i for i in Settings.BASES_SPRITES if i.state in [
+                    'ai', 'hostile']]) == len(
+                      Settings.BASES_SPRITES):
+                    self.defeat = True
+                    [sound.stop() for sound in ALL_EFFECTS]
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
