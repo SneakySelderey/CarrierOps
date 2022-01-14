@@ -3,6 +3,7 @@ from friendly_missile import MissileFriendly
 import Settings
 from carrier import Carrier
 from math import sin, cos
+from animated_sprite import Particle
 import pygame
 import copy
 
@@ -24,7 +25,10 @@ class AI(Carrier):
         """Обновление позиции объекта"""
         self.left = self.prev_pos[0] > self.pos[0]
         land = list(Settings.BACKGROUND_MAP)[0]
-        if pygame.sprite.collide_mask(self, land):
+        if pygame.sprite.collide_mask(self, land) or not all(
+                land.rect.collidepoint(point) for point in [
+                    self.rect.midleft, self.rect.midtop, self.rect.midright,
+                    self.rect.midbottom]):
             self.pos = self.prev_pos
 
         if self.pos != self.destination and not self.stop:
@@ -35,6 +39,8 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
+        if not self.stop and self.visibility:
+            [Particle(self) for _ in range(2)]
 
     def missile_launch(self, base, activation_on_base):
         missile = MissileFriendly(base.rect.center, False, self, base, self.run)

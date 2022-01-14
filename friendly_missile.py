@@ -1,8 +1,9 @@
 import pygame
 from Settings import new_image_size, EXPLOSION, \
-    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, EXPLOSION_SHEET
+    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, \
+    get_pos_in_coords, get_pos_in_field
 import Settings
-from animated_sprite import AnimatedSprite
+from animated_sprite import AnimatedSprite, Explosion, Particle
 
 
 class MissileFriendly(AnimatedSprite):
@@ -19,7 +20,7 @@ class MissileFriendly(AnimatedSprite):
         self.pos = pygame.math.Vector2([player.rect.centerx,
                                         player.rect.centery])
         self.prev_pos = list(self.rect.center)
-        self.left = True
+        self.left = False
         self.radius = Settings.CELL_SIZE * 2
         self.pause_checked = False
         self.activation_on_base = True
@@ -39,7 +40,6 @@ class MissileFriendly(AnimatedSprite):
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
         self.turn = 0
-        self.da_bomb = False
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
         self.obj = obj
@@ -55,9 +55,9 @@ class MissileFriendly(AnimatedSprite):
             Settings.PLAYER_MISSILES.remove(self)
             Settings.AI_MISSILES.remove(self)
             Settings.ALL_SPRITES_FOR_SURE.remove(self)
-            self.run.player_missiles_hit += 1
 
-        self.left = self.prev_pos[0] < self.pos.x
+        self.left = self.prev_pos[0] > self.pos.x
+
         if not self.activated:
             self.total_ticks += 0.02
 
@@ -79,6 +79,8 @@ class MissileFriendly(AnimatedSprite):
                 if pygame.sprite.collide_circle_ratio(1)(self, self.base):
                     self.activated = True
 
+        [Particle(self) for _ in range(15)]
+
         self.missile_activation()
         if self.activated:
             self.missile_tracking()
@@ -86,19 +88,18 @@ class MissileFriendly(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x = (self.rect.centerx - left) / cell_size
-        c_y = (self.rect.centery - top) / cell_size
+        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
         self.rect = self.image.get_rect(
-            center=(left + c_x * Settings.CELL_SIZE,
-                    top + c_y * Settings.CELL_SIZE))
+            center=get_pos_in_coords((c_x, c_y), top, left))
         self.pos = pygame.math.Vector2(list(self.rect.center))
-        act_x = (self.activation[0] - left) / cell_size
-        act_y = (self.activation[1] - top) / cell_size
-        self.activation = [left + act_x * Settings.CELL_SIZE,
-                           top + act_y * Settings.CELL_SIZE]
+        pr_x, pr_y = get_pos_in_field(self.prev_pos, cell_size, top, left)
+        self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
+        act_x, act_y = get_pos_in_field(self.activation, cell_size, top, left)
+        self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
-        if self.left:
+        self.left = self.prev_pos[0] > self.pos.x
+        if not self.left:
             self.image = pygame.transform.flip(new_image_size(
                 self.frames[self.cur_frame]), True, False)
         else:
@@ -138,44 +139,42 @@ class MissileFriendly(AnimatedSprite):
         try:
             if self.obj in Settings.PLAYER_SPRITE:
                 for ai in Settings.AI_SPRITE:
-                    if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
-                        self.alpha = pygame.math.Vector2(
-                            (ai.rect.centerx - self.rect.centerx,
-                             ai.rect.centery - self.rect.centery)).normalize()
-                    if pygame.sprite.collide_mask(self, ai):
-                        self.da_bomb = True
-                        self.cut_sheet(EXPLOSION_SHEET, 6, 2)
-                        self.rect.center = ai.rect.center
-                        EXPLOSION.play()
-                        break
+                if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
+                    self.alpha = pygame.math.Vector2(
+                        (ai.rect.centerx - self.rect.centerx,
+                         ai.rect.centery - self.rect.centery)).normalize()
+                if pygame.sprite.collide_mask(self, ai):
+                    Explosion(ai)
+                    Settings.PLAYER_MISSILES_HIT += 1
+                    EXPLOSION.play()
+                    break
             else:
                 for player in Settings.PLAYER_SPRITE:
                     if pygame.sprite.collide_circle_ratio(0.35)(self, player):
-                        self.alpha = pygame.math.Vector2(
-                            (player.rect.centerx - self.rect.centerx,
-                             player.rect.centery - self.rect.centery)).normalize()
-                    if pygame.sprite.collide_mask(self, player):
-                        self.da_bomb = True
-                        self.cut_sheet(EXPLOSION_SHEET, 6, 2)
-                        self.rect.center = player.rect.center
-                        EXPLOSION.play()
-                        break
+                    self.alpha = pygame.math.Vector2(
+                        (player.rect.centerx - self.rect.centerx,
+                         player.rect.centery - self.rect.centery)).normalize()
+                if pygame.sprite.collide_mask(self, player):
+                    Explosion(player)
+                    Settings.AI_MISSILES_HIT += 1
+                    EXPLOSION.play()
+                    break
         except ValueError:
             self.total_ticks = 10
 
     def update_frame(self):
         """Установка нового кадра"""
-        if not self.da_bomb:
-            self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
-                self.cur_frame + 1 != len(self.frames) else 7
-            if self.left:
-                self.image = pygame.transform.flip(new_image_size(
-                    self.frames[self.cur_frame]), True, False)
-            else:
-                self.image = new_image_size(self.frames[self.cur_frame])
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames) if \
+            self.cur_frame + 1 != len(self.frames) else 7
+        if not self.left:
+            self.image = pygame.transform.flip(new_image_size(
+                self.frames[self.cur_frame]), True, False)
         else:
-            try:
-                self.cur_frame += 1
-                self.image = new_image_size(self.frames[self.cur_frame])
-            except IndexError:
-                self.total_ticks = 10
+            self.image = new_image_size(self.frames[self.cur_frame])
+
+    def data_to_save(self):
+        """Возвращает значения, которые надо сохранить"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return 'friendly', to_save

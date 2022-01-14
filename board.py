@@ -10,11 +10,10 @@ class Board:
         self.cell_size = Settings.CELL_SIZE
         self.width = width
         self.height = height
-        self.board = [[0] * height for _ in range(width)]
-        self.bases = []
         self.left = 20
         self.top = 20
         self.cell_size = 30
+        Settings.TOP, Settings.LEFT = self.top, self.left
         self.cells = {(i, j) for i in range(self.width) for j in
                       range(self.height)}
         self.used = set()
@@ -25,6 +24,7 @@ class Board:
         self.left = left
         self.top = top
         self.cell_size = cell_size
+        Settings.TOP, Settings.LEFT = top, left
 
     def add_bases(self):
         """Функция для добавления баз"""
@@ -38,9 +38,9 @@ class Board:
     def add_base(self, x, y, *mega):
         """Функция для добавления базы на поле"""
         if not mega:
-            base = Base(x, y, 'neutral', True, self.cell_size, self, self.run)
+            base = Base(x, y, 'neutral', True)
         else:
-            base = SuperBase(x, y, mega[0], True, self.cell_size, self, run=self.run)
+            base = SuperBase(x, y, mega[0], True)
         land = list(Settings.BACKGROUND_MAP)[0]
         while pygame.sprite.collide_mask(land, base) is not None:
             self.used.add((x, y))
@@ -52,8 +52,6 @@ class Board:
             Settings.PLAYER_START = (x, y)
         elif mega and mega[0] == 'ai':
             Settings.AI_START = (x, y)
-        self.board[x][y] = base
-        self.bases.append(base)
 
     def render(self, screen):
         """Метод, отрисовывающий сетку"""
@@ -71,14 +69,3 @@ class Board:
         if not 0 <= x <= self.width or not 0 <= y <= self.height:
             return
         return x, y
-
-    def on_click(self, cell_pos):
-        """Функция"""
-        x, y = cell_pos  # TODO: WHEN PRESSING ON BOARD
-
-    def get_click(self, mouse_pos):
-        """Функия для полчения клика на поле. Если пользователь нажал на поле,
-         идет обработка этого события"""
-        cell = self.get_cell(mouse_pos)
-        if cell is not None:
-            self.on_click(cell)

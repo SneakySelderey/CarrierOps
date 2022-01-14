@@ -8,7 +8,7 @@
          "font":
          {
            "name": "Teletacticle",
-           "size": 18,
+           "size": 14,
            "bold": 0,
            "italic": 0,
            "regular_path": "data/font/Teletactile.ttf"
@@ -274,5 +274,35 @@
          {
              "text_horiz_alignment": "left"
          }
-     }
+     },
+  "text_entry_line":
+     {
+         "colours":
+         {
+             "dark_bg": "#25292e",
+             "selected_bg": "#55595e",
+             "normal_text": "#AAAAAA",
+             "selected_text": "#FFFFFF",
+             "normal_border": "#FFFFFF"
+         },
+         "misc":
+         {
+             "shape": "rounded_rectangle",
+             "shape_corner_radius": 5,
+             "border_width": "2",
+             "shadow_width": "2",
+             "padding": "6,4"
+         }
+     },
+  "@selection_list_item":
+  {
+    "font":
+         {
+             "name":  "Teletacticle",
+             "size":  17,
+             "bold":  0,
+             "italic":  0,
+             "regular_path":  "data/font/Teletactile.ttf"
+         }
+  }
 }

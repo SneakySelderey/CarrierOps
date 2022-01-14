@@ -5,6 +5,16 @@ import sqlite3
 from random import random
 
 
+def get_pos_in_field(center, cell, top, left):
+    """Возвращает положение объекта в сетке"""
+    return [(center[0] - left) / cell, (center[1] - top) / cell]
+
+
+def get_pos_in_coords(center, top, left):
+    """Возвраащет положение объекта в системе координат"""
+    return [left + center[0] * CELL_SIZE, top + center[1] * CELL_SIZE]
+
+
 def random_resource_type():
     """Функция дял случайного выбора типа базы в зависимости от соотношения"""
     n = random()
@@ -38,12 +48,13 @@ Saves.Date, PathsOfSaves.Path FROM Saves INNER JOIN PathsOfSaves ON
 Saves.Path = PathsOfSaves.ID""").fetchall()}
 
 
+# Для параметров экрана
 user32 = ctypes.windll.user32
 screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 pygame.init()
 pygame.mixer.init()
 
-# Константы
+# Группы спрайтосв
 TO_DRAW = pygame.sprite.Group()
 ANIMATED_SPRTIES = pygame.sprite.Group()
 ALL_SPRITES_FOR_SURE = pygame.sprite.Group()
@@ -56,15 +67,19 @@ AI_MISSILES = pygame.sprite.Group()
 AI_AIRCRAFT = pygame.sprite.Group()
 ICONS_GROUP = pygame.sprite.Group()
 RESOURCES_BASE = pygame.sprite.Group()
-CARRIER_GROP = pygame.sprite.Group()
+CARRIER_GROUP = pygame.sprite.Group()
 BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
 BOARD = []
+EXPLOSION_GROUP = pygame.sprite.Group()
+PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
 HOSTILE_BASES = []
+
+# Числовые и булевые значения значения
 AIR_SPEED = 2.5
-MISSILE_SPEED = 1
+MISSILE_SPEED = 2
 NUM_OF_MISSILES = 5
 NUM_OF_AIRCRAFT = 3
 OIL_VOLUME = 100
@@ -79,11 +94,20 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
-NUM_OF_BASES = 1
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
+NUM_OF_BASES = 10
 PLAYER_START = None
 AI_START = None
+# Для подсчета результатов
+LAUNCHED_MISSILES = 0
+LAUNCHED_AIRCRAFT = 0
+PLAYER_MISSILES_HIT = 0
+AI_MISSILES_HIT = 0
+BASES_CAPT_PLAYER = 0
+BASES_CAPT_AI = 0
+
+# Для экрана
 WINDOW_SIZE = [(3840, 2160), (1920, 1080), (1680, 1050), (1600, 1024),
                (1600, 900), (1440, 900), (1366, 768), (1280, 1024),
                (1280, 960), (1280, 800), (1280, 768), (1280, 720), (1152, 864),
@@ -95,6 +119,7 @@ except ValueError:
 WIDTH, HEIGHT = WINDOW_SIZE[0]
 P_WIDTH, P_HEIGHT = 1600, 900
 CELL_SIZE = WIDTH // 20
+TOP, LEFT = 0, 0
 IS_FULLSCREEN = False
 IS_PAUSE = True
 pygame.display.set_mode((WIDTH, HEIGHT))
@@ -102,13 +127,13 @@ pygame.display.set_mode((WIDTH, HEIGHT))
 # Подлючение к БД
 CONNECTION = sqlite3.connect('data/system/user_data.sqlite')
 CONNECTION.execute("PRAGMA foreign_keys = ON")
-USER_DATA = get_user_data()
 
 # Events
 MUSIC_END = pygame.USEREVENT + 1
 FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
+UPDATE_PARTICLES = pygame.USEREVENT + 5
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -119,6 +144,9 @@ DEEPSKYBLUE4 = pygame.Color('deepskyblue4')
 GREY = pygame.Color('grey')
 BLUE = pygame.Color('blue')
 RED = pygame.Color('red')
+WATER_COLORS = [pygame.Color('darkblue'), pygame.Color(62, 95, 138),
+                pygame.Color(0, 47, 85), BLUE]
+FIRE_COLORS = [RED, pygame.Color('yellow'), pygame.Color('orange'), GREY]
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения

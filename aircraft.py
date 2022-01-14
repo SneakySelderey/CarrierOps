@@ -1,7 +1,7 @@
 import pygame
 from math import sin, cos, atan2, degrees
 from Settings import new_image_size, LANDING, PLAYER_SPRITE, PLAYER_AIRCRAFT, \
-    AIRCRAFT_FRIENDLY_SHEET
+    AIRCRAFT_FRIENDLY_SHEET, get_pos_in_coords, get_pos_in_field
 import Settings
 from animated_sprite import AnimatedSprite
 
@@ -24,11 +24,19 @@ class AircraftFriendly(AnimatedSprite):
         self.stop = False  # Если самолет достиг точки направления
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
+        self.to_return = False
         self.radius = Settings.CELL_SIZE * 3.5
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
         """Обновление координат самолета при полете"""
+        land = list(Settings.BACKGROUND_MAP)[0]
+        if not all(
+                land.rect.collidepoint(point) for point in [
+                    self.rect.midleft, self.rect.midtop, self.rect.midright,
+                    self.rect.midbottom]) and not self.to_return:
+            self.stop = True
+
         if not self.delete:
             self.total_ticks += 1
 
@@ -38,8 +46,8 @@ class AircraftFriendly(AnimatedSprite):
                 self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
                 self.rect.center = self.pos
 
-            if abs(self.destination[0] - self.rect.centerx) <= 10 and \
-                    abs(self.destination[1] - self.rect.centery) <= 10:
+            if abs(self.destination[0] - self.rect.centerx) <= 5 and \
+                    abs(self.destination[1] - self.rect.centery) <= 5:
                 #  Если самолет достиг цели
                 self.stop = True
 
@@ -51,16 +59,13 @@ class AircraftFriendly(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x = (self.rect.centerx - left) / cell_size
-        c_y = (self.rect.centery - top) / cell_size
+        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
         self.rect = self.image.get_rect(
-            center=(left + c_x * Settings.CELL_SIZE,
-                    top + c_y * Settings.CELL_SIZE))
+            center=get_pos_in_coords((c_x, c_y), top, left))
         self.pos = list(self.rect.center)
-        dest_x = (self.destination[0] - left) / cell_size
-        dest_y = (self.destination[1] - top) / cell_size
-        self.destination = [left + dest_x * Settings.CELL_SIZE,
-                            top + dest_y * Settings.CELL_SIZE]
+        dest_x, dest_y = get_pos_in_field(self.destination, cell_size, top,
+                                          left)
+        self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
         self.alpha = atan2(self.destination[1] - self.rect.centery,
                            self.destination[0] - self.rect.centerx)
         self.image = pygame.transform.rotate(self.image,
@@ -77,6 +82,7 @@ class AircraftFriendly(AnimatedSprite):
                            player.rect.centerx - self.rect.centerx)
         self.destination = [player.rect.centerx, player.rect.centery]
         self.stop = False
+        self.to_return = True
         if pygame.sprite.collide_rect(self, player):
             Settings.NUM_OF_AIRCRAFT += 1
             self.delete = True
@@ -96,3 +102,10 @@ class AircraftFriendly(AnimatedSprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = pygame.transform.rotate(new_image_size(
             self.frames[self.cur_frame]), -degrees(self.alpha)-90)
+
+    def data_to_save(self):
+        """Возвраащет значения для сохранения"""
+        to_save = self.__dict__.copy()
+        del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
+            to_save['mask']
+        return 'friendly', to_save
