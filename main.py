@@ -854,7 +854,7 @@ class Run:
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
                     and not missile_tracking and not air_tracking:
-                self.ai.visibility = True
+                self.ai.visibility = False
                 self.ai_detected = False
                 self.play_new_contact = True
                 if self.play_contact_lost:
