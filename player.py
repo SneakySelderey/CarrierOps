@@ -49,5 +49,5 @@ class Player(Carrier):
             self.alpha = atan2(self.destination[1] - self.pos[1],
                                self.destination[0] - self.pos[0])
 
-            #if not self.stop:
-            #    [Particle(self) for _ in range(4)]
+            if not self.stop:
+                [Particle(self) for _ in range(4)]

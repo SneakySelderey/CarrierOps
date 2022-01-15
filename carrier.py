@@ -25,7 +25,6 @@ class Carrier(AnimatedSprite):
             self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
         else:
             self.mask = pygame.mask.from_surface(new_image_size(AI_MASK))
-        #elf.mask = pygame.mask.from_surface(self.image)
 
     def new_destination(self, pos):
         """Функция для задания новой точки направления"""

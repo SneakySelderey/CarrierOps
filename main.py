@@ -11,6 +11,7 @@ from map_solomon import Map, LandCheck
 from Settings import *
 import Settings
 import pygame_gui
+from math import hypot
 from player import Player
 from AI import AI
 import win32gui
@@ -78,7 +79,9 @@ def update_objects():
     [sprite.new_position(game_objects.board.cell_size, game_objects.board.top,
                          game_objects.board.left) for sprite in
      Settings.ALL_SPRITES_FOR_SURE]
-    Settings.ALWAYS_UPDATE.update()
+    for base in Settings.BASES_SPRITES:
+        base.rect.topleft = [base.x * Settings.CELL_SIZE + Settings.LEFT,
+                             base.y * Settings.CELL_SIZE + Settings.TOP]
     camera.new_position()
     calculate_speed(Settings.CELL_SIZE)
     game_objects.cell_size = Settings.CELL_SIZE
@@ -136,6 +139,7 @@ def load_save(title):
         # Загузим карту
         Map(data['map']['visibility'], game_objects.board,
             data['map']['chosen_map'])
+        LandCheck(game_objects.board)
         # Загрузим игрока и ИИ
         for carrier in data['carriers']:
             new_carrier = Player() if carrier['obj'] == 'player' else AI()
@@ -798,18 +802,18 @@ class Run:
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
 
-    def has_path(self, x1, y1, x2, y2):
-        self.g = defaultdict(list)
-        n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
-        for i in range(n):
-            for j in range(m):
-                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-                                  check(i + v[0], j + v[1], n, m)]
-        ans = self.bfs((x1, y1), self.g, (x2, y2))
-        return (x2, y2) in ans
+    # def has_path(self, x1, y1, x2, y2):
+    #     self.g = defaultdict(list)
+    #     n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
+    #     for i in range(n):
+    #         for j in range(m):
+    #             self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
+    #                               check(i + v[0], j + v[1], n, m)]
+    #     ans = self.bfs((x1, y1), self.g, (x2, y2))
+    #     return (x2, y2) in ans
 
     def bfs(self, start, g, end):
-        self.path = []
+        path = []
         visited, queue = [start], deque([start])
         p = {}
         while queue:
@@ -824,10 +828,10 @@ class Run:
         if end in visited:
             to = end
             while to != start:
-                self.path.append(to)
+                path.append(to)
                 to = p[to]
-            self.path.reverse()
-        return self.path
+            path.reverse()
+        return path
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -853,14 +857,13 @@ class Run:
             ai_pos_x = ai.rect.centerx // Settings.CELL_SIZE
             ai_pos_y = ai.rect.centery // Settings.CELL_SIZE
             for base in Settings.BASES_SPRITES:
-                dist = [ai_pos_x - base.x, ai_pos_y - base.y]
+                dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
                 if base.start_of_capture != 2 and base.state != 'ai':
                     distance.append(
                         (dist, [base.rect.centerx, base.rect.centery]))
             try:
                 destination_ai = min(distance, key=lambda x: x[0])
                 idx = distance.index(destination_ai)
-
                 path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
                                 (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
                                 self.g, ((distance[idx][-1][1] - self.board.top) // Settings.CELL_SIZE,

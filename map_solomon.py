@@ -56,5 +56,8 @@ class LandCheck(pygame.sprite.Sprite):
                 if pygame.sprite.collide_mask(
                         self, list(Settings.BACKGROUND_MAP)[0]):
                     Settings.BOARD[y][x] = 'X'
+        # for i in Settings.BOARD:
+        #     print(*i)
+        # print()
 
         self.kill()

@@ -38,8 +38,8 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
-        #if not self.stop and self.visibility:
-        #    [Particle(self) for _ in range(2)]
+        if not self.stop and self.visibility:
+            [Particle(self) for _ in range(2)]
 
     def missile_launch(self, coords):
         Missile(self.rect.center, coords, False, 'ai')
