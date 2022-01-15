@@ -142,6 +142,7 @@ class Missile(AnimatedSprite):
                         if self.explosion_sound:
                             EXPLOSION.play()
                             self.explosion_sound = False
+                            self.kill()
                         break
             else:
                 player = list(Settings.PLAYER_SPRITE)[0]
@@ -155,6 +156,7 @@ class Missile(AnimatedSprite):
                     if self.explosion_sound:
                         EXPLOSION.play()
                         self.explosion_sound = False
+                        self.kill()
         except ValueError:
             self.total_ticks = 10
 
