@@ -125,7 +125,7 @@ class SuperBase(Base):
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
-            self.visibility = False
+            self.visibility = True
         else:
             self.start_of_capture = 1
             Settings.FRIENDLY_BASES.append((self.x, self.y))

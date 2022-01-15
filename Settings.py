@@ -184,6 +184,8 @@ HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png
 EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
 VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
 LAND_CHECK_IMG = pygame.image.load('data/img/land_check.png').convert_alpha()
+AI_MASK = pygame.image.load('data/img/ai_carrier.png')
+PLAYER_MASK = pygame.image.load('data/img/player_carrier.png')
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
