@@ -7,7 +7,7 @@ from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
 from camera import Camera
-from map_solomon import Map
+from map_solomon import Map, LandCheck
 from Settings import *
 import Settings
 import pygame_gui
@@ -68,7 +68,7 @@ def calculate_speed(cell):
     Settings.PLAYER_SPEED = 1.5 / diff
     Settings.AIR_SPEED = 2.5 / diff
     Settings.MISSILE_SPEED = 2 / diff
-    Settings.AI_SPEED = 1 / diff
+    Settings.AI_SPEED = 5 / diff
 
 
 def update_objects():
@@ -296,6 +296,7 @@ def clear_sprite_groups():
 def terminate():
     """"Функция для завершения работы программы"""
     pygame.quit()
+    exit()
     sys.exit()
 
 
@@ -768,11 +769,6 @@ class Run:
         self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, self.cell_size)
 
-        for x in range(self.cells_y):
-            Settings.BOARD.append([])
-            for y in range(self.cells_x):
-                Settings.BOARD[x].append('.')
-
         # Флаги, переменные
         self.running = True
         self.defeat = False
@@ -791,6 +787,7 @@ class Run:
                                   check(i + v[0], j + v[1], n, m)]
 
         Map(True, self.board, chosen_map)
+        LandCheck(self.board)
         self.board.add_bases()
         Player()
         AI()
@@ -986,8 +983,7 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
-            elif len(ai.frames) == 12:
-                ai.visibility = True
+            ai.visibility = True
 
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
