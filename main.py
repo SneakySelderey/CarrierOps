@@ -2,7 +2,7 @@ from random import choice, choices
 import sys
 import pygame.sprite
 from board import Board
-from friendly_missile import MissileFriendly
+from friendly_missile import Missile
 from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
@@ -15,11 +15,14 @@ from player import Player
 from AI import AI
 import win32gui
 from collections import defaultdict, deque
-from math import hypot
 from datetime import datetime
 import shelve
 from string import ascii_letters, digits
 from base import Base, SuperBase
+
+
+def check(x, y, n, m):
+    return 0 <= x < n and 0 <= y < m
 
 
 def give_sprites_to_check():
@@ -102,6 +105,7 @@ def load_save(title):
     title = int(title) if title.isdigit() else title
     with shelve.open(get_user_data()[title][1]) as data:
         # Загрузим ресурсы
+        Settings.BOARD = data['board']
         Settings.LAUNCHED_MISSILES = data['launched_missiles']
         Settings.LAUNCHED_AIRCRAFT = data['launched_aircraft']
         Settings.PLAYER_MISSILES_HIT = data['player_hit']
@@ -160,11 +164,9 @@ def load_save(title):
                 new_base.__dict__[i] = j
         # Загрузим ракеты
         for missile in data['missiles']:
-            if missile[0] == 'friendly':
-                new_mis = MissileFriendly(missile[1]['activation'],
-                                          missile[1]['visibility'])
-            else:
-                pass  # TODO: HOSTILE MISSILES
+            new_mis = Missile(
+                missile[1]['rect'].center, missile[1]['activation'],
+                missile[1]['visibility'], missile[1]['obj'])
             for i, j in missile[1].items():
                 new_mis.__dict__[i] = j
     update_objects()
@@ -210,6 +212,7 @@ def create_save(title):
         data['missiles'] = [missile.data_to_save() for missile in set(
             Settings.PLAYER_MISSILES) | set(Settings.AI_MISSILES)]
         data['map'] = list(Settings.BACKGROUND_MAP)[0].data_to_save()
+        data['board'] = Settings.BOARD
 
     rebase_load_manager()
 
@@ -785,7 +788,7 @@ class Run:
         for i in range(n):
             for j in range(m):
                 self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-                                  self.check(i + v[0], j + v[1], n, m)]
+                                  check(i + v[0], j + v[1], n, m)]
 
         Map(True, self.board, chosen_map)
         self.board.add_bases()
@@ -798,19 +801,15 @@ class Run:
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
 
-
     def has_path(self, x1, y1, x2, y2):
         self.g = defaultdict(list)
         n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
         for i in range(n):
             for j in range(m):
                 self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-                             self.check(i + v[0], j + v[1], n, m)]
+                                  check(i + v[0], j + v[1], n, m)]
         ans = self.bfs((x1, y1), self.g, (x2, y2))
         return (x2, y2) in ans
-
-    def check(self, x, y, n, m):
-        return 0 <= x < n and 0 <= y < m
 
     def bfs(self, start, g, end):
         self.path = []
@@ -835,8 +834,9 @@ class Run:
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
-        Settings.PLAYER_MISSILES.add(MissileFriendly(
-            destination, True, list(Settings.PLAYER_SPRITE)[0]))
+        Settings.PLAYER_MISSILES.add(Missile(
+            list(Settings.PLAYER_SPRITE)[0].rect.center, destination, True,
+            'player'))
         [mis.new_position(Settings.CELL_SIZE, self.board.top, self.board.left)
          for mis in Settings.PLAYER_MISSILES]
         FIRE_VLS.play()
@@ -871,7 +871,6 @@ class Run:
                 path = (path[0][1], path[0][0])
                 ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
                                     path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
-                can_capture = True
             except ValueError:
                 ai.new_destination(ai.pos)
             except IndexError:

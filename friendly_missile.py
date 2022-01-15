@@ -1,25 +1,24 @@
 import pygame
 from Settings import new_image_size, EXPLOSION, \
-    PLAYER_SPRITE, PLAYER_MISSILES, PLAYER_MISSILE_SHEET, \
-    get_pos_in_coords, get_pos_in_field
+    PLAYER_MISSILES, PLAYER_MISSILE_SHEET, \
+    get_pos_in_coords, get_pos_in_field, HOSTILE_MISSILE_SHEET
 import Settings
 from animated_sprite import AnimatedSprite, Explosion, Particle
 from math import hypot
 
 
-class MissileFriendly(AnimatedSprite):
+class Missile(AnimatedSprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, activation, visibility, obj):
-        if obj in Settings.PLAYER_SPRITE:
+    def __init__(self, center, activation, visibility, obj):
+        self.obj = obj
+        if obj == 'player':
             super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
-            player = list(PLAYER_SPRITE)[0]
         else:
-            super().__init__(Settings.HOSTILE_MISSILE_SHEET, 15, 1, Settings.AI_MISSILES)
-            player = list(Settings.AI_SPRITE)[list(Settings.AI_SPRITE).index(obj)]
-        self.rect.center = [player.rect.centerx, player.rect.centery]
-        self.pos = pygame.math.Vector2([player.rect.centerx,
-                                        player.rect.centery])
+            super().__init__(HOSTILE_MISSILE_SHEET, 15, 1,
+                             Settings.AI_MISSILES)
+        self.rect.center = list(center)
+        self.pos = pygame.math.Vector2([center[0], center[1]])
         self.prev_pos = list(self.rect.center)
         self.left = False
         self.radius = Settings.CELL_SIZE * 2
@@ -31,8 +30,8 @@ class MissileFriendly(AnimatedSprite):
         self.total_ticks = 0
         try:
             self.alpha = pygame.math.Vector2((
-                activation[0] - player.rect.centerx,
-                activation[1] - player.rect.centery)).normalize()
+                activation[0] - center[0],
+                activation[1] - center[1])).normalize()
             self.visibility = visibility
         except ValueError:
             self.total_ticks = 10
@@ -46,17 +45,13 @@ class MissileFriendly(AnimatedSprite):
         self.turn = 0
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
-        self.obj = obj
 
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
         # если ракета исчерпала свой ресурс, она падает в море и
         # спрайт удаляется
         if self.total_ticks >= 10:
-            Settings.ANIMATED_SPRTIES.remove(self)
-            Settings.PLAYER_MISSILES.remove(self)
-            Settings.AI_MISSILES.remove(self)
-            Settings.ALL_SPRITES_FOR_SURE.remove(self)
+            self.kill()
 
         self.left = self.prev_pos[0] > self.pos.x
 
@@ -73,8 +68,9 @@ class MissileFriendly(AnimatedSprite):
             #  Если ракета достигла цели
             self.activated = True
 
-        if hypot(self.rect.centerx - self.activation[0],
-                 self.rect.centery - self.activation[1]) <= Settings.CELL_SIZE * 3:
+        if self.obj == 'ai' and hypot(self.rect.centerx - self.activation[0],
+                                      self.rect.centery - self.activation[1]) \
+                <= Settings.CELL_SIZE * 3:
             self.activated = True
 
         [Particle(self) for _ in range(15)]
@@ -96,7 +92,6 @@ class MissileFriendly(AnimatedSprite):
         self.activation = get_pos_in_coords((act_x, act_y), top, left)
         self.mask = pygame.mask.from_surface(self.image)
         self.radius = Settings.CELL_SIZE * 2
-        self.left = self.prev_pos[0] > self.pos.x
         if not self.left:
             self.image = pygame.transform.flip(new_image_size(
                 self.frames[self.cur_frame]), True, False)
@@ -135,7 +130,7 @@ class MissileFriendly(AnimatedSprite):
             self.ticks2 = 0
         self.ticks2 += 1
         try:
-            if self.obj in Settings.PLAYER_SPRITE:
+            if self.obj == 'player':
                 for ai in Settings.AI_SPRITE:
                     if pygame.sprite.collide_circle_ratio(0.35)(self, ai):
                         self.alpha = pygame.math.Vector2(
@@ -149,18 +144,17 @@ class MissileFriendly(AnimatedSprite):
                             self.explosion_sound = False
                         break
             else:
-                for player in Settings.PLAYER_SPRITE:
-                    if pygame.sprite.collide_circle_ratio(0.35)(self, player):
-                        self.alpha = pygame.math.Vector2(
-                            (player.rect.centerx - self.rect.centerx,
-                             player.rect.centery - self.rect.centery)).normalize()
-                    if pygame.sprite.collide_mask(self, player):
-                        Explosion(player)
-                        Settings.AI_MISSILES_HIT += 1
-                        if self.explosion_sound:
-                            EXPLOSION.play()
-                            self.explosion_sound = False
-                        break
+                player = list(Settings.PLAYER_SPRITE)[0]
+                if pygame.sprite.collide_circle_ratio(0.35)(self, player):
+                    self.alpha = pygame.math.Vector2(
+                        (player.rect.centerx - self.rect.centerx,
+                         player.rect.centery - self.rect.centery)).normalize()
+                if pygame.sprite.collide_mask(self, player):
+                    Explosion(player)
+                    Settings.AI_MISSILES_HIT += 1
+                    if self.explosion_sound:
+                        EXPLOSION.play()
+                        self.explosion_sound = False
         except ValueError:
             self.total_ticks = 10
 
