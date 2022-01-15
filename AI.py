@@ -41,6 +41,5 @@ class AI(Carrier):
         if not self.stop and self.visibility:
             [Particle(self) for _ in range(2)]
 
-    def missile_launch(self, base, activation_on_base):
-        missile = MissileFriendly(base.rect.center, False, self, base)
-        missile.activation_on_base = activation_on_base
+    def missile_launch(self, coords):
+        MissileFriendly(coords, False, self)

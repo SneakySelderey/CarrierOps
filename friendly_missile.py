@@ -4,12 +4,13 @@ from Settings import new_image_size, EXPLOSION, \
     get_pos_in_coords, get_pos_in_field
 import Settings
 from animated_sprite import AnimatedSprite, Explosion, Particle
+from math import hypot
 
 
 class MissileFriendly(AnimatedSprite):
     """Класс, определяющий параметры и спрайт дружественной
     противокорабельной ракеты"""
-    def __init__(self, activation, visibility, obj, base):
+    def __init__(self, activation, visibility, obj):
         if obj in Settings.PLAYER_SPRITE:
             super().__init__(PLAYER_MISSILE_SHEET, 15, 1, PLAYER_MISSILES)
             player = list(PLAYER_SPRITE)[0]
@@ -38,6 +39,7 @@ class MissileFriendly(AnimatedSprite):
             self.alpha = pygame.math.Vector2(0, 0)
 
         self.explosion_sound = True
+        self.activation = activation
 
         # Флаги, ответственные за паттерн поиска ракеты
         self.activated = False
@@ -45,7 +47,6 @@ class MissileFriendly(AnimatedSprite):
         self.activation = list(activation)
         self.mask = pygame.mask.from_surface(self.image)
         self.obj = obj
-        self.base = base
 
     def update(self):
         """Обновление координат ракеты при полете к точке активации ГСН"""
@@ -72,13 +73,9 @@ class MissileFriendly(AnimatedSprite):
             #  Если ракета достигла цели
             self.activated = True
 
-        if self.base:
-            if self.activation_on_base:
-                if pygame.sprite.collide_circle_ratio(2)(self, self.base):
-                    self.activated = True
-            else:
-                if pygame.sprite.collide_circle_ratio(1)(self, self.base):
-                    self.activated = True
+        if hypot(self.rect.centerx - self.activation[0],
+                 self.rect.centery - self.activation[1]) <= Settings.CELL_SIZE * 3:
+            self.activated = True
 
         [Particle(self) for _ in range(15)]
 

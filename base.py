@@ -80,7 +80,7 @@ class Base(pygame.sprite.Sprite):
                 for ai in list(Settings.AI_SPRITE):
                     if hypot(ai.rect.centerx - self.rect.centerx,
                              ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
-                        ai.missile_launch(self, True)
+                        ai.missile_launch(self.rect.center)
             elif self.state == 'hostile':
                 Settings.BASES_CAPT_AI += 1
 
@@ -174,7 +174,7 @@ class SuperBase(Base):
                     for ai in list(Settings.AI_SPRITE):
                         if hypot(ai.rect.centerx - self.rect.centerx,
                                  ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
-                            ai.missile_launch(self, True)
+                            ai.missile_launch(self.rect.center)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:
