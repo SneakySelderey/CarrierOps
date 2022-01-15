@@ -94,6 +94,7 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
+SPEEDS = [1.5, 1.5, 2, 2.5]
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 NUM_OF_BASES = 10

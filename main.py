@@ -66,10 +66,10 @@ def calculate_speed(cell):
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
     diff = 80 / cell
-    Settings.PLAYER_SPEED = 1.5 / diff
-    Settings.AIR_SPEED = 2.5 / diff
-    Settings.MISSILE_SPEED = 2 / diff
-    Settings.AI_SPEED = 5 / diff
+    Settings.PLAYER_SPEED = Settings.SPEEDS[0] / diff
+    Settings.AIR_SPEED = Settings.SPEEDS[3] / diff
+    Settings.MISSILE_SPEED = Settings.SPEEDS[2] / diff
+    Settings.AI_SPEED = Settings.SPEEDS[1] / diff
 
 
 def update_objects():
@@ -1193,6 +1193,9 @@ class Run:
                       Settings.BASES_SPRITES):
                     self.defeat = True
                     [sound.stop() for sound in ALL_EFFECTS]
+                if player.current_health <= 0:
+                    self.defeat = True
+                    [sound.stop() for sound in ALL_EFFECTS]
                 help_surface.fill((0, 0, 0, alpha))
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
@@ -1218,7 +1221,6 @@ class Run:
 
                 campaign_manager.update(delta)
                 campaign_manager.draw_ui(screen)
-
                 pygame.display.flip()
 
         # После поражения или победы

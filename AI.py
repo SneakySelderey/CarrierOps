@@ -42,5 +42,20 @@ class AI(Carrier):
         if not self.stop and self.visibility:
             [Particle(self) for _ in range(2)]
 
+        if self.current_health <= 0:
+            self.respawn()
+
     def missile_launch(self, coords):
+        """Функция для запуска ракеты"""
         Missile(self.rect.center, coords, False, 'ai')
+
+    def respawn(self):
+        self.rect.center = [Settings.LEFT + Settings.AI_START[0] *
+                            Settings.CELL_SIZE + Settings.CELL_SIZE // 2,
+                            Settings.TOP + Settings.AI_START[1] *
+                            Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
+        self.pos = list(self.rect.center)
+        self.current_health = 100
+        self.destination = list(self.rect.center)
+
+        self.prev_pos = list(self.rect.center)
