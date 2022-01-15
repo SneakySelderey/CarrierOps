@@ -76,13 +76,11 @@ class Base(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
             if self.state == 'friendly':
-                Settings.BASES_CAPT_PLAYER += 1
                 for ai in list(Settings.AI_SPRITE):
                     if hypot(ai.rect.centerx - self.rect.centerx,
-                             ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                             ai.rect.centery - self.rect.centery) <= \
+                            Settings.CELL_SIZE * 15:
                         ai.missile_launch(self.rect.center)
-            elif self.state == 'hostile':
-                Settings.BASES_CAPT_AI += 1
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + Settings.LEFT,
