@@ -140,6 +140,7 @@ class Missile(AnimatedSprite):
                         Explosion(ai)
                         Settings.PLAYER_MISSILES_HIT += 1
                         if self.explosion_sound:
+                            [sound.stop() for sound in Settings.ALL_EFFECTS]
                             EXPLOSION.play()
                             self.explosion_sound = False
                             self.kill()
@@ -154,6 +155,7 @@ class Missile(AnimatedSprite):
                     Explosion(player)
                     Settings.AI_MISSILES_HIT += 1
                     if self.explosion_sound:
+                        [sound.stop() for sound in Settings.ALL_EFFECTS]
                         EXPLOSION.play()
                         self.explosion_sound = False
                         self.kill()

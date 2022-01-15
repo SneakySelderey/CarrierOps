@@ -766,14 +766,14 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        self.cell_size = int(Settings.CELL_SIZE)
-        self.cells_x = Settings.WIDTH * 2 // self.cell_size
-        self.cells_y = Settings.HEIGHT * 2 // self.cell_size
+        self.cells_x = Settings.WIDTH * 2 // Settings.CELL_SIZE
+        self.cells_y = Settings.HEIGHT * 2 // Settings.CELL_SIZE
 
         self.board = Board(self.cells_x, self.cells_y, self)
-        self.board.set_view(0, 0, self.cell_size)
+        self.board.set_view(0, 0, Settings.CELL_SIZE)
 
         # Флаги, переменные
+        self.AI_missiles_timer = 15
         self.running = True
         self.defeat = False
         self.win = False
@@ -795,22 +795,10 @@ class Run:
         self.board.add_bases()
         Player()
         AI()
-        
-        self.AI_missiles_timer = 15
 
     def data_to_save(self):
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
-
-    # def has_path(self, x1, y1, x2, y2):
-    #     self.g = defaultdict(list)
-    #     n, m = Settings.WIDTH // Settings.CELL_SIZE, Settings.HEIGHT // Settings.CELL_SIZE
-    #     for i in range(n):
-    #         for j in range(m):
-    #             self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-    #                               check(i + v[0], j + v[1], n, m)]
-    #     ans = self.bfs((x1, y1), self.g, (x2, y2))
-    #     return (x2, y2) in ans
 
     def bfs(self, start, g, end):
         path = []

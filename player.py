@@ -1,5 +1,5 @@
 import pygame
-from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
+from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET, get_bigger_rect
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
@@ -24,9 +24,10 @@ class Player(Carrier):
         self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
+            r = pygame.Rect(land.rect.x, land.rect.y, land.rect.w, land.rect.h)
             if pygame.sprite.collide_mask(self, land) or not all(
-                land.rect.collidepoint(point) for point in [
-                    self.rect.midleft, self.rect.midtop, self.rect.midright,
+                get_bigger_rect(r, 2).collidepoint(point) for point in
+                [self.rect.midleft, self.rect.midtop, self.rect.midright,
                     self.rect.midbottom]):
                 self.pos = self.prev_pos
 
