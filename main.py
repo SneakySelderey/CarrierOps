@@ -420,6 +420,9 @@ def show_setting_screen(flag=True):
                         Settings.CELL_SIZE = WIDTH // 20
                         # Обновим элементы интерфейса
                         rebase_elements()
+                        background2 = help_surface if not flag else \
+                            pygame.transform.scale(MENU_BACKGROUND, (
+                                Settings.WIDTH, Settings.HEIGHT))
                         help_surface = pygame.transform.scale(
                             help_surface, (Settings.WIDTH, Settings.HEIGHT))
                         background = pygame.transform.scale(
