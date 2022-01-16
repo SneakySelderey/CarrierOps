@@ -14,6 +14,7 @@ class AircraftFriendly(AnimatedSprite):
         self.rect = self.image.get_rect(center=[player.rect.centerx,
                                                 player.rect.centery])
         self.pos = list(self.rect.center)
+        self.prev_pos = list(self.rect.center)
         self.visibility = visibility
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
@@ -42,6 +43,7 @@ class AircraftFriendly(AnimatedSprite):
 
             if self.pos != self.destination and not self.stop:
                 # Обновление кооординат (из полярнйо системы в декартову)
+                self.prev_pos = [self.pos[0], self.pos[1]]
                 self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(
                     self.alpha)
                 self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(
@@ -64,13 +66,15 @@ class AircraftFriendly(AnimatedSprite):
         c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
         self.rect = self.image.get_rect(
             center=get_pos_in_coords((c_x, c_y), top, left))
-        self.pos = list(self.rect.center)
+        self.pos = get_pos_in_coords(get_pos_in_field(
+            self.prev_pos, cell_size, top, left), top, left)
         dest_x, dest_y = get_pos_in_field(self.destination, cell_size, top,
                                           left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
         if not self.stop:
-            self.alpha = atan2(self.destination[1] - self.rect.centery,
-                               self.destination[0] - self.rect.centerx)
+            self.alpha = atan2(self.destination[1] - self.pos[1],
+                               self.destination[0] - self.pos[0])
+        self.stop = False
         self.image = pygame.transform.rotate(self.image,
                                              -degrees(self.alpha) - 90)
         self.radius = Settings.CELL_SIZE * 3.5

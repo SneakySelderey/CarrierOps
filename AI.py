@@ -18,7 +18,6 @@ class AI(Carrier):
         self.destination = list(self.rect.center)
 
         self.prev_pos = list(self.rect.center)
-        self.current_health = 10
 
     def update(self):
         """Обновление позиции объекта"""
@@ -44,12 +43,13 @@ class AI(Carrier):
         mis.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
 
     def respawn(self):
+        """Возрождение авианосца потивника"""
         self.rect.center = [Settings.LEFT + Settings.AI_START[0] *
                             Settings.CELL_SIZE + Settings.CELL_SIZE // 2,
                             Settings.TOP + Settings.AI_START[1] *
                             Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
-        self.current_health = 10
+        self.current_health = 100
         self.destination = list(self.rect.center)
 
         self.prev_pos = list(self.rect.center)

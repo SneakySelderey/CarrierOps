@@ -14,7 +14,7 @@ class Carrier(AnimatedSprite):
         self.pos = list(self.rect.center)
         self.destination = self.pos
         self.alpha = 0
-        self.stop = False
+        self.stop = True
         self.radius = Settings.CELL_SIZE * 4
         self.visibility = True if sheet == PLAYER_CARRIER_SHEET else False
         self.health_capacity = 100
@@ -42,7 +42,11 @@ class Carrier(AnimatedSprite):
         pr_x, pr_y = get_pos_in_field(self.prev_pos, cell_size, top, left)
         self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
         self.rect = self.image.get_rect(center=self.prev_pos)
-        self.pos = list(self.rect.center)
+        if not self.stop:
+            self.pos = get_pos_in_coords(get_pos_in_field(
+                self.pos, cell_size, top, left), top, left)
+        else:
+            self.pos = list(self.rect.center)
         self.left = self.prev_pos[0] > self.pos[0]
         if self.obj == 'player':
             self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
