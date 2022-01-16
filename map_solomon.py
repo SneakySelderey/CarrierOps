@@ -41,7 +41,7 @@ class LandCheck(pygame.sprite.Sprite):
     def __init__(self, board):
         super().__init__()
         self.image = pygame.transform.scale(Settings.LAND_CHECK_IMG, (
-            Settings.CELL_SIZE * 0.6, Settings.CELL_SIZE * 0.6))
+            Settings.CELL_SIZE * 0.95, Settings.CELL_SIZE * 0.95))
         self.rect = self.image.get_rect()
         self.rect.topleft = (0, 0)
         self.mask = pygame.mask.from_surface(self.image)

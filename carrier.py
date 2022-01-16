@@ -43,6 +43,7 @@ class Carrier(AnimatedSprite):
         self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
         self.rect = self.image.get_rect(center=self.prev_pos)
         self.pos = list(self.rect.center)
+        self.left = self.prev_pos[0] > self.pos[0]
         if self.obj == 'player':
             self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
         else:
