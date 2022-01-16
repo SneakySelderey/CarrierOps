@@ -26,15 +26,6 @@ class AI(Carrier):
         land = list(Settings.BACKGROUND_MAP)[0]
         if pygame.sprite.collide_mask(self, land):
             self.pos = [self.prev_pos[0], self.prev_pos[1]]
-        elif not all(land.rect.collidepoint(point) for point in
-                     self.get_points()):
-            for i in [(0, -3), (0, 3), (3, 0), (-3, 0)]:
-                self.rect.center = self.rect.center[0] + i[0], \
-                                   self.rect.center[1] + i[1]
-                self.pos = list(self.rect.center)
-                if all(land.rect.collidepoint(point) for point in
-                       self.get_points()):
-                    break
 
         if self.pos != self.destination and not self.stop:
             self.prev_pos = list(copy.copy(self.pos))
