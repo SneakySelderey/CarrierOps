@@ -375,7 +375,7 @@ def show_setting_screen(flag=True):
     alpha_down = 255
     background = pygame.transform.scale(SETTINGS_BACKGROUND, (
         Settings.WIDTH, Settings.HEIGHT))
-    background2 = screen if not flag else pygame.transform.scale(
+    background2 = help_surface if not flag else pygame.transform.scale(
         MENU_BACKGROUND, (Settings.WIDTH, Settings.HEIGHT))
     while True:
         delta = clock.tick(60) / 1000.0
@@ -450,15 +450,13 @@ def show_setting_screen(flag=True):
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
-            help_surface.fill((0, 0, 0, alpha_up))
-            background2.set_alpha(255 - alpha_up)
+            background2.fill((0, 0, 0, alpha_up))
         alpha_up = min(alpha_up + 15, 255)
         if alpha_up == 255:
             alpha_down = max(alpha_down - 15, 150)
             screen.blit(background, (0, 0))
-            help_surface.fill((0, 0, 0, alpha_down))
+            background2.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
-        screen.blit(help_surface, (0, 0))
         # Обновление менеджера
         settings_manager.update(delta)
         settings_manager.draw_ui(screen)
@@ -470,8 +468,10 @@ def show_setting_screen(flag=True):
 def show_gameover_win_screen(gameover=True):
     """Функция для отрисовки и взаимодействия с экраном победы или поражения"""
     [i.stop() for i in ALL_EFFECTS]
-    background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT)) \
-        if gameover else pygame.transform.scale(VICTORY, (WIDTH, HEIGHT))
+    background = pygame.transform.scale(GAMEOVER_SCREEN, (
+        Settings.WIDTH, Settings.HEIGHT)) \
+        if gameover else pygame.transform.scale(VICTORY, (
+        Settings.WIDTH, Settings.HEIGHT))
     if gameover and list(Settings.PLAYER_SPRITE)[0].current_health <= 0:
         text = MAIN_FONT.render('GAME OVER. YOU DIED', True, WHITE)
     elif gameover:
@@ -531,16 +531,16 @@ def show_gameover_win_screen(gameover=True):
         pygame.display.flip()
 
 
-def show_in_game_menu():
+def show_in_game_menu(from_game=True):
     """Функция для отрисовки и взаимодействия с внутриигровым меню"""
     # Переменные для создания красивой картинки
     help_surface_2 = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                     pygame.SRCALPHA)
-    help_surface_2.blit(screen, (0, 0))
+    help_surface_2.blit(game_surf, (0, 0))
     help_surface_3 = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                     pygame.SRCALPHA)
 
-    alpha = 0
+    alpha = 0 if from_game else 200
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -624,7 +624,7 @@ def show_load_menu(from_main=True):
     alpha_down = 255
     background = pygame.transform.scale(SAVE_LOAD_BACKGROUND,
                                         (Settings.WIDTH, Settings.HEIGHT))
-    background2 = screen if not from_main else pygame.transform.scale(
+    background2 = help_surface if not from_main else pygame.transform.scale(
         MENU_BACKGROUND, (Settings.WIDTH, Settings.HEIGHT))
     surf = pygame.Surface((int(Settings.WIDTH * 0.64),
                            int(Settings.HEIGHT * 0.4)))
@@ -702,15 +702,13 @@ def show_load_menu(from_main=True):
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
-            help_surface.fill((0, 0, 0, alpha_up))
-            background2.set_alpha(255 - alpha_up)
+            background2.fill((0, 0, 0, alpha_up))
         alpha_up = min(alpha_up + 15, 255)
         if alpha_up == 255:
             alpha_down = max(alpha_down - 15, 150)
             screen.blit(background, (0, 0))
-            help_surface.fill((0, 0, 0, alpha_down))
+            background2.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
-        screen.blit(help_surface, (0, 0))
 
         # Обновление менеджера
         load_manager.update(delta)
@@ -734,8 +732,9 @@ def show_resources_menu():
     # Переменные для создания красивой картинки
     alpha_up = 0
     alpha_down = 255
-    background = pygame.transform.scale(RESOURCE_BACKGROUND, (WIDTH, HEIGHT))
-    background2 = screen
+    background = pygame.transform.scale(RESOURCE_BACKGROUND, (
+        Settings.WIDTH, Settings.HEIGHT))
+    background2 = help_surface
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -748,15 +747,13 @@ def show_resources_menu():
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
-            help_surface.fill((0, 0, 0, alpha_up))
-            background2.set_alpha(255 - alpha_up)
+            background2.fill((0, 0, 0, alpha_up))
         alpha_up = min(alpha_up + 15, 255)
         if alpha_up == 255:
             alpha_down = max(alpha_down - 15, 150)
             screen.blit(background, (0, 0))
-            help_surface.fill((0, 0, 0, alpha_down))
+            background2.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
-        screen.blit(help_surface, (0, 0))
         [i.update_text(j) for i, j in zip(
             [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
                 Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
@@ -1053,6 +1050,7 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
+        from_game = True
         pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
@@ -1067,6 +1065,7 @@ class Run:
         pygame.time.set_timer(UPDATE_PARTICLES, 30)
         Settings.ALL_SPRITES_FOR_SURE.update()
         while self.running:
+            from_game = True if not self.menu else False
             player = list(Settings.PLAYER_SPRITE)[0]
             delta = clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
@@ -1159,7 +1158,7 @@ class Run:
                 self.resource_menu = False
             if self.menu:
                 # Получим код возврата от игрового меню
-                res = show_in_game_menu()
+                res = show_in_game_menu(from_game)
                 if res == 1:  # пользователь нажал на RESUME
                     self.menu = False
                 if res == 2:  # Если нажал на MAIN MENU
@@ -1219,6 +1218,7 @@ class Run:
 
                 campaign_manager.update(delta)
                 campaign_manager.draw_ui(screen)
+                game_surf.blit(screen, (0, 0))
                 pygame.display.flip()
 
         # После поражения или победы
@@ -1243,6 +1243,8 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
     # Вспомогательная поверхность для отрисовки
     help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
+                                  pygame.SRCALPHA)
+    game_surf = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                   pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     clock = pygame.time.Clock()
@@ -1306,6 +1308,8 @@ if __name__ == '__main__':
                 clear_sprite_groups()
                 set_standard_values()
                 game_objects = Run()
+            help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
+                                          pygame.SRCALPHA)
             update_objects()
             result = game_objects.main()
             game_run = False
