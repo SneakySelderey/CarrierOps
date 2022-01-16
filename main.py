@@ -427,10 +427,8 @@ def show_setting_screen(flag=True):
                             SETTINGS_ELEMENTS['FULLSCREEN'].set_text('*')
                         # Если игра уже начата, обновим координаты всех
                         # объектов
-                        if game_objects is not None:
-                            update_objects()
-                        else:
-                            calculate_speed(Settings.CELL_SIZE)
+                        update_objects()
+                        calculate_speed(Settings.CELL_SIZE)
                         if not Settings.IS_FULLSCREEN:
                             move_window()
                 if event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
@@ -473,9 +471,14 @@ def show_gameover_win_screen(gameover=True):
     [i.stop() for i in ALL_EFFECTS]
     background = pygame.transform.scale(GAMEOVER_SCREEN, (WIDTH, HEIGHT)) \
         if gameover else pygame.transform.scale(VICTORY, (WIDTH, HEIGHT))
-    text = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES" if gameover
-                            else "VICTORY. YOU'VE CAPTURED ALL BASES",
-                            True, WHITE)
+    if gameover and list(Settings.PLAYER_SPRITE)[0].current_health <= 0:
+        text = MAIN_FONT.render('GAME OVER. YOU DIED', True, WHITE)
+    elif gameover:
+        text = MAIN_FONT.render("GAME OVER. YOU'VE LOST ALL BASES", True,
+                                WHITE)
+    else:
+        text = MAIN_FONT.render("VICTORY. YOU'VE CAPTURED ALL BASES",
+                                True, WHITE)
     alpha = 255
     screen.fill(BLACK)
     gameover_manager.draw_ui(screen)
@@ -532,7 +535,10 @@ def show_in_game_menu():
     # Переменные для создания красивой картинки
     help_surface_2 = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                     pygame.SRCALPHA)
-    help_surface_2.blit(help_surface, (0, 0))
+    help_surface_2.blit(screen, (0, 0))
+    help_surface_3 = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
+                                    pygame.SRCALPHA)
+
     alpha = 0
     while True:
         delta = clock.tick(60) / 1000.0
@@ -555,8 +561,8 @@ def show_in_game_menu():
             game_manager.process_events(event)
         # Создание красивой картинки
         screen.blit(help_surface_2, (0, 0))
-        help_surface.fill((0, 0, 0, alpha))
-        screen.blit(help_surface, (0, 0))
+        help_surface_3.fill((0, 0, 0, alpha))
+        screen.blit(help_surface_3, (0, 0))
         alpha = min(alpha + 20, 200)
         # Обновление менеджера
         game_manager.draw_ui(screen)
@@ -1086,6 +1092,8 @@ class Run:
                             30)
                         update_objects()
                 if event.type == pygame.KEYDOWN:
+                    diff = Settings.CELL_SIZE // 4
+                    dx, dy = camera.dx, camera.dy
                     if event.key == pygame.K_p:
                         Settings.IS_PAUSE = not Settings.IS_PAUSE
                     if event.key == pygame.K_ESCAPE:
@@ -1094,29 +1102,17 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
-                    if event.key == pygame.K_UP:
-                        camera.dy += Settings.CELL_SIZE // 4
+                    if event.key in [pygame.K_UP, pygame.K_DOWN]:
+                        camera.dy = dy + diff if event.key == pygame.K_UP else dy - diff
                         arrow_pressed = True
-                    if event.key == pygame.K_DOWN:
-                        camera.dy -= Settings.CELL_SIZE // 4
-                        arrow_pressed = True
-                    if event.key == pygame.K_LEFT:
-                        camera.dx += Settings.CELL_SIZE // 4
-                        arrow_pressed = True
-                    if event.key == pygame.K_RIGHT:
-                        camera.dx -= Settings.CELL_SIZE // 4
+                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                        camera.dx = dx + diff if event.key == pygame.K_LEFT else dx - diff
                         arrow_pressed = True
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_UP:
+                    if event.key in [pygame.K_UP, pygame.K_DOWN]:
                         camera.dy = 0
                         arrow_pressed = False
-                    if event.key == pygame.K_DOWN:
-                        camera.dy = 0
-                        arrow_pressed = False
-                    if event.key == pygame.K_LEFT:
-                        camera.dx = 0
-                        arrow_pressed = False
-                    if event.key == pygame.K_RIGHT:
+                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
                         camera.dx = 0
                         arrow_pressed = False
                 if event.type == MUSIC_END:
@@ -1308,6 +1304,7 @@ if __name__ == '__main__':
                 clear_sprite_groups()
                 set_standard_values()
                 game_objects = Run()
+            update_objects()
             result = game_objects.main()
             game_run = False
             gameover_run = result == 1

@@ -8,8 +8,7 @@ from math import hypot
 
 
 class Missile(AnimatedSprite):
-    """Класс, определяющий параметры и спрайт дружественной
-    противокорабельной ракеты"""
+    """Класс, определяющий параметры и спрайт противокорабельной ракеты"""
     def __init__(self, center, activation, visibility, obj):
         self.obj = obj
         if obj == 'player':

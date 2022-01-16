@@ -47,7 +47,8 @@ class AI(Carrier):
 
     def missile_launch(self, coords):
         """Функция для запуска ракеты"""
-        Missile(self.rect.center, coords, False, 'ai')
+        mis = Missile(self.rect.center, coords, False, 'ai')
+        mis.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
 
     def respawn(self):
         self.rect.center = [Settings.LEFT + Settings.AI_START[0] *
