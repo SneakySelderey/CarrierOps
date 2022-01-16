@@ -5,7 +5,6 @@ from carrier import Carrier
 from math import sin, cos
 from animated_sprite import Particle
 import pygame
-import copy
 
 
 class AI(Carrier):
@@ -19,6 +18,7 @@ class AI(Carrier):
         self.destination = list(self.rect.center)
 
         self.prev_pos = list(self.rect.center)
+        self.current_health = 10
 
     def update(self):
         """Обновление позиции объекта"""
@@ -28,7 +28,7 @@ class AI(Carrier):
             self.pos = [self.prev_pos[0], self.prev_pos[1]]
 
         if self.pos != self.destination and not self.stop:
-            self.prev_pos = list(copy.copy(self.pos))
+            self.prev_pos = [self.pos[0], self.pos[1]]
             # Обновление кооординат (из полярной системы в декартову)
             self.pos[0] = self.pos[0] + Settings.AI_SPEED * cos(
                 self.alpha)
@@ -37,9 +37,6 @@ class AI(Carrier):
             self.rect.center = self.pos
         if not self.stop and self.visibility:
             [Particle(self) for _ in range(2)]
-
-        if self.current_health <= 0:
-            self.respawn()
 
     def missile_launch(self, coords):
         """Функция для запуска ракеты"""
@@ -52,7 +49,7 @@ class AI(Carrier):
                             Settings.TOP + Settings.AI_START[1] *
                             Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
-        self.current_health = 100
+        self.current_health = 10
         self.destination = list(self.rect.center)
 
         self.prev_pos = list(self.rect.center)

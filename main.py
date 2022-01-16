@@ -989,6 +989,8 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
+            ai.visibility = True
+
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)

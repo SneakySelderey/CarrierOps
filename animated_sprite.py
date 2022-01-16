@@ -49,6 +49,8 @@ class Explosion(AnimatedSprite):
             self.cur_frame += 1
             self.image = new_image_size(self.frames[self.cur_frame])
         except IndexError:
+            if self.parent.obj == 'ai' and self.parent.current_health <= 0:
+                self.parent.respawn()
             self.kill()
 
     def new_position(self, cell, top, left):
