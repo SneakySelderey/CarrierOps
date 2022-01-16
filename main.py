@@ -177,6 +177,7 @@ def load_save(title):
     game_objects.menu = False
     Settings.IS_PAUSE = True
     calculate_speed(Settings.CELL_SIZE)
+    give_tooltip(3)
 
 
 def create_save(title):
@@ -233,6 +234,12 @@ def give_tooltip(num):
             manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
+    elif num == 3:
+        pygame_gui.elements.UIScreenSpaceHealthBar(
+            relative_rect=pygame.Rect(10, 13, 200, 30),
+            manager=campaign_manager,
+            sprite_to_monitor=list(Settings.PLAYER_SPRITE)[0]
+        )
 
 
 def rebase_elements():
@@ -1048,11 +1055,7 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
-        pygame_gui.elements.UIScreenSpaceHealthBar(
-            relative_rect=pygame.Rect(10, 13, 200, 30),
-            manager=campaign_manager,
-            sprite_to_monitor=list(PLAYER_SPRITE)[0]
-        )
+        give_tooltip(3)
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
