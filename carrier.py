@@ -74,3 +74,8 @@ class Carrier(AnimatedSprite):
         del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
             to_save['mask']
         return to_save
+
+    def get_points(self):
+        """Возвращает середины сторон прямоугольника авианосца"""
+        return [self.rect.midleft, self.rect.midtop, self.rect.midright,
+                self.rect.midbottom]

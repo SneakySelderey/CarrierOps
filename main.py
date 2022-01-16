@@ -20,6 +20,7 @@ from datetime import datetime
 import shelve
 from string import ascii_letters, digits
 from base import Base, SuperBase
+from pygame._sdl2 import Window
 
 
 def check(x, y, n, m):
@@ -979,8 +980,6 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
-            ai.visibility = True
-
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)
@@ -1048,9 +1047,10 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
+        window = Window.from_display_module()
+        print(window.position)
         alpha = 0
         arrow_pressed = False
-        from_game = True
         pygame_gui.elements.UIScreenSpaceHealthBar(
             relative_rect=pygame.Rect(10, 13, 200, 30),
             manager=campaign_manager,
@@ -1137,13 +1137,15 @@ class Run:
             self.camera_update()
 
             if not arrow_pressed:
-                if pygame.mouse.get_pos()[0] >= Settings.WIDTH - 50:
+                if Settings.WIDTH - 1 > pygame.mouse.get_pos()[0] >= \
+                        Settings.WIDTH - 50:
                     camera.dx = -Settings.CELL_SIZE // 4
-                elif pygame.mouse.get_pos()[0] <= 50:
+                elif 0 < pygame.mouse.get_pos()[0] <= 50:
                     camera.dx = Settings.CELL_SIZE // 4
-                elif pygame.mouse.get_pos()[1] >= Settings.HEIGHT - 50:
+                elif Settings.HEIGHT - 1 > pygame.mouse.get_pos()[1] >= \
+                        Settings.HEIGHT - 50:
                     camera.dy = -Settings.CELL_SIZE // 4
-                elif pygame.mouse.get_pos()[1] <= 50:
+                elif 0 < pygame.mouse.get_pos()[1] <= 50:
                     camera.dy = Settings.CELL_SIZE // 4
                 else:
                     camera.dx = 0

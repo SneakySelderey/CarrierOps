@@ -12,9 +12,9 @@ class Player(Carrier):
     def __init__(self):
         super().__init__(PLAYER_CARRIER_SHEET, PLAYER_SPRITE)
         self.rect.center = [Settings.PLAYER_START[0] * Settings.CELL_SIZE +
-                            Settings.CELL_SIZE // 2,
+                            Settings.CELL_SIZE / 2,
                             Settings.PLAYER_START[1] * Settings.CELL_SIZE +
-                            Settings.CELL_SIZE // 2]
+                            Settings.CELL_SIZE / 2]
         self.pos = list(self.rect.center)
         self.destination = list(self.rect.center)
         self.prev_pos = list(self.rect.center)
@@ -24,15 +24,20 @@ class Player(Carrier):
         self.left = self.prev_pos[0] > self.pos[0]
         if Settings.OIL_VOLUME:
             land = list(Settings.BACKGROUND_MAP)[0]
-            r = pygame.Rect(land.rect.x, land.rect.y, land.rect.w, land.rect.h)
-            if pygame.sprite.collide_mask(self, land) or not all(
-                get_bigger_rect(r, 2).collidepoint(point) for point in
-                [self.rect.midleft, self.rect.midtop, self.rect.midright,
-                    self.rect.midbottom]):
-                self.pos = self.prev_pos
+            if pygame.sprite.collide_mask(self, land):
+                self.pos = [self.prev_pos[0], self.prev_pos[1]]
+            elif not all(land.rect.collidepoint(point) for point in
+                         self.get_points()):
+                for i in [(0, -3), (0, 3), (3, 0), (-3, 0)]:
+                    self.rect.center = self.rect.center[0] + i[0], \
+                                       self.rect.center[1] + i[1]
+                    self.pos = list(self.rect.center)
+                    if all(land.rect.collidepoint(point) for point in
+                           self.get_points()):
+                        break
 
             if self.pos != self.destination and not self.stop:
-                self.prev_pos = list(copy.copy(self.pos))
+                self.prev_pos = [self.pos[0], self.pos[1]]
                 # Обновление кооординат (из полярнйо системы в декартову)
                 self.pos[0] = self.pos[0] + Settings.PLAYER_SPEED * cos(
                     self.alpha)
