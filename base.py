@@ -171,7 +171,8 @@ class SuperBase(Base):
                     Settings.HOSTILE_BASES.remove(base_grid)
                     for ai in list(Settings.AI_SPRITE):
                         if hypot(ai.rect.centerx - self.rect.centerx,
-                                 ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
+                                 ai.rect.centery - self.rect.centery) <= \
+                                Settings.CELL_SIZE * 15:
                             ai.missile_launch(self.rect.center)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)

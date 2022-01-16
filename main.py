@@ -2,7 +2,7 @@ from random import choice, choices
 import sys
 import pygame.sprite
 from board import Board
-from friendly_missile import Missile
+from missile import Missile
 from gui_elements import *
 import gui_elements
 from aircraft import AircraftFriendly
@@ -20,7 +20,6 @@ from datetime import datetime
 import shelve
 from string import ascii_letters, digits
 from base import Base, SuperBase
-from pygame._sdl2 import Window
 
 
 def check(x, y, n, m):
@@ -1047,8 +1046,6 @@ class Run:
 
     def main(self):
         """Функция с основным игровым циклом"""
-        window = Window.from_display_module()
-        print(window.position)
         alpha = 0
         arrow_pressed = False
         pygame_gui.elements.UIScreenSpaceHealthBar(
@@ -1104,10 +1101,12 @@ class Run:
                     if event.key == pygame.K_c:
                         camera.new_position()
                     if event.key in [pygame.K_UP, pygame.K_DOWN]:
-                        camera.dy = dy + diff if event.key == pygame.K_UP else dy - diff
+                        camera.dy = dy + diff if event.key == pygame.K_UP \
+                            else dy - diff
                         arrow_pressed = True
                     if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
-                        camera.dx = dx + diff if event.key == pygame.K_LEFT else dx - diff
+                        camera.dx = dx + diff if event.key == pygame.K_LEFT \
+                            else dx - diff
                         arrow_pressed = True
                 if event.type == pygame.KEYUP:
                     if event.key in [pygame.K_UP, pygame.K_DOWN]:

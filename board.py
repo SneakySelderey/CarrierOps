@@ -29,8 +29,6 @@ class Board:
     def add_bases(self):
         """Функция для добавления баз"""
         self.cell_size = Settings.CELL_SIZE
-        # self.cells = {(j[0], i[0]) for i in enumerate(Settings.BOARD) for j
-        #               in enumerate(i[1])}
         player_base, *bases, ai_base = sorted(sample(
             self.cells, Settings.NUM_OF_BASES + 2))
         [self.add_base(*base) for base in bases]

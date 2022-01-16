@@ -42,8 +42,10 @@ class AircraftFriendly(AnimatedSprite):
 
             if self.pos != self.destination and not self.stop:
                 # Обновление кооординат (из полярнйо системы в декартову)
-                self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(self.alpha)
-                self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(self.alpha)
+                self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(
+                    self.alpha)
+                self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(
+                    self.alpha)
                 self.rect.center = self.pos
 
             if abs(self.destination[0] - self.rect.centerx) <= 5 and \

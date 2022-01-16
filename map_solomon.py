@@ -51,8 +51,9 @@ class LandCheck(pygame.sprite.Sprite):
 
         for x in range(board.width):
             for y in range(board.height):
-                self.rect.center = (Settings.CELL_SIZE * x + Settings.CELL_SIZE / 2,
-                                    Settings.CELL_SIZE * y + Settings.CELL_SIZE / 2)
+                self.rect.center = (
+                    Settings.CELL_SIZE * x + Settings.CELL_SIZE / 2,
+                    Settings.CELL_SIZE * y + Settings.CELL_SIZE / 2)
                 if pygame.sprite.collide_mask(
                         self, list(Settings.BACKGROUND_MAP)[0]):
                     Settings.BOARD[y][x] = 'X'

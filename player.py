@@ -1,10 +1,9 @@
 import pygame
-from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET, get_bigger_rect
+from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
 from animated_sprite import Particle
-import copy
 
 
 class Player(Carrier):

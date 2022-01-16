@@ -1,5 +1,5 @@
-from Settings import AI_SPRITE, AI_CARRIER_SHEET, get_bigger_rect
-from friendly_missile import Missile
+from Settings import AI_SPRITE, AI_CARRIER_SHEET
+from missile import Missile
 import Settings
 from carrier import Carrier
 from math import sin, cos
@@ -24,7 +24,6 @@ class AI(Carrier):
         """Обновление позиции объекта"""
         self.left = self.prev_pos[0] > self.pos[0]
         land = list(Settings.BACKGROUND_MAP)[0]
-        r = pygame.Rect(land.rect.x, land.rect.y, land.rect.w, land.rect.h)
         if pygame.sprite.collide_mask(self, land):
             self.pos = [self.prev_pos[0], self.prev_pos[1]]
         elif not all(land.rect.collidepoint(point) for point in
