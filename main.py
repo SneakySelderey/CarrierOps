@@ -299,8 +299,9 @@ def clear_sprite_groups():
 
 def terminate():
     """"Функция для завершения работы программы"""
+    pygame.display.quit()
+    pygame.mixer.quit()
     pygame.quit()
-    exit()
     sys.exit()
 
 
@@ -772,8 +773,9 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        self.cells_x = Settings.WIDTH * 2 // Settings.CELL_SIZE
-        self.cells_y = Settings.HEIGHT * 2 // Settings.CELL_SIZE
+        # self.cells_x = Settings.WIDTH * 2 // Settings.CELL_SIZE
+        # self.cells_y = Settings.HEIGHT * 2 // Settings.CELL_SIZE
+        self.cells_x, self.cells_y = 40, 22
 
         self.board = Board(self.cells_x, self.cells_y, self)
         self.board.set_view(0, 0, Settings.CELL_SIZE)
