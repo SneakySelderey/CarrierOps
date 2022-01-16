@@ -94,6 +94,7 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
+SPEEDS = {'PLAYER': 1.5, 'AI': 1.5, 'MISSILE': 2, 'AIRCRAFT': 2.5}
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 NUM_OF_BASES = 10
@@ -184,6 +185,8 @@ HOSTILE_MISSILE_SHEET = pygame.image.load('data/sheets/hostile_missile_sheet.png
 EXPLOSION_SHEET = pygame.image.load('data/sheets/explosion_sheet.png')
 VICTORY = pygame.image.load('data/img/victory.jpg').convert_alpha()
 LAND_CHECK_IMG = pygame.image.load('data/img/land_check.png').convert_alpha()
+AI_MASK = pygame.image.load('data/img/ai_carrier.png').convert_alpha()
+PLAYER_MASK = pygame.image.load('data/img/player_carrier.png').convert_alpha()
 
 # Звуки
 CONTACT_LOST = pygame.mixer.Sound('data/sound/contact_lost.wav')
@@ -200,8 +203,9 @@ MORSE = pygame.mixer.Sound('data/sound/morse.wav')
 MAIN_BASE_DETECTION = pygame.mixer.Sound('data/sound/MainBaseDetected.wav')
 MISSILE_DETECTION = pygame.mixer.Sound('data/sound/MissileWarning.wav')
 SLIDE_EFFECTS = [TALKING, FOOTSTEPS]
-ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE, MISSILE_DETECTION,
-               TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS, MORSE, MAIN_BASE_DETECTION]
+ALL_EFFECTS = [CONTACT_LOST, EXPLOSION, FIRE_VLS, NEW_CONTACT, WEAPON_ACQUIRE,
+               MISSILE_DETECTION, TAKEOFF, LANDING, CLOCK, TALKING, FOOTSTEPS,
+               MORSE, MAIN_BASE_DETECTION]
 
 # Музыка
 MENU_MUSIC = os.listdir(os.getcwd() + '/data/music/menu/')

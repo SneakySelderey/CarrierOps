@@ -89,7 +89,7 @@ class Particle(pygame.sprite.Sprite):
                          choice(dy) * Settings.CELL_SIZE / 1000]
         self.gravity = list(gravity)
         self.prev_left = parent.left
-        self.visibility = True
+        self.visibility = parent.visibility
         self.ticks = 7
 
     def update(self):
@@ -110,5 +110,6 @@ class Particle(pygame.sprite.Sprite):
             self.rect.x -= self.velocity[0]
             self.rect.y -= self.velocity[1]
         self.prev_left = self.parent.left
+        self.visibility = self.parent.visibility
         if not self.ticks:
             self.kill()

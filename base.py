@@ -76,13 +76,11 @@ class Base(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(Base.Images[self.state], (
                 Settings.CELL_SIZE, Settings.CELL_SIZE))
             if self.state == 'friendly':
-                self.run.bases_captured_by_player += 1
                 for ai in list(Settings.AI_SPRITE):
                     if hypot(ai.rect.centerx - self.rect.centerx,
-                             ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
-                        ai.missile_launch(self, True)
-            elif self.state == 'hostile':
-                self.run.bases_captured_by_AI += 1
+                             ai.rect.centery - self.rect.centery) <= \
+                            Settings.CELL_SIZE * 15:
+                        ai.missile_launch(self.rect.center)
 
         self.rect = self.image.get_rect()
         self.rect.topleft = [self.x * Settings.CELL_SIZE + Settings.LEFT,
@@ -135,15 +133,15 @@ class SuperBase(Base):
         base_grid = self.x, self.y
         prev_start = self.start_of_capture
         player = list(Settings.PLAYER_SPRITE)[0]
-        if pygame.sprite.collide_mask(self, player):
+        if pygame.sprite.collide_mask(self, player) and not Settings.IS_PAUSE:
             self.start_of_capture = 1
             if self.state == 'player':
                 Settings.NUM_OF_AIRCRAFT += Settings.BASE_NUM_OF_AIRCRAFT
                 Settings.NUM_OF_MISSILES += Settings.BASE_NUM_OF_MISSILES
-                oil_lack = min(100 - Settings.OIL_VOLUME, Settings.BASE_OIL_VOLUME)
+                oil_lack = min(100 - Settings.OIL_VOLUME,
+                               Settings.BASE_OIL_VOLUME)
                 Settings.BASE_OIL_VOLUME -= oil_lack
                 Settings.OIL_VOLUME += oil_lack
-                Settings.OIL_VOLUME += Settings.BASE_OIL_VOLUME
                 hp_lack = min((100 - player.current_health) // 10,
                               Settings.BASE_NUM_OF_REPAIR_PARTS)
                 Settings.BASE_NUM_OF_REPAIR_PARTS -= hp_lack
@@ -173,8 +171,9 @@ class SuperBase(Base):
                     Settings.HOSTILE_BASES.remove(base_grid)
                     for ai in list(Settings.AI_SPRITE):
                         if hypot(ai.rect.centerx - self.rect.centerx,
-                                 ai.rect.centery - self.rect.centery) <= Settings.CELL_SIZE * 15:
-                            ai.missile_launch(self, True)
+                                 ai.rect.centery - self.rect.centery) <= \
+                                Settings.CELL_SIZE * 15:
+                            ai.missile_launch(self.rect.center)
                 if base_grid not in Settings.FRIENDLY_BASES:
                     Settings.FRIENDLY_BASES.append(base_grid)
             elif self.start_of_capture == 2:

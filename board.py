@@ -47,6 +47,7 @@ class Board:
             x, y = choice(list(self.cells - self.used))
             base.x, base.y = x, y
             base.new_position(self.cell_size, self.top, self.left)
+        base.new_position(self.cell_size, self.top, self.left)
         self.used.add((x, y))
         if mega and mega[0] == 'player':
             Settings.PLAYER_START = (x, y)

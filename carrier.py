@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_image_size, PLAYER_CARRIER_SHEET, get_pos_in_field, \
-    get_pos_in_coords
+    get_pos_in_coords, AI_MASK, PLAYER_MASK
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
@@ -21,7 +21,10 @@ class Carrier(AnimatedSprite):
         self.current_health = 100
         self.prev_pos = list(self.rect.center)
         self.left = False
-        self.mask = pygame.mask.from_surface(self.image)
+        if self.obj == 'player':
+            self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
+        else:
+            self.mask = pygame.mask.from_surface(new_image_size(AI_MASK))
 
     def new_destination(self, pos):
         """Функция для задания новой точки направления"""
@@ -40,7 +43,10 @@ class Carrier(AnimatedSprite):
         self.prev_pos = get_pos_in_coords((pr_x, pr_y), top, left)
         self.rect = self.image.get_rect(center=self.prev_pos)
         self.pos = list(self.rect.center)
-        self.mask = pygame.mask.from_surface(self.image)
+        if self.obj == 'player':
+            self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
+        else:
+            self.mask = pygame.mask.from_surface(new_image_size(AI_MASK))
         dest_x, dest_y = get_pos_in_field(self.destination,
                                           cell_size, top, left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
@@ -68,3 +74,8 @@ class Carrier(AnimatedSprite):
         del to_save['_Sprite__g'], to_save['frames'], to_save['image'], \
             to_save['mask']
         return to_save
+
+    def get_points(self):
+        """Возвращает середины сторон прямоугольника авианосца"""
+        return [self.rect.midleft, self.rect.midtop, self.rect.midright,
+                self.rect.midbottom]
