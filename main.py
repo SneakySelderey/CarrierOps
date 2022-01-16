@@ -66,10 +66,10 @@ def calculate_speed(cell):
     """Функция для подсчета скорости движимых объектов после изменения
     разрешения"""
     diff = 80 / cell
-    Settings.PLAYER_SPEED = Settings.SPEEDS[0] / diff
-    Settings.AIR_SPEED = Settings.SPEEDS[3] / diff
-    Settings.MISSILE_SPEED = Settings.SPEEDS[2] / diff
-    Settings.AI_SPEED = Settings.SPEEDS[1] / diff
+    Settings.PLAYER_SPEED = Settings.SPEEDS['PLAYER'] / diff
+    Settings.AIR_SPEED = Settings.SPEEDS['AIRCRAFT'] / diff
+    Settings.MISSILE_SPEED = Settings.SPEEDS['MISSILE'] / diff
+    Settings.AI_SPEED = Settings.SPEEDS['AI'] / diff
 
 
 def update_objects():
@@ -471,7 +471,7 @@ def show_gameover_win_screen(gameover=True):
     background = pygame.transform.scale(GAMEOVER_SCREEN, (
         Settings.WIDTH, Settings.HEIGHT)) \
         if gameover else pygame.transform.scale(VICTORY, (
-        Settings.WIDTH, Settings.HEIGHT))
+            Settings.WIDTH, Settings.HEIGHT))
     if gameover and list(Settings.PLAYER_SPRITE)[0].current_health <= 0:
         text = MAIN_FONT.render('GAME OVER. YOU DIED', True, WHITE)
     elif gameover:
