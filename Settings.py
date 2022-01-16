@@ -151,6 +151,7 @@ FIRE_COLORS = [RED, pygame.Color('yellow'), pygame.Color('orange'), GREY]
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения
+GAME_ICON = pygame.image.load('data/img/icon.png').convert_alpha()
 PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
                                     (40, 40))
 MISSILE_ICON = pygame.transform.scale(pygame.image.load(

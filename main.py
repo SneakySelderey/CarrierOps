@@ -1256,6 +1256,7 @@ if __name__ == '__main__':
     game_surf = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                   pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
+    pygame.display.set_icon(GAME_ICON)
     clock = pygame.time.Clock()
     FPS = 60
     chosen_map = 'solomon'
