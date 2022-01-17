@@ -23,7 +23,31 @@ from base import Base, SuperBase
 
 
 def check(x, y, n, m):
+    """Функция проверки попаданяи коорднаты в поле"""
     return 0 <= x < n and 0 <= y < m
+
+
+def bfs(start, g, end):
+    """Функция поиска в ширину в графе клеток поля"""
+    path = []
+    visited, queue = [start], deque([start])
+    p = {}
+    while queue:
+        vertex = queue.popleft()
+        if vertex == end:
+            break
+        for nr in g[vertex]:
+            if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
+                visited.append(nr)
+                queue.append(nr)
+                p[nr] = vertex
+    if end in visited:
+        to = end
+        while to != start:
+            path.append(to)
+            to = p[to]
+        path.reverse()
+    return path
 
 
 def give_sprites_to_check():
@@ -292,6 +316,7 @@ def clear_sprite_groups():
     Settings.EXPLOSION_GROUP.empty()
     Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.PLAYER_SPRITE.empty()
+    Settings.PARTICLES_GROUP.empty()
     Settings.CARRIER_GROUP.empty()
     Settings.AI_SPRITE.empty()
     Settings.BASES_SPRITES.empty()
@@ -815,27 +840,6 @@ class Run:
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
 
-    def bfs(self, start, g, end):
-        path = []
-        visited, queue = [start], deque([start])
-        p = {}
-        while queue:
-            vertex = queue.popleft()
-            if vertex == end:
-                break
-            for nr in g[vertex]:
-                if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
-                    visited.append(nr)
-                    queue.append(nr)
-                    p[nr] = vertex
-        if end in visited:
-            to = end
-            while to != start:
-                path.append(to)
-                to = p[to]
-            path.reverse()
-        return path
-
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
         Settings.PLAYER_MISSILES.add(Missile(
@@ -857,23 +861,22 @@ class Run:
         """Расчет точки движания для ИИ"""
         for ai in Settings.AI_SPRITE:
             distance = []
-            ai_pos_x = ai.rect.centerx // Settings.CELL_SIZE
-            ai_pos_y = ai.rect.centery // Settings.CELL_SIZE
+            ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
+                ai.rect.center, Settings.CELL_SIZE, self.board.top,
+                self.board.left))
             for base in Settings.BASES_SPRITES:
                 dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
                 if base.start_of_capture != 2 and base.state != 'ai':
                     distance.append(
-                        (dist, [base.rect.centerx, base.rect.centery]))
+                        (dist, [base.x, base.y]))
             try:
-                destination_ai = min(distance, key=lambda x: x[0])
-                idx = distance.index(destination_ai)
-                path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
-                                (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
-                                self.g, ((distance[idx][-1][1] - self.board.top) // Settings.CELL_SIZE,
-                                         (distance[idx][-1][0] - self.board.left) // Settings.CELL_SIZE))
+                min_dist = min(distance, key=lambda a: a[0])[1]
+                path = bfs((ai_pos_y, ai_pos_x), self.g,
+                           (min_dist[1], min_dist[0]))
                 path = (path[0][1], path[0][0])
-                ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
-                                    path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
+                ai.new_destination(get_pos_in_coords(
+                    [path[0] + 0.5, path[1] + 0.5], self.board.top,
+                    self.board.left))
             except ValueError:
                 ai.new_destination(ai.pos)
             except IndexError:
