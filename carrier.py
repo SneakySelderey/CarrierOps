@@ -21,10 +21,7 @@ class Carrier(AnimatedSprite):
         self.current_health = 100
         self.prev_pos = list(self.rect.center)
         self.left = False
-        if self.obj == 'player':
-            self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
-        else:
-            self.mask = pygame.mask.from_surface(new_image_size(AI_MASK))
+        self.mask = pygame.mask.from_surface(new_image_size(self.frames[0]))
 
     def new_destination(self, pos):
         """Функция для задания новой точки направления"""
@@ -48,10 +45,7 @@ class Carrier(AnimatedSprite):
         else:
             self.pos = list(self.rect.center)
         self.left = self.prev_pos[0] > self.pos[0]
-        if self.obj == 'player':
-            self.mask = pygame.mask.from_surface(new_image_size(PLAYER_MASK))
-        else:
-            self.mask = pygame.mask.from_surface(new_image_size(AI_MASK))
+        self.mask = pygame.mask.from_surface(new_image_size(self.frames[0]))
         dest_x, dest_y = get_pos_in_field(self.destination,
                                           cell_size, top, left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
