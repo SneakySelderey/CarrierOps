@@ -839,7 +839,7 @@ class Run:
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
         Settings.PLAYER_AIRCRAFT.add(Aircraft(
-            destination, True, list(Settings.PLAYER_SPRITE[0])))
+            destination, True, list(Settings.PLAYER_SPRITE)[0]))
         TAKEOFF.play()
         Settings.LAUNCHED_AIRCRAFT += 1
 
@@ -960,8 +960,30 @@ class Run:
                                    (air_x, air_y),
                                    Settings.CELL_SIZE * 3.5, 1)
 
+            air_tracking_AI = False
+            for aircraft in Settings.AI_AIRCRAFT:
+                air_x, air_y = aircraft.rect.center
+                # если цель в радиусе обнаружения самолета, то
+                # поднимается соответствующий флаг
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
+                    air_tracking_AI = True
+                    pygame.draw.circle(screen, RED,
+                                       (air_x, air_y),
+                                       Settings.CELL_SIZE * 3.5, 1)
+                    pygame.draw.line(screen, RED,
+                                     (air_x, air_y),
+                                     (aircraft.destination[0],
+                                      aircraft.destination[1]))
+                # если самолет исчерпал свой ресурс, он возвращается на
+                # авианосец
+                if aircraft.delete:
+                    aircraft.kill()
+                # отрисовка радиуса обнаружения самолета
+                aircraft.destination[0] += camera.dx
+                aircraft.destination[1] += camera.dy
+
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
-                    missile_tracking or air_tracking:
+                    missile_tracking or air_tracking or air_tracking_AI:
                 ai.visibility = True
                 if self.AI_missiles_timer >= 15:
                     ai.missile_launch(player.rect.center)
