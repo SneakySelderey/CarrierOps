@@ -891,15 +891,6 @@ class Run:
             for missile in Settings.PLAYER_MISSILES:
                 if pygame.sprite.collide_circle(missile, base):
                     base.show_bar = True
-            for missile in Settings.AI_MISSILES:
-                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
-                    missile.visibility = True
-                    if not missile.pause_checked:
-                        Settings.IS_PAUSE = True
-                        missile.pause_checked = True
-                        Settings.MISSILE_DETECTION.play()
-                else:
-                    missile.pause_checked = False
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
                 if self.play_main_base_detection:
@@ -928,6 +919,16 @@ class Run:
                                    (missile_x, missile_y),
                                    Settings.CELL_SIZE * 2, 1)
 
+            for missile in Settings.AI_MISSILES:
+                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
+                    missile.visibility = True
+                    if not missile.pause_checked:
+                        Settings.IS_PAUSE = True
+                        missile.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
+                else:
+                    missile.pause_checked = False
+
             # проверка на обнаружение самолетом
             air_tracking = False
             for aircraft in Settings.PLAYER_AIRCRAFT:
@@ -954,7 +955,7 @@ class Run:
             air_tracking_AI = False
             for aircraft in Settings.AI_AIRCRAFT:
                 air_x, air_y = aircraft.rect.center
-                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
+                if pygame.sprite.collide_circle_ratio(0.55)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
                     aircraft.visibility = True
                     air_tracking_AI = True
                     pygame.draw.circle(screen, RED,
@@ -1000,7 +1001,10 @@ class Run:
                     Settings.IS_PAUSE = True
 
             if air_tracking_AI:
-                if self.AI_missiles_timer >= 15:
+                player = list(Settings.PLAYER_SPRITE)[0]
+                if self.AI_missiles_timer >= 15 and \
+                        hypot(ai.rect.centerx - player.rect.centerx,
+                              ai.rect.centery - player.rect.centery) <= Settings.CELL_SIZE * 15:
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
                 self.AI_missiles_timer += 0.02
