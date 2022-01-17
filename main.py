@@ -35,12 +35,10 @@ def give_sprites_to_check():
 
 def set_standard_values():
     """Функция для установки значений по умолчанию"""
-    Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
-        Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
-    Settings.NUM_OF_REPAIR_PARTS = 0
-    Settings.OIL_VOLUME = 100
-    Settings.NUM_OF_AIRCRAFT = 3
-    Settings.NUM_OF_MISSILES = 5
+    for carrier in Settings.CARRIER_GROUP:
+        carrier.num_of_aircraft = 3
+        carrier.num_of_missiles = 5
+        carrier.oil_volume = 100
     Settings.LAUNCHED_MISSILES = 0
     Settings.LAUNCHED_AIRCRAFT = 0
     Settings.PLAYER_MISSILES_HIT = 0
@@ -111,13 +109,6 @@ def load_save(title):
         Settings.AI_MISSILES_HIT = data['ai_hit']
         Settings.BASES_CAPT_PLAYER = data['player_captured']
         Settings.BASES_CAPT_AI = data['ai_captured']
-        Settings.OIL_VOLUME = data['player_oil']
-        Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
-        Settings.NUM_OF_MISSILES = data['player_missiles']
-        Settings.BASE_OIL_VOLUME = data['base_oil']
-        Settings.BASE_NUM_OF_AIRCRAFT = data['base_aircraft']
-        Settings.BASE_NUM_OF_MISSILES = data['base_missiles']
-        Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
         Settings.CELL_SIZE = data['cell_size']
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
@@ -194,13 +185,6 @@ def create_save(title):
         data['ai_hit'] = Settings.AI_MISSILES_HIT
         data['player_captured'] = Settings.BASES_CAPT_PLAYER
         data['ai_captured'] = Settings.BASES_CAPT_AI
-        data['player_oil'] = Settings.OIL_VOLUME
-        data['player_aircraft'] = Settings.NUM_OF_AIRCRAFT
-        data['player_missiles'] = Settings.NUM_OF_MISSILES
-        data['base_oil'] = Settings.BASE_OIL_VOLUME
-        data['base_aircraft'] = Settings.BASE_NUM_OF_AIRCRAFT
-        data['base_missiles'] = Settings.BASE_NUM_OF_MISSILES
-        data['base_repair_parts'] = Settings.BASE_NUM_OF_REPAIR_PARTS
         data['cell_size'] = Settings.CELL_SIZE
         data['game'] = game_objects.data_to_save()
         data['bases'] = [base.data_to_save() for base in
@@ -742,6 +726,12 @@ def show_resources_menu():
     background = pygame.transform.scale(RESOURCE_BACKGROUND, (
         Settings.WIDTH, Settings.HEIGHT))
     background2 = help_surface
+    base = [i for i in Settings.BASES_SPRITES if i.state == 'player']
+    try:
+        resources = base[0].num_of_aircraft, base[0].num_of_missiles, \
+                    base[0].oil_volume, base[0].num_of_repair_parts
+    except AttributeError:
+        resources = 0, 0, 0, 0
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -762,9 +752,7 @@ def show_resources_menu():
             background2.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         [i.update_text(j) for i, j in zip(
-            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
-                Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
-                Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
+            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], resources)]
         Settings.RESOURCES_BASE.update()
         Settings.RESOURCES_BASE.draw(screen)
         # Обновление менеджера
@@ -1060,14 +1048,14 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         player.new_destination(event.pos)
-                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
-                            Settings.OIL_VOLUME:
+                    if event.button == 2 and player.num_of_aircraft and \
+                            player.oil_volume:
                         self.aircraft_launch(event.pos)
-                        Settings.NUM_OF_AIRCRAFT -= 1
-                        Settings.OIL_VOLUME -= 1
-                    if event.button == 3 and Settings.NUM_OF_MISSILES:
+                        player.num_of_aircraft -= 1
+                        player.oil_volume -= 1
+                    if event.button == 3 and player.num_of_missiles:
                         self.missile_launch(event.pos)
-                        Settings.NUM_OF_MISSILES -= 1
+                        player.num_of_missiles -= 1
                     if event.button == 4 and Settings.CELL_SIZE < 200:
                         Settings.CELL_SIZE = min(
                             Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
@@ -1112,7 +1100,7 @@ class Run:
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
-                    Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
+                    player.oil_volume = max(player.oil_volume - 1, 0)
                 if event.type == UPDATE_ALL_SPRITES and not (
                     Settings.IS_PAUSE or self.menu or self.resource_menu or
                         self.defeat):

@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_image_size, PLAYER_CARRIER_SHEET, get_pos_in_field, \
-    get_pos_in_coords, AI_MASK, PLAYER_MASK
+    get_pos_in_coords
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
@@ -22,6 +22,9 @@ class Carrier(AnimatedSprite):
         self.prev_pos = list(self.rect.center)
         self.left = False
         self.mask = pygame.mask.from_surface(new_image_size(self.frames[0]))
+        self.num_of_missiles = 5
+        self.num_of_aircraft = 3
+        self.oil_volume = 100
 
     def new_destination(self, pos):
         """Функция для задания новой точки направления"""

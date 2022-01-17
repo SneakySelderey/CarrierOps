@@ -42,8 +42,9 @@ class AI(Carrier):
 
     def missile_launch(self, coords):
         """Функция для запуска ракеты"""
-        mis = Missile(self.rect.center, coords, False, 'ai')
-        mis.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
+        if self.num_of_missiles:
+            mis = Missile(self.rect.center, coords, False, 'ai')
+            mis.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
 
     def respawn(self):
         """Возрождение авианосца потивника"""
@@ -54,5 +55,7 @@ class AI(Carrier):
         self.pos = list(self.rect.center)
         self.current_health = 100
         self.destination = list(self.rect.center)
-
         self.prev_pos = list(self.rect.center)
+        self.num_of_missiles = 5
+        self.num_of_aircraft = 3
+        self.oil_volume = 100

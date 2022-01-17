@@ -21,7 +21,7 @@ class Player(Carrier):
     def update(self):
         """Обновление позиции объекта"""
         self.left = self.prev_pos[0] > self.pos[0]
-        if Settings.OIL_VOLUME:
+        if self.oil_volume:
             land = list(Settings.BACKGROUND_MAP)[0]
             rect = get_bigger_rect(pygame.Rect(land.rect.x, land.rect.y,
                                                land.rect.w,  land.rect.h), 5)
