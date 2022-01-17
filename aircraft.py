@@ -66,15 +66,14 @@ class AircraftFriendly(AnimatedSprite):
         c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
         self.rect = self.image.get_rect(
             center=get_pos_in_coords((c_x, c_y), top, left))
-        self.pos = get_pos_in_coords(get_pos_in_field(
-            self.prev_pos, cell_size, top, left), top, left)
+        self.pos = get_pos_in_coords(get_pos_in_field(self.pos, cell_size,
+                                                      top, left), top, left)
         dest_x, dest_y = get_pos_in_field(self.destination, cell_size, top,
                                           left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
         if not self.stop:
-            self.alpha = atan2(self.destination[1] - self.pos[1],
-                               self.destination[0] - self.pos[0])
-        self.stop = False
+            self.alpha = atan2(self.destination[1] - self.rect.centery,
+                               self.destination[0] - self.rect.centerx)
         self.image = pygame.transform.rotate(self.image,
                                              -degrees(self.alpha) - 90)
         self.radius = Settings.CELL_SIZE * 3.5

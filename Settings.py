@@ -3,6 +3,48 @@ import ctypes
 import os
 import sqlite3
 from random import random
+from collections import deque
+
+
+def check(x, y, n, m):
+    """Функция проверки попаданяи коорднаты в поле"""
+    return 0 <= x < n and 0 <= y < m
+
+
+def bfs(start, end):
+    """Функция поиска в ширину в графе клеток поля"""
+    path = []
+    visited, queue = [start], deque([start])
+    p = {}
+    while queue:
+        vertex = queue.popleft()
+        if vertex == end:
+            break
+        for nr in GRAPH[vertex]:
+            if nr not in visited and BOARD[nr[0]][nr[1]] != 'X':
+                visited.append(nr)
+                queue.append(nr)
+                p[nr] = vertex
+    if end in visited:
+        to = end
+        while to != start:
+            path.append(to)
+            to = p[to]
+        path.reverse()
+    return path
+
+
+def find_free_space(start):
+    """Функция поиска ближайшей свободной клетки"""
+    visited, queue = [start], deque([start])
+    while queue:
+        vertex = queue.popleft()
+        if BOARD[vertex[0]][vertex[1]] == '.':
+            return vertex
+        for nr in GRAPH[vertex]:
+            if nr not in visited:
+                visited.append(nr)
+                queue.append(nr)
 
 
 def get_pos_in_field(center, cell, top, left):
@@ -72,6 +114,7 @@ BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
 BOARD = []
+GRAPH = {}
 EXPLOSION_GROUP = pygame.sprite.Group()
 PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []

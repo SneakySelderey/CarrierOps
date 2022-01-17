@@ -84,3 +84,9 @@ class Carrier(AnimatedSprite):
         """Возвращает середины сторон прямоугольника авианосца"""
         return [self.rect.midleft, self.rect.midtop, self.rect.midright,
                 self.rect.midbottom]
+
+    def get_pos(self):
+        pos_x, pos_y = map(int, get_pos_in_field(
+            self.rect.center, Settings.CELL_SIZE, Settings.TOP,
+            Settings.LEFT))
+        return pos_y, pos_x

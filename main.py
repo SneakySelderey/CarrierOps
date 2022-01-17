@@ -22,34 +22,6 @@ from string import ascii_letters, digits
 from base import Base, SuperBase
 
 
-def check(x, y, n, m):
-    """Функция проверки попаданяи коорднаты в поле"""
-    return 0 <= x < n and 0 <= y < m
-
-
-def bfs(start, g, end):
-    """Функция поиска в ширину в графе клеток поля"""
-    path = []
-    visited, queue = [start], deque([start])
-    p = {}
-    while queue:
-        vertex = queue.popleft()
-        if vertex == end:
-            break
-        for nr in g[vertex]:
-            if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
-                visited.append(nr)
-                queue.append(nr)
-                p[nr] = vertex
-    if end in visited:
-        to = end
-        while to != start:
-            path.append(to)
-            to = p[to]
-        path.reverse()
-    return path
-
-
 def give_sprites_to_check():
     """Функция, возвращающая список групп спрайтов для проверки в методе
     fog_of_war и camera_update"""
@@ -805,8 +777,6 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        # self.cells_x = Settings.WIDTH * 2 // Settings.CELL_SIZE
-        # self.cells_y = Settings.HEIGHT * 2 // Settings.CELL_SIZE
         self.cells_x, self.cells_y = 40, 22
 
         self.board = Board(self.cells_x, self.cells_y, self)
@@ -823,12 +793,13 @@ class Run:
         self.battle = False
         self.play_main_base_detection = True
 
-        self.g = defaultdict(list)
+        Settings.GRAPH = defaultdict(list)
         n, m = self.board.height, self.board.width
         for i in range(n):
             for j in range(m):
-                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-                                  check(i + v[0], j + v[1], n, m)]
+                Settings.GRAPH[(i, j)] = [
+                    (i + v[0], j + v[1]) for v in N if check(
+                        i + v[0], j + v[1], n, m)]
 
         Map(True, self.board, chosen_map)
         LandCheck(self.board)
@@ -860,11 +831,11 @@ class Run:
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
         for ai in Settings.AI_SPRITE:
+            ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
+                ai.rect.center, Settings.CELL_SIZE, self.board.top,
+                self.board.left))
             if not ai.path and ai.stop:
                 distance = []
-                ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
-                    ai.rect.center, Settings.CELL_SIZE, self.board.top,
-                    self.board.left))
                 for base in Settings.BASES_SPRITES:
                     dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
                     if base.start_of_capture != 2 and base.state != 'ai':
@@ -873,8 +844,7 @@ class Run:
                 try:
                     min_dist = min(distance, key=lambda a: a[0])[1]
                     ai.path = deque(bfs(
-                        (ai_pos_y, ai_pos_x), self.g,
-                        (min_dist[1], min_dist[0])))
+                        (ai_pos_y, ai_pos_x), (min_dist[1], min_dist[0])))
                     path = ai.path.popleft()
                     ai.new_destination(get_pos_in_coords(
                         [path[1] + 0.5, path[0] + 0.5], self.board.top,
