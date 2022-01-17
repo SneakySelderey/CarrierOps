@@ -956,6 +956,14 @@ class Run:
                 air_x, air_y = aircraft.rect.center
                 if pygame.sprite.collide_circle_ratio(0.47)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
                     aircraft.visibility = True
+                    air_tracking_AI = True
+                    pygame.draw.circle(screen, RED,
+                                       (air_x, air_y),
+                                       Settings.CELL_SIZE * 3.5, 1)
+                    pygame.draw.line(screen, RED,
+                                     (air_x, air_y),
+                                     (aircraft.destination[0],
+                                      aircraft.destination[1]))
                     if not aircraft.pause_checked:
                         Settings.IS_PAUSE = True
                         aircraft.pause_checked = True
@@ -964,14 +972,6 @@ class Run:
                     aircraft.pause_checked = False
                 # если цель в радиусе обнаружения самолета, то
                 # поднимается соответствующий флаг
-                air_tracking_AI = True
-                pygame.draw.circle(screen, RED,
-                                   (air_x, air_y),
-                                   Settings.CELL_SIZE * 3.5, 1)
-                pygame.draw.line(screen, RED,
-                                 (air_x, air_y),
-                                 (aircraft.destination[0],
-                                  aircraft.destination[1]))
                 # если самолет исчерпал свой ресурс, он возвращается на
                 # авианосец
                 if aircraft.delete:
@@ -981,7 +981,7 @@ class Run:
                 aircraft.destination[1] += camera.dy
 
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
-                    missile_tracking or air_tracking or air_tracking_AI:
+                    missile_tracking or air_tracking:
                 ai.visibility = True
                 if self.AI_missiles_timer >= 15 and not (missile_tracking or air_tracking):
                     ai.missile_launch(player.rect.center)
@@ -998,6 +998,12 @@ class Run:
                     self.play_new_contact = False
                     self.play_contact_lost = True
                     Settings.IS_PAUSE = True
+
+            if air_tracking_AI:
+                if self.AI_missiles_timer >= 15:
+                    ai.missile_launch(player.rect.center)
+                    self.AI_missiles_timer = 0
+                self.AI_missiles_timer += 0.02
 
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
