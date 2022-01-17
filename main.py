@@ -1040,6 +1040,7 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
+        mouse_border = False
         give_tooltip(3)
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
@@ -1088,15 +1089,17 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
-                    if event.key in [pygame.K_UP, pygame.K_DOWN]:
+                    if event.key in [pygame.K_UP, pygame.K_DOWN] and not \
+                            mouse_border:
                         camera.dy = dy + diff if event.key == pygame.K_UP \
                             else dy - diff
                         arrow_pressed = True
-                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT] and not \
+                            mouse_border:
                         camera.dx = dx + diff if event.key == pygame.K_LEFT \
                             else dx - diff
                         arrow_pressed = True
-                if event.type == pygame.KEYUP:
+                if event.type == pygame.KEYUP and not mouse_border:
                     if event.key in [pygame.K_UP, pygame.K_DOWN]:
                         camera.dy = 0
                         arrow_pressed = False
@@ -1124,6 +1127,7 @@ class Run:
             self.camera_update()
 
             if not arrow_pressed:
+                mouse_border = True
                 if Settings.WIDTH - 1 > pygame.mouse.get_pos()[0] >= \
                         Settings.WIDTH - 50:
                     camera.dx = -Settings.CELL_SIZE // 4
@@ -1135,6 +1139,7 @@ class Run:
                 elif 0 < pygame.mouse.get_pos()[1] <= 50:
                     camera.dy = Settings.CELL_SIZE // 4
                 else:
+                    mouse_border = False
                     camera.dx = 0
                     camera.dy = 0
 
