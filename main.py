@@ -5,7 +5,7 @@ from board import Board
 from missile import Missile
 from gui_elements import *
 import gui_elements
-from aircraft import AircraftFriendly
+from aircraft import Aircraft
 from camera import Camera
 from map_solomon import Map, LandCheck
 from Settings import *
@@ -148,8 +148,8 @@ def load_save(title):
         # Загрузим самолеты
         for aircraft in data['aircraft']:
             if aircraft[0] == 'friendly':
-                new_air = AircraftFriendly(aircraft[1]['destination'],
-                                           aircraft[1]['visibility'])
+                new_air = Aircraft(aircraft[1]['destination'],
+                                   aircraft[1]['visibility'])
             else:
                 pass  # TODO: HOSTILE AIRCRAFT
             for i, j in aircraft[1].items():
@@ -838,8 +838,8 @@ class Run:
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
-        Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
-            destination, True))
+        Settings.PLAYER_AIRCRAFT.add(Aircraft(
+            destination, True, list(Settings.PLAYER_SPRITE[0])))
         TAKEOFF.play()
         Settings.LAUNCHED_AIRCRAFT += 1
 
@@ -900,6 +900,15 @@ class Run:
                         Settings.MISSILE_DETECTION.play()
                 else:
                     missile.pause_checked = False
+            for air in Settings.AI_AIRCRAFT:
+                if pygame.sprite.collide_circle_ratio(1)(air, player):
+                    air.visibility = True
+                    if not air.pause_checked:
+                        Settings.IS_PAUSE = True
+                        air.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
+                else:
+                    air.pause_checked = False
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
                 if self.play_main_base_detection:
@@ -973,7 +982,7 @@ class Run:
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
                     and not missile_tracking and not air_tracking:
-                ai.visibility = False
+                ai.visibility = True
                 self.play_new_contact = True
                 if self.play_contact_lost:
                     CONTACT_LOST.play()
