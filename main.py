@@ -860,27 +860,34 @@ class Run:
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
         for ai in Settings.AI_SPRITE:
-            distance = []
-            ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
-                ai.rect.center, Settings.CELL_SIZE, self.board.top,
-                self.board.left))
-            for base in Settings.BASES_SPRITES:
-                dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
-                if base.start_of_capture != 2 and base.state != 'ai':
-                    distance.append(
-                        (dist, [base.x, base.y]))
-            try:
-                min_dist = min(distance, key=lambda a: a[0])[1]
-                ai.path = deque(bfs((ai_pos_y, ai_pos_x), self.g,
-                                    (min_dist[1], min_dist[0])))
+            if not ai.path and ai.stop:
+                distance = []
+                ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
+                    ai.rect.center, Settings.CELL_SIZE, self.board.top,
+                    self.board.left))
+                for base in Settings.BASES_SPRITES:
+                    dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
+                    if base.start_of_capture != 2 and base.state != 'ai':
+                        distance.append(
+                            (dist, [base.x, base.y]))
+                try:
+                    min_dist = min(distance, key=lambda a: a[0])[1]
+                    ai.path = deque(bfs(
+                        (ai_pos_y, ai_pos_x), self.g,
+                        (min_dist[1], min_dist[0])))
+                    path = ai.path.popleft()
+                    ai.new_destination(get_pos_in_coords(
+                        [path[1] + 0.5, path[0] + 0.5], self.board.top,
+                        self.board.left))
+                except ValueError:
+                    ai.new_destination(ai.pos)
+                except IndexError:
+                    ai.new_destination(ai.pos)
+            elif ai.stop:
                 path = ai.path.popleft()
                 ai.new_destination(get_pos_in_coords(
                     [path[1] + 0.5, path[0] + 0.5], self.board.top,
                     self.board.left))
-            except ValueError:
-                ai.new_destination(ai.pos)
-            except IndexError:
-                ai.new_destination(ai.pos)
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -1257,7 +1264,7 @@ if __name__ == '__main__':
     help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                   pygame.SRCALPHA)
     game_surf = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
-                                  pygame.SRCALPHA)
+                               pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
     pygame.display.set_icon(GAME_ICON)
     clock = pygame.time.Clock()

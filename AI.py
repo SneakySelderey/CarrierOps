@@ -34,6 +34,9 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
+        if abs(self.destination[0] - self.rect.centerx) <= 5 and abs(
+                self.destination[1] - self.rect.centery) <= 5:
+            self.stop = True
         if not self.stop and self.visibility:
             [Particle(self) for _ in range(2)]
 
