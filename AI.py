@@ -1,4 +1,4 @@
-from Settings import AI_SPRITE, AI_CARRIER_SHEET, get_pos_in_field
+from Settings import AI_SPRITE, AI_CARRIER_SHEET
 from missile import Missile
 import Settings
 from carrier import Carrier
@@ -15,9 +15,8 @@ class AI(Carrier):
                             Settings.CELL_SIZE // 2, Settings.AI_START[1] *
                             Settings.CELL_SIZE + Settings.CELL_SIZE // 2]
         self.pos = list(self.rect.center)
-        self.cur_cell = [Settings.AI_START[0], Settings.AI_START[1]]
+        self.path = []
         self.destination = list(self.rect.center)
-
         self.prev_pos = list(self.rect.center)
 
     def update(self):
@@ -35,8 +34,6 @@ class AI(Carrier):
             self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
                 self.alpha)
             self.rect.center = self.pos
-            self.cur_cell = [int(i) for i in get_pos_in_field(
-                self.pos, Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)]
         if not self.stop and self.visibility:
             [Particle(self) for _ in range(2)]
 

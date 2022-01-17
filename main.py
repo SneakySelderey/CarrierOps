@@ -871,11 +871,11 @@ class Run:
                         (dist, [base.x, base.y]))
             try:
                 min_dist = min(distance, key=lambda a: a[0])[1]
-                path = bfs((ai_pos_y, ai_pos_x), self.g,
-                           (min_dist[1], min_dist[0]))
-                path = (path[0][1], path[0][0])
+                ai.path = deque(bfs((ai_pos_y, ai_pos_x), self.g,
+                                    (min_dist[1], min_dist[0])))
+                path = ai.path.popleft()
                 ai.new_destination(get_pos_in_coords(
-                    [path[0] + 0.5, path[1] + 0.5], self.board.top,
+                    [path[1] + 0.5, path[0] + 0.5], self.board.top,
                     self.board.left))
             except ValueError:
                 ai.new_destination(ai.pos)
