@@ -900,15 +900,6 @@ class Run:
                         Settings.MISSILE_DETECTION.play()
                 else:
                     missile.pause_checked = False
-            for air in Settings.AI_AIRCRAFT:
-                if pygame.sprite.collide_circle_ratio(1)(air, player):
-                    air.visibility = True
-                    if not air.pause_checked:
-                        Settings.IS_PAUSE = True
-                        air.pause_checked = True
-                        Settings.MISSILE_DETECTION.play()
-                else:
-                    air.pause_checked = False
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
                 if self.play_main_base_detection:
@@ -963,17 +954,24 @@ class Run:
             air_tracking_AI = False
             for aircraft in Settings.AI_AIRCRAFT:
                 air_x, air_y = aircraft.rect.center
+                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
+                    aircraft.visibility = True
+                    if not aircraft.pause_checked:
+                        Settings.IS_PAUSE = True
+                        aircraft.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
+                else:
+                    aircraft.pause_checked = False
                 # если цель в радиусе обнаружения самолета, то
                 # поднимается соответствующий флаг
-                if pygame.sprite.collide_circle_ratio(0.47)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
-                    air_tracking_AI = True
-                    pygame.draw.circle(screen, RED,
-                                       (air_x, air_y),
-                                       Settings.CELL_SIZE * 3.5, 1)
-                    pygame.draw.line(screen, RED,
-                                     (air_x, air_y),
-                                     (aircraft.destination[0],
-                                      aircraft.destination[1]))
+                air_tracking_AI = True
+                pygame.draw.circle(screen, RED,
+                                   (air_x, air_y),
+                                   Settings.CELL_SIZE * 3.5, 1)
+                pygame.draw.line(screen, RED,
+                                 (air_x, air_y),
+                                 (aircraft.destination[0],
+                                  aircraft.destination[1]))
                 # если самолет исчерпал свой ресурс, он возвращается на
                 # авианосец
                 if aircraft.delete:
@@ -985,7 +983,7 @@ class Run:
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
                     missile_tracking or air_tracking or air_tracking_AI:
                 ai.visibility = True
-                if self.AI_missiles_timer >= 15:
+                if self.AI_missiles_timer >= 15 and not (missile_tracking or air_tracking):
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
                 self.AI_missiles_timer += 0.02
