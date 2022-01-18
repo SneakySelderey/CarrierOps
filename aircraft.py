@@ -69,13 +69,14 @@ class Aircraft(AnimatedSprite):
         dest_x, dest_y = get_pos_in_field(self.destination, cell_size, top,
                                           left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
-        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
-        self.rect = self.image.get_rect(
-            center=get_pos_in_coords((c_x, c_y), top, left))
         if not self.stop:
+            c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
+            self.rect = self.image.get_rect(
+                center=get_pos_in_coords((c_x, c_y), top, left))
             self.alpha = atan2(self.destination[1] - self.rect.centery,
                                self.destination[0] - self.rect.centerx)
-        self.stop = False
+        else:
+            self.rect.center = self.destination
         self.pos = list(self.rect.center)
         self.image = pygame.transform.rotate(self.image,
                                              -degrees(self.alpha) - 90)
