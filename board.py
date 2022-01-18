@@ -1,7 +1,7 @@
 import pygame
 import Settings
 from base import Base, SuperBase
-from random import sample, choice
+from random import sample
 
 
 class Board:

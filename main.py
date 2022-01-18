@@ -29,7 +29,8 @@ def give_sprites_to_check():
             Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
             Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
             Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
-            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP]
+            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP,
+            Settings.PARTICLES_GROUP]
 
 
 def set_standard_values():
@@ -1007,8 +1008,6 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
-            ai.visibility = True
-
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)
@@ -1235,7 +1234,6 @@ class Run:
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
                 help_surface.blit(screen, (0, 0))
-                Settings.PARTICLES_GROUP.draw(screen)
                 Settings.ICONS_GROUP.draw(screen)
                 self.draw_icons_and_bars()
 

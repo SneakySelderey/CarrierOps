@@ -117,4 +117,3 @@ class Carrier(AnimatedSprite):
                     self.pos = list(self.rect.center)
                     if not pygame.sprite.collide_mask(self, land):
                         break
-

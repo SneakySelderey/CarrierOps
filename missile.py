@@ -23,6 +23,7 @@ class Missile(AnimatedSprite):
         self.radius = Settings.CELL_SIZE * 2
         self.pause_checked = False
         self.activation_on_base = True
+        self.visibility = visibility
         # Таймеры
         self.ticks = 10
         self.ticks2 = 0
@@ -31,7 +32,6 @@ class Missile(AnimatedSprite):
             self.alpha = pygame.math.Vector2((
                 activation[0] - center[0],
                 activation[1] - center[1])).normalize()
-            self.visibility = visibility
         except ValueError:
             self.total_ticks = 10
             self.alpha = pygame.math.Vector2(0, 0)

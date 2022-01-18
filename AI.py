@@ -98,9 +98,10 @@ class AI(Carrier):
         """Функция для запуска самолета"""
         player = list(Settings.PLAYER_SPRITE)[0]
         if not any(pygame.sprite.collide_mask(air, player) for air in
-                   Settings.AI_AIRCRAFT):
+                   Settings.AI_AIRCRAFT) and self.num_of_aircraft > 0:
             air = Aircraft(self.rect.center, coords, False, self.idx)
             air.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
+            self.num_of_aircraft -= 1
 
     def respawn(self):
         """Возрождение авианосца потивника"""
