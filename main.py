@@ -5,7 +5,7 @@ from board import Board
 from missile import Missile
 from gui_elements import *
 import gui_elements
-from aircraft import AircraftFriendly
+from aircraft import Aircraft
 from camera import Camera
 from map_solomon import Map, LandCheck
 from Settings import *
@@ -113,6 +113,8 @@ def load_save(title):
         Settings.CELL_SIZE = data['cell_size']
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
+        Settings.PLAYER_START = data['start'][0]
+        Settings.AI_START = data['start'][1]
 
         # Загрузим класс для игры
         chosen_map = data['map']['chosen_map']
@@ -135,11 +137,9 @@ def load_save(title):
                 new_carrier.__dict__[i] = j
         # Загрузим самолеты
         for aircraft in data['aircraft']:
-            if aircraft[0] == 'friendly':
-                new_air = AircraftFriendly(aircraft[1]['destination'],
-                                           aircraft[1]['visibility'])
-            else:
-                pass  # TODO: HOSTILE AIRCRAFT
+            new_air = Aircraft(aircraft[1]['rect'].center,
+                               aircraft[1]['destination'],
+                               aircraft[1]['visibility'], aircraft[1]['obj'])
             for i, j in aircraft[1].items():
                 new_air.__dict__[i] = j
         # Загрузим базы
@@ -201,6 +201,7 @@ def create_save(title):
             Settings.PLAYER_MISSILES) | set(Settings.AI_MISSILES)]
         data['map'] = list(Settings.BACKGROUND_MAP)[0].data_to_save()
         data['board'] = Settings.BOARD
+        data['start'] = Settings.PLAYER_START, Settings.AI_START
 
     rebase_load_manager()
 
@@ -817,8 +818,8 @@ class Run:
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
-        Settings.PLAYER_AIRCRAFT.add(AircraftFriendly(
-            destination, True))
+        Settings.PLAYER_AIRCRAFT.add(Aircraft(list(
+            Settings.PLAYER_SPRITE)[0].rect.center, destination, True, 'P0'))
         TAKEOFF.play()
         Settings.LAUNCHED_AIRCRAFT += 1
 
@@ -875,15 +876,6 @@ class Run:
             for missile in Settings.PLAYER_MISSILES:
                 if pygame.sprite.collide_circle(missile, base):
                     base.show_bar = True
-            for missile in Settings.AI_MISSILES:
-                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
-                    missile.visibility = True
-                    if not missile.pause_checked:
-                        Settings.IS_PAUSE = True
-                        missile.pause_checked = True
-                        Settings.MISSILE_DETECTION.play()
-                else:
-                    missile.pause_checked = False
             if base.show_bar and base.state == 'ai':
                 base.visibility = True
                 if self.play_main_base_detection:
@@ -912,6 +904,17 @@ class Run:
                                    (missile_x, missile_y),
                                    Settings.CELL_SIZE * 2, 1)
 
+            for missile in Settings.AI_MISSILES:
+                if pygame.sprite.collide_circle_ratio(0.65)(missile, player):
+                    missile.visibility = True
+                    if not missile.pause_checked:
+                        Settings.IS_PAUSE = True
+                        missile.pause_checked = True
+                        Settings.MISSILE_DETECTION.play()
+                else:
+                    missile.visibility = False
+                    missile.pause_checked = False
+
             # проверка на обнаружение самолетом
             air_tracking = False
             for aircraft in Settings.PLAYER_AIRCRAFT:
@@ -934,14 +937,45 @@ class Run:
                 pygame.draw.circle(screen, BLUE,
                                    (air_x, air_y),
                                    Settings.CELL_SIZE * 3.5, 1)
+            air_tracking_AI = False
+            for aircraft in Settings.AI_AIRCRAFT:
+                air_x, air_y = aircraft.rect.center
+                if pygame.sprite.collide_circle_ratio(0.55)(aircraft, player):
+                    aircraft.visibility = True
+                    air_tracking_AI = True
+                    pygame.draw.circle(screen, RED,
+                                       (air_x, air_y),
+                                       Settings.CELL_SIZE * 3.5, 1)
+                    pygame.draw.line(screen, RED,
+                                     (air_x, air_y),
+                                     (aircraft.destination[0],
+                                      aircraft.destination[1]))
+                    if not aircraft.pause_checked:
+                        Settings.IS_PAUSE = True
+                        aircraft.pause_checked = True
+                        Settings.AIRCRAFT_DETECTION.play()
+                else:
+                    aircraft.visibility = False
+                    aircraft.pause_checked = False
+                # если цель в радиусе обнаружения самолета, то
+                # поднимается соответствующий флаг
+                # если самолет исчерпал свой ресурс, он возвращается на
+                # авианосец
+                if aircraft.delete:
+                    aircraft.kill()
+                # отрисовка радиуса обнаружения самолета
+                aircraft.destination[0] += camera.dx
+                aircraft.destination[1] += camera.dy
 
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
                     missile_tracking or air_tracking:
                 ai.visibility = True
-                if self.AI_missiles_timer >= 15:
+                if self.AI_missiles_timer >= 15 and not (missile_tracking or
+                                                         air_tracking):
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
-                self.AI_missiles_timer += 0.02
+                if not Settings.IS_PAUSE:
+                    self.AI_missiles_timer += 0.02
                 pygame.draw.circle(screen, RED, ai.rect.center,
                                    Settings.CELL_SIZE * 4, 1)
                 self.play_contact_lost = True
@@ -953,6 +987,16 @@ class Run:
                     self.play_new_contact = False
                     self.play_contact_lost = True
                     Settings.IS_PAUSE = True
+
+            if air_tracking_AI:
+                player = list(Settings.PLAYER_SPRITE)[0]
+                if self.AI_missiles_timer >= 15 and \
+                        hypot(ai.rect.centerx - player.rect.centerx,
+                              ai.rect.centery - player.rect.centery) <= \
+                        Settings.CELL_SIZE * 15:
+                    ai.missile_launch(player.rect.center)
+                    self.AI_missiles_timer = 0
+                self.AI_missiles_timer += 0.02
 
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \

@@ -6,13 +6,15 @@ import Settings
 from animated_sprite import AnimatedSprite
 
 
-class AircraftFriendly(AnimatedSprite):
+class Aircraft(AnimatedSprite):
     """Класс, определяющий параметры и спрайт самолета"""
-    def __init__(self, destination, visibility):
-        super().__init__(AIRCRAFT_FRIENDLY_SHEET, 7, 1, PLAYER_AIRCRAFT)
-        player = list(PLAYER_SPRITE)[0]
-        self.rect = self.image.get_rect(center=[player.rect.centerx,
-                                                player.rect.centery])
+    def __init__(self, center, destination, visibility, obj):
+        self.obj = obj
+        if self.obj == 'P0':
+            super().__init__(AIRCRAFT_FRIENDLY_SHEET, 7, 1, PLAYER_AIRCRAFT)
+        else:
+            super().__init__(Settings.AIRCRAFT_HOSTILE_SHEET, 7, 1, Settings.AI_AIRCRAFT)
+        self.rect.center = center
         self.pos = list(self.rect.center)
         self.prev_pos = list(self.rect.center)
         self.visibility = visibility
@@ -26,8 +28,10 @@ class AircraftFriendly(AnimatedSprite):
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
         self.to_return = False
+        self.tracking = False
         self.radius = Settings.CELL_SIZE * 3.5
         self.mask = pygame.mask.from_surface(self.image)
+        self.pause_checked = False
 
     def update(self):
         """Обновление координат самолета при полете"""
@@ -51,7 +55,8 @@ class AircraftFriendly(AnimatedSprite):
                 self.rect.center = self.pos
 
             if abs(self.destination[0] - self.rect.centerx) <= 5 and \
-                    abs(self.destination[1] - self.rect.centery) <= 5:
+                    abs(self.destination[1] - self.rect.centery) <= 5 and \
+                    not self.tracking:
                 #  Если самолет достиг цели
                 self.stop = True
 
@@ -84,10 +89,11 @@ class AircraftFriendly(AnimatedSprite):
         if self.play_sound:
             LANDING.play()
             self.play_sound = False
-        player = list(PLAYER_SPRITE)[0]
-        self.alpha = atan2(player.rect.centery - self.rect.centery,
-                           player.rect.centerx - self.rect.centerx)
-        self.destination = [player.rect.centerx, player.rect.centery]
+        carrier = list(Settings.PLAYER_SPRITE)[0] if self.obj == 'P0' else [
+            i for i in Settings.AI_SPRITE if i.idx == self.obj][0]
+        self.alpha = atan2(carrier.rect.centery - self.rect.centery,
+                           carrier.rect.centerx - self.rect.centerx)
+        self.destination = [carrier.rect.centerx, carrier.rect.centery]
         self.stop = False
         self.to_return = True
         if pygame.sprite.collide_rect(self, player):
@@ -96,12 +102,18 @@ class AircraftFriendly(AnimatedSprite):
 
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
-        for ai in Settings.AI_SPRITE:
-            if pygame.sprite.collide_circle_ratio(0.47)(self, ai):
+        self.tracking = False
+        if self.obj == 'P0':
+            opposite = list(Settings.AI_SPRITE)
+        else:
+            opposite = list(Settings.PLAYER_SPRITE)
+        for target in opposite:
+            if pygame.sprite.collide_circle_ratio(0.47)(self, target):
+                self.tracking = True
                 self.stop = False
-                if not pygame.sprite.collide_mask(self, ai):
-                    self.alpha = atan2(ai.rect.centery - self.rect.centery,
-                                       ai.rect.centerx - self.rect.centerx)
+                if not pygame.sprite.collide_mask(self, target):
+                    self.alpha = atan2(target.rect.centery - self.rect.centery,
+                                       target.rect.centerx - self.rect.centerx)
                 break
 
     def update_frame(self):
