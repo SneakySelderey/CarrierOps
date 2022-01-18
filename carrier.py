@@ -1,6 +1,6 @@
 import pygame
 from Settings import new_image_size, PLAYER_CARRIER_SHEET, get_pos_in_field, \
-    get_pos_in_coords
+    get_pos_in_coords, find_free_space
 import Settings
 from math import atan2
 from animated_sprite import AnimatedSprite
@@ -21,7 +21,8 @@ class Carrier(AnimatedSprite):
         self.current_health = 100
         self.prev_pos = list(self.rect.center)
         self.left = False
-        self.mask = pygame.mask.from_surface(new_image_size(self.frames[0]))
+        self.mask = pygame.mask.from_surface(new_image_size(
+            self.frames[self.cur_frame]))
         self.num_of_missiles = 5
         self.num_of_aircraft = 3
         self.oil_volume = 100
@@ -48,7 +49,8 @@ class Carrier(AnimatedSprite):
         else:
             self.pos = list(self.rect.center)
         self.left = self.prev_pos[0] > self.pos[0]
-        self.mask = pygame.mask.from_surface(new_image_size(self.frames[0]))
+        self.mask = pygame.mask.from_surface(new_image_size(
+            self.frames[self.cur_frame]))
         dest_x, dest_y = get_pos_in_field(self.destination,
                                           cell_size, top, left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
@@ -83,7 +85,32 @@ class Carrier(AnimatedSprite):
                 self.rect.midbottom]
 
     def get_pos(self):
+        """Функция дя получения точки - положения в сетке для BFS"""
         pos_x, pos_y = map(int, get_pos_in_field(
             self.rect.center, Settings.CELL_SIZE, Settings.TOP,
             Settings.LEFT))
         return pos_y, pos_x
+
+    def check_stuck(self):
+        """Функция для перемещения авианосца, если он застрял в суше"""
+        land = list(Settings.BACKGROUND_MAP)[0]
+        if pygame.sprite.collide_mask(self, land):
+            x = [(self.rect.x + i, self.rect.centery) for i in
+                 range(1, self.image.get_width() - 1)]
+            y = [(self.rect.centerx, self.rect.y + i) for i in
+                 range(1, self.image.get_height() - 1)]
+            a = filter(
+                lambda p: land.rect.collidepoint(p) and land.mask.get_at(p),
+                set(x) | set(y))
+            if a:
+                p = find_free_space(self.get_pos())
+                self.destination = list(get_pos_in_coords([
+                    p[1] + 0.5, p[0] + 0.5], Settings.TOP, Settings.LEFT))
+                # self.rect.center = get_pos_in_coords([
+                #     p[1] + 0.5, p[0] + 0.5], Settings.TOP, Settings.LEFT)
+                # self.pos = list(self.rect.center)
+                # self.prev_pos = list(self.rect.center)
+                # self.mask = pygame.mask.from_surface(new_image_size(
+                #     self.frames[self.cur_frame]))
+                # self.destination = list(self.rect.center)
+

@@ -78,6 +78,9 @@ def update_objects():
                              base.y * Settings.CELL_SIZE + Settings.TOP]
     camera.new_position()
     calculate_speed(Settings.CELL_SIZE)
+    player = list(Settings.PLAYER_SPRITE)[0]
+    player.check_stuck()
+    # [carrier.check_stuck() for carrier in Settings.CARRIER_GROUP]
     game_objects.cell_size = Settings.CELL_SIZE
 
 

@@ -137,7 +137,7 @@ class Missile(AnimatedSprite):
                              ai.rect.centery - self.rect.centery)).normalize()
                     if pygame.sprite.collide_mask(self, ai):
                         exp = Explosion(ai)
-                        ai.current_health -= 10
+                        ai.current_health = max(ai.current_health - 10, 0)
                         Settings.PLAYER_MISSILES_HIT += 1
                         if ai.current_health > 0:
                             if self.explosion_sound:
@@ -161,7 +161,8 @@ class Missile(AnimatedSprite):
                         [sound.stop() for sound in Settings.ALL_EFFECTS]
                         EXPLOSION.play()
                         self.explosion_sound = False
-                        player.current_health -= 10
+                        player.current_health = \
+                            max(player.current_health - 10, 0)
                         self.kill()
         except ValueError:
             self.total_ticks = 10
