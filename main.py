@@ -990,7 +990,8 @@ class Run:
                                                          air_tracking):
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
-                self.AI_missiles_timer += 0.02
+                if not Settings.IS_PAUSE:
+                    self.AI_missiles_timer += 0.02
                 pygame.draw.circle(screen, RED, ai.rect.center,
                                    Settings.CELL_SIZE * 4, 1)
                 self.play_contact_lost = True
