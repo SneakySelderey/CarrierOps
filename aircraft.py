@@ -27,6 +27,7 @@ class Aircraft(AnimatedSprite):
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
         self.to_return = False
+        self.tracking = True
         self.radius = Settings.CELL_SIZE * 3.5
         self.mask = pygame.mask.from_surface(self.image)
         self.pause_checked = False
@@ -52,7 +53,8 @@ class Aircraft(AnimatedSprite):
                 self.rect.center = self.pos
 
             if abs(self.destination[0] - self.rect.centerx) <= 5 and \
-                    abs(self.destination[1] - self.rect.centery) <= 5:
+                    abs(self.destination[1] - self.rect.centery) <= 5 and \
+                    not self.tracking:
                 #  Если самолет достиг цели
                 self.stop = True
 
@@ -102,6 +104,7 @@ class Aircraft(AnimatedSprite):
             opposite = list(Settings.PLAYER_SPRITE)
         for target in opposite:
             if pygame.sprite.collide_circle_ratio(0.47)(self, target):
+                self.tracking = True
                 self.stop = False
                 if not pygame.sprite.collide_mask(self, target):
                     self.alpha = atan2(target.rect.centery - self.rect.centery,
