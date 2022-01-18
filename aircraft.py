@@ -27,7 +27,7 @@ class Aircraft(AnimatedSprite):
         self.delete = False  # Если самолет вернулся на авианосец, он удаляется
         self.play_sound = True
         self.to_return = False
-        self.tracking = True
+        self.tracking = False
         self.radius = Settings.CELL_SIZE * 3.5
         self.mask = pygame.mask.from_surface(self.image)
         self.pause_checked = False
@@ -98,6 +98,7 @@ class Aircraft(AnimatedSprite):
 
     def aircraft_tracking(self):
         """Обновление координат при слежении за целью"""
+        self.tracking = False
         if self.obj == 'P0':
             opposite = list(Settings.AI_SPRITE)
         else:
