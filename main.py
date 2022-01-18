@@ -969,7 +969,7 @@ class Run:
                     if not aircraft.pause_checked:
                         Settings.IS_PAUSE = True
                         aircraft.pause_checked = True
-                        Settings.MISSILE_DETECTION.play()
+                        Settings.AIRCRAFT_DETECTION.play()
                 else:
                     aircraft.visibility = False
                     aircraft.pause_checked = False
@@ -1016,7 +1016,7 @@ class Run:
             # противник прячется в тумане войны
             elif not pygame.sprite.collide_circle_ratio(0.5)(player, ai) \
                     and not missile_tracking and not air_tracking:
-                ai.visibility = True
+                ai.visibility = False
                 self.play_new_contact = True
                 if self.play_contact_lost:
                     CONTACT_LOST.play()
