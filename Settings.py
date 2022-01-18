@@ -37,14 +37,17 @@ def bfs(start, end):
 def find_free_space(start):
     """Функция поиска ближайшей свободной клетки"""
     visited, queue = [start], deque([start])
-    while queue:
-        vertex = queue.popleft()
-        if BOARD[vertex[0]][vertex[1]] == '.':
-            return vertex
-        for nr in GRAPH[vertex]:
-            if nr not in visited:
-                visited.append(nr)
-                queue.append(nr)
+    try:
+        while queue:
+            vertex = queue.popleft()
+            if BOARD[vertex[0]][vertex[1]] == '.':
+                return vertex
+            for nr in GRAPH[vertex]:
+                if nr not in visited:
+                    visited.append(nr)
+                    queue.append(nr)
+    except IndexError:
+        return start
 
 
 def get_pos_in_field(center, cell, top, left):
@@ -170,6 +173,7 @@ FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
 UPDATE_PARTICLES = pygame.USEREVENT + 5
+AI_FUEL_CONSUMPTION = pygame.USEREVENT + 6
 
 # Цвета
 BLACK = pygame.Color('black')

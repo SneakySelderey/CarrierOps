@@ -33,7 +33,7 @@ class Base(pygame.sprite.Sprite):
         self.show_bar = False
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
-            self.ticks_to_give_resource = 0
+            self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -131,7 +131,7 @@ class SuperBase(Base):
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
-            self.visibility = True
+            self.visibility = False
         else:
             self.start_of_capture = 1
             Settings.FRIENDLY_BASES.append((self.x, self.y))
@@ -153,7 +153,7 @@ class SuperBase(Base):
                     self.give_resources(ai)
 
         self.ticks_to_capture = self.ticks_to_capture if \
-            prev_start == self.start_of_capture else Settings.BASE_TICKS
+            prev_start == self.start_of_capture else Settings.BASE_TICKS * 2
 
         if prev_start != self.start_of_capture:
             self.to_add = True

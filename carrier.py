@@ -36,6 +36,9 @@ class Carrier(AnimatedSprite):
         if self.alpha != 0 and self.obj == 'player':
             pygame.time.set_timer(Settings.FUEL_CONSUMPTION,
                                   Settings.FUEL_CONSUMPTION_SPEED)
+        elif self.alpha != 0 and self.obj == 'ai':
+            pygame.time.set_timer(Settings.AI_FUEL_CONSUMPTION,
+                                  Settings.FUEL_CONSUMPTION_SPEED)
 
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""

@@ -80,7 +80,6 @@ def update_objects():
     calculate_speed(Settings.CELL_SIZE)
     player = list(Settings.PLAYER_SPRITE)[0]
     player.check_stuck()
-    # [carrier.check_stuck() for carrier in Settings.CARRIER_GROUP]
     game_objects.cell_size = Settings.CELL_SIZE
 
 
@@ -169,6 +168,7 @@ def load_save(title):
     Settings.IS_PAUSE = True
     calculate_speed(Settings.CELL_SIZE)
     give_tooltip(3)
+    Settings.PARTICLES_GROUP.empty()
 
 
 def create_save(title):
@@ -1023,10 +1023,11 @@ class Run:
                 screen.blit(ico, rect)
             # Отрисовка полоски захвата
             if base.show_bar and base.ticks_to_capture:
+                tks = Settings.BASE_TICKS if base.state not in [
+                    'player', 'ai'] else Settings.BASE_TICKS * 2
                 image = pygame.Surface((int(
                     Settings.CELL_SIZE - Settings.CELL_SIZE /
-                    Settings.BASE_TICKS
-                    * base.ticks_to_capture), 5))
+                    tks * base.ticks_to_capture), 5))
                 image.fill(BLUE if base.start_of_capture == 1 else RED)
                 rect = image.get_rect(topleft=(base.rect.x, base.rect.y - 10))
                 screen.blit(image, rect)
@@ -1038,6 +1039,7 @@ class Run:
         mouse_border = False
         give_tooltip(3)
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+        pygame.time.set_timer(AI_FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
         camera.new_position()
@@ -1107,6 +1109,9 @@ class Run:
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
+                if event.type == AI_FUEL_CONSUMPTION and not Settings.IS_PAUSE:
+                    for ai in Settings.AI_SPRITE:
+                        ai.oil_volume = max(ai.oil_volume - 1, 0)
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     player.oil_volume = max(player.oil_volume - 1, 0)
                 if event.type == UPDATE_ALL_SPRITES and not (
