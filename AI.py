@@ -25,6 +25,8 @@ class AI(Carrier):
         land = list(Settings.BACKGROUND_MAP)[0]
         if pygame.sprite.collide_mask(self, land):
             self.pos = [self.prev_pos[0], self.prev_pos[1]]
+            self.check_stuck()
+            self.path = []
 
         if self.pos != self.destination and not self.stop:
             self.prev_pos = [self.pos[0], self.pos[1]]

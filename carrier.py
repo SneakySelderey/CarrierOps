@@ -106,11 +106,10 @@ class Carrier(AnimatedSprite):
                 p = find_free_space(self.get_pos())
                 self.destination = list(get_pos_in_coords([
                     p[1] + 0.5, p[0] + 0.5], Settings.TOP, Settings.LEFT))
-                # self.rect.center = get_pos_in_coords([
-                #     p[1] + 0.5, p[0] + 0.5], Settings.TOP, Settings.LEFT)
-                # self.pos = list(self.rect.center)
-                # self.prev_pos = list(self.rect.center)
-                # self.mask = pygame.mask.from_surface(new_image_size(
-                #     self.frames[self.cur_frame]))
-                # self.destination = list(self.rect.center)
+                for i in [(3, 0), (-3, 0), (0, 3), (0, -3)]:
+                    self.rect.center = self.rect.center[0] + i[0], \
+                                       self.rect.center[1] + i[1]
+                    self.pos = list(self.rect.center)
+                    if not pygame.sprite.collide_mask(self, land):
+                        break
 
