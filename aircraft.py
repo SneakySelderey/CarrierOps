@@ -63,17 +63,18 @@ class AircraftFriendly(AnimatedSprite):
     def new_position(self, cell_size, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
         self.image = new_image_size(self.frames[self.cur_frame])
-        c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
-        self.rect = self.image.get_rect(
-            center=get_pos_in_coords((c_x, c_y), top, left))
-        self.pos = get_pos_in_coords(get_pos_in_field(self.pos, cell_size,
-                                                      top, left), top, left)
         dest_x, dest_y = get_pos_in_field(self.destination, cell_size, top,
                                           left)
         self.destination = get_pos_in_coords((dest_x, dest_y), top, left)
         if not self.stop:
+            c_x, c_y = get_pos_in_field(self.rect.center, cell_size, top, left)
+            self.rect = self.image.get_rect(
+                center=get_pos_in_coords((c_x, c_y), top, left))
             self.alpha = atan2(self.destination[1] - self.rect.centery,
                                self.destination[0] - self.rect.centerx)
+        else:
+            self.rect.center = self.destination
+        self.pos = list(self.rect.center)
         self.image = pygame.transform.rotate(self.image,
                                              -degrees(self.alpha) - 90)
         self.radius = Settings.CELL_SIZE * 3.5
@@ -90,7 +91,7 @@ class AircraftFriendly(AnimatedSprite):
         self.stop = False
         self.to_return = True
         if pygame.sprite.collide_rect(self, player):
-            Settings.NUM_OF_AIRCRAFT += 1
+            player.num_of_aircraft += 1
             self.delete = True
 
     def aircraft_tracking(self):

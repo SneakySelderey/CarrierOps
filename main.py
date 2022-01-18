@@ -1056,16 +1056,17 @@ class Run:
                     if event.button == 3 and player.num_of_missiles:
                         self.missile_launch(event.pos)
                         player.num_of_missiles -= 1
-                    if event.button == 4 and Settings.CELL_SIZE < 200:
-                        Settings.CELL_SIZE = min(
-                            Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
-                            200)
-                        update_objects()
-                    if event.button == 5 and Settings.CELL_SIZE > 30:
-                        Settings.CELL_SIZE = max(
-                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
-                            30)
-                        update_objects()
+                    if not arrow_pressed and not mouse_border:
+                        if event.button == 4 and Settings.CELL_SIZE < 200:
+                            Settings.CELL_SIZE = min(
+                                Settings.CELL_SIZE + 2 *
+                                Settings.CELL_SIZE / 30, 200)
+                            update_objects()
+                        if event.button == 5 and Settings.CELL_SIZE > 30:
+                            Settings.CELL_SIZE = max(
+                                Settings.CELL_SIZE - 2 *
+                                Settings.CELL_SIZE / 30, 30)
+                            update_objects()
                 if event.type == pygame.KEYDOWN:
                     diff = Settings.CELL_SIZE // 4
                     dx, dy = camera.dx, camera.dy
