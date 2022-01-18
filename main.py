@@ -969,7 +969,7 @@ class Run:
                     if not aircraft.pause_checked:
                         Settings.IS_PAUSE = True
                         aircraft.pause_checked = True
-                        Settings.MISSILE_DETECTION.play()
+                        Settings.AIRCRAFT_DETECTION.play()
                 else:
                     aircraft.visibility = False
                     aircraft.pause_checked = False
