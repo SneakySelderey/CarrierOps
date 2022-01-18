@@ -21,14 +21,14 @@ class AI(Carrier):
         self.path = []
         self.destination = list(self.rect.center)
         self.prev_pos = list(self.rect.center)
-        self.num_of_missiles = 1
 
     def update(self):
         """Обновление позиции объекта"""
         if self.oil_volume:
             self.left = self.prev_pos[0] > self.pos[0]
             land = list(Settings.BACKGROUND_MAP)[0]
-            if pygame.sprite.collide_mask(self, land):
+            if pygame.sprite.collide_mask(self, land) or not \
+                    self.rect.colliderect(land.rect):
                 self.pos = [self.prev_pos[0], self.prev_pos[1]]
                 self.check_stuck()
                 self.path = []
@@ -91,9 +91,6 @@ class AI(Carrier):
             mis = Missile(self.rect.center, coords, False, 'ai')
             mis.new_position(Settings.CELL_SIZE, Settings.TOP, Settings.LEFT)
             self.num_of_missiles -= 1
-        for i in Settings.BASES_SPRITES:
-            if i.state == 'ai':
-                i.num_of_missiles = 100
 
     def respawn(self):
         """Возрождение авианосца потивника"""
