@@ -106,7 +106,7 @@ class Carrier(AnimatedSprite):
                 p = find_free_space(self.get_pos())
                 self.destination = list(get_pos_in_coords([
                     p[1] + 0.5, p[0] + 0.5], Settings.TOP, Settings.LEFT))
-                for i in [(3, 0), (-3, 0), (0, 3), (0, -3)]:
+                for i in [(5, 0), (-5, 0), (0, 5), (0, -5)]:
                     self.rect.center = self.rect.center[0] + i[0], \
                                        self.rect.center[1] + i[1]
                     self.pos = list(self.rect.center)
