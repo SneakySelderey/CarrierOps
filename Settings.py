@@ -2,7 +2,7 @@ import pygame
 import ctypes
 import os
 import sqlite3
-from random import random
+from random import random, randint
 from collections import deque
 
 
@@ -129,10 +129,10 @@ BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
-SPEEDS = {'PLAYER': 1.5, 'AI': 1.5, 'MISSILE': 2, 'AIRCRAFT': 2.5}
+SPEEDS = {'PLAYER': 1.5, 'AI': 15, 'MISSILE': 2, 'AIRCRAFT': 2.5}
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
-NUM_OF_BASES = 10
+NUM_OF_BASES = randint(10, 13)
 PLAYER_START = None
 AI_START = None
 # Для подсчета результатов

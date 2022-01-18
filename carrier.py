@@ -91,17 +91,19 @@ class Carrier(AnimatedSprite):
             Settings.LEFT))
         return pos_y, pos_x
 
-    def check_stuck(self):
+    def check_stuck(self, ai=False):
         """Функция для перемещения авианосца, если он застрял в суше"""
         land = list(Settings.BACKGROUND_MAP)[0]
         if pygame.sprite.collide_mask(self, land):
-            x = [(self.rect.x + i, self.rect.centery) for i in
-                 range(1, self.image.get_width() - 1)]
-            y = [(self.rect.centerx, self.rect.y + i) for i in
-                 range(1, self.image.get_height() - 1)]
-            a = filter(
-                lambda p: land.rect.collidepoint(p) and land.mask.get_at(p),
-                set(x) | set(y))
+            a = [1]
+            if not ai:
+                x = [(self.rect.x + i, self.rect.centery) for i in
+                     range(1, self.image.get_width() - 1)]
+                y = [(self.rect.centerx, self.rect.y + i) for i in
+                     range(1, self.image.get_height() - 1)]
+                a = filter(
+                    lambda p: land.rect.collidepoint(p) and land.mask.get_at(p),
+                    set(x) | set(y))
             if a:
                 p = find_free_space(self.get_pos())
                 self.destination = list(get_pos_in_coords([

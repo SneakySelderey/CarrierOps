@@ -156,6 +156,7 @@ def load_save(title):
                                      base[1]['visibility'])
             for i, j in base[1].items():
                 new_base.__dict__[i] = j
+        Settings.NUM_OF_BASES = len(Settings.BASES_SPRITES)
         # Загрузим ракеты
         for missile in data['missiles']:
             new_mis = Missile(
@@ -731,8 +732,11 @@ def show_resources_menu():
     background2 = help_surface
     base = [i for i in Settings.BASES_SPRITES if i.state == 'player']
     try:
-        resources = base[0].num_of_aircraft, base[0].num_of_missiles, \
-                    base[0].oil_volume, base[0].num_of_repair_parts
+        air = sum([b.num_of_aircraft for b in base])
+        mis = sum([m.num_of_missiles for m in base])
+        oil = sum([o.oil_volume for o in base])
+        rep = sum([r.num_of_repair_parts for r in base])
+        resources = air, mis, oil, rep
     except AttributeError:
         resources = 0, 0, 0, 0
     while True:
