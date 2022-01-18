@@ -2,7 +2,52 @@ import pygame
 import ctypes
 import os
 import sqlite3
-from random import random
+from random import random, randint
+from collections import deque
+
+
+def check(x, y, n, m):
+    """Функция проверки попаданяи коорднаты в поле"""
+    return 0 <= x < n and 0 <= y < m
+
+
+def bfs(start, end):
+    """Функция поиска в ширину в графе клеток поля"""
+    path = []
+    visited, queue = [start], deque([start])
+    p = {}
+    while queue:
+        vertex = queue.popleft()
+        if vertex == end:
+            break
+        for nr in GRAPH[vertex]:
+            if nr not in visited and BOARD[nr[0]][nr[1]] != 'X':
+                visited.append(nr)
+                queue.append(nr)
+                p[nr] = vertex
+    if end in visited:
+        to = end
+        while to != start:
+            path.append(to)
+            to = p[to]
+        path.reverse()
+    return path
+
+
+def find_free_space(start):
+    """Функция поиска ближайшей свободной клетки"""
+    visited, queue = [start], deque([start])
+    try:
+        while queue:
+            vertex = queue.popleft()
+            if BOARD[vertex[0]][vertex[1]] == '.':
+                return vertex
+            for nr in GRAPH[vertex]:
+                if nr not in visited:
+                    visited.append(nr)
+                    queue.append(nr)
+    except IndexError:
+        return start
 
 
 def get_pos_in_field(center, cell, top, left):
@@ -72,6 +117,7 @@ BACKGROUND_MAP = pygame.sprite.Group()
 MOVE_POINT_SPRITE = pygame.sprite.Group()
 ALWAYS_UPDATE = pygame.sprite.Group()
 BOARD = []
+GRAPH = {}
 EXPLOSION_GROUP = pygame.sprite.Group()
 PARTICLES_GROUP = pygame.sprite.Group()
 FRIENDLY_BASES = []
@@ -80,15 +126,7 @@ HOSTILE_BASES = []
 # Числовые и булевые значения значения
 AIR_SPEED = 2.5
 MISSILE_SPEED = 2
-NUM_OF_MISSILES = 5
-NUM_OF_AIRCRAFT = 3
-OIL_VOLUME = 100
-NUM_OF_REPAIR_PARTS = 0
-BASE_NUM_OF_MISSILES = 0
-BASE_NUM_OF_AIRCRAFT = 0
-BASE_OIL_VOLUME = 0
-BASE_NUM_OF_REPAIR_PARTS = 0
-FUEL_CONSUMPTION_SPEED = 1000
+FUEL_CONSUMPTION_SPEED = 2000
 BASES_RATIO_R_A_M_O = 0.2, 0.2, 0.25, 0.35
 BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
@@ -97,7 +135,7 @@ AI_SPEED = 1
 SPEEDS = {'PLAYER': 1.5, 'AI': 1.5, 'MISSILE': 2, 'AIRCRAFT': 2.5}
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
-NUM_OF_BASES = 10
+NUM_OF_BASES = randint(10, 13)
 PLAYER_START = None
 AI_START = None
 # Для подсчета результатов
@@ -135,6 +173,7 @@ FUEL_CONSUMPTION = pygame.USEREVENT + 2
 UPDATE_ALL_SPRITES = pygame.USEREVENT + 3
 UPDATE_ANIMATED_SPRITES = pygame.USEREVENT + 4
 UPDATE_PARTICLES = pygame.USEREVENT + 5
+AI_FUEL_CONSUMPTION = pygame.USEREVENT + 6
 
 # Цвета
 BLACK = pygame.Color('black')
@@ -151,6 +190,7 @@ FIRE_COLORS = [RED, pygame.Color('yellow'), pygame.Color('orange'), GREY]
 FADING = pygame.Color(0, 0, 0, 200)
 
 # Изображения
+GAME_ICON = pygame.image.load('data/img/icon.png').convert_alpha()
 PLANE_ICON = pygame.transform.scale(pygame.image.load('data/img/plane.png'),
                                     (40, 40))
 MISSILE_ICON = pygame.transform.scale(pygame.image.load(

@@ -16,6 +16,7 @@ class Aircraft(AnimatedSprite):
             super().__init__(Settings.AIRCRAFT_HOSTILE_SHEET, 7, 1, Settings.AI_AIRCRAFT)
         self.rect.center = center
         self.pos = list(self.rect.center)
+        self.prev_pos = list(self.rect.center)
         self.visibility = visibility
         self.alpha = atan2(destination[1] - self.pos[1],
                            destination[0] - self.pos[0])
@@ -46,6 +47,7 @@ class Aircraft(AnimatedSprite):
 
             if self.pos != self.destination and not self.stop:
                 # Обновление кооординат (из полярнйо системы в декартову)
+                self.prev_pos = [self.pos[0], self.pos[1]]
                 self.pos[0] = self.pos[0] + Settings.AIR_SPEED * cos(
                     self.alpha)
                 self.pos[1] = self.pos[1] + Settings.AIR_SPEED * sin(
@@ -94,8 +96,8 @@ class Aircraft(AnimatedSprite):
         self.destination = [carrier.rect.centerx, carrier.rect.centery]
         self.stop = False
         self.to_return = True
-        if pygame.sprite.collide_rect(self, carrier):
-            Settings.NUM_OF_AIRCRAFT += 1
+        if pygame.sprite.collide_rect(self, player):
+            player.num_of_aircraft += 1
             self.delete = True
 
     def aircraft_tracking(self):

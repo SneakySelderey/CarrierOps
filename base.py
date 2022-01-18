@@ -32,7 +32,7 @@ class Base(pygame.sprite.Sprite):
         self.show_bar = False
         if self.state not in ['player', 'ai']:
             self.resource_type = random_resource_type()
-            self.ticks_to_give_resource = 0
+            self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
 
     def update(self):
         """Обновление изображения базы, если она захватывается"""
@@ -87,17 +87,23 @@ class Base(pygame.sprite.Sprite):
 
         if self.ticks_to_give_resource and not Settings.IS_PAUSE:
             self.ticks_to_give_resource -= 1
-        elif self.state == 'friendly' and not Settings.IS_PAUSE:
+        elif not Settings.IS_PAUSE:
+            state = 'player' if self.state == 'friendly' else 'ai'
+            main_bases = [base for base in Settings.BASES_SPRITES if
+                          base.state == state]
             self.ticks_to_give_resource = Settings.GIVE_RESOURCE_TIME
             if self.resource_type == 'oil':
-                Settings.BASE_OIL_VOLUME = min(
-                    Settings.BASE_OIL_VOLUME + 1, 100)
+                for base in main_bases:
+                    base.oil_volume = min(base.oil_volume + 1, 100)
             elif self.resource_type == 'missile':
-                Settings.BASE_NUM_OF_MISSILES += 1
+                for base in main_bases:
+                    base.num_of_missiles += 1
             elif self.resource_type == 'aircraft':
-                Settings.BASE_NUM_OF_AIRCRAFT += 1
+                for base in main_bases:
+                    base.num_of_aircraft += 1
             else:
-                Settings.BASE_NUM_OF_REPAIR_PARTS += 1
+                for base in main_bases:
+                    base.num_of_repair_parts += 1
 
     def new_position(self, cell, top, left):
         """Функция для подсчета новых координат после изменения разрешения"""
@@ -119,6 +125,8 @@ class SuperBase(Base):
     def __init__(self, *args):
         super().__init__(*args)
         self.ticks_to_capture = 0
+        self.num_of_aircraft = self.num_of_missiles = self.oil_volume = \
+            self.num_of_repair_parts = 0
         if self.state == 'ai':
             Settings.HOSTILE_BASES.append((self.x, self.y))
             self.start_of_capture = 2
@@ -135,25 +143,16 @@ class SuperBase(Base):
         if pygame.sprite.collide_mask(self, player) and not Settings.IS_PAUSE:
             self.start_of_capture = 1
             if self.state == 'player':
-                Settings.NUM_OF_AIRCRAFT += Settings.BASE_NUM_OF_AIRCRAFT
-                Settings.NUM_OF_MISSILES += Settings.BASE_NUM_OF_MISSILES
-                oil_lack = min(100 - Settings.OIL_VOLUME,
-                               Settings.BASE_OIL_VOLUME)
-                Settings.BASE_OIL_VOLUME -= oil_lack
-                Settings.OIL_VOLUME += oil_lack
-                hp_lack = min((100 - player.current_health) // 10,
-                              Settings.BASE_NUM_OF_REPAIR_PARTS)
-                Settings.BASE_NUM_OF_REPAIR_PARTS -= hp_lack
-                player.current_health += hp_lack * 10
-                Settings.BASE_NUM_OF_AIRCRAFT = 0
-                Settings.BASE_NUM_OF_MISSILES = 0
+                self.give_resources(player)
         for ai in Settings.AI_SPRITE:
             if pygame.sprite.collide_mask(self, ai) and not \
                     pygame.sprite.collide_mask(self, player):
                 self.start_of_capture = 2
+                if self.state == 'ai':
+                    self.give_resources(ai)
 
         self.ticks_to_capture = self.ticks_to_capture if \
-            prev_start == self.start_of_capture else Settings.BASE_TICKS
+            prev_start == self.start_of_capture else Settings.BASE_TICKS * 2
 
         if prev_start != self.start_of_capture:
             self.to_add = True
@@ -194,3 +193,17 @@ class SuperBase(Base):
         to_save = self.__dict__.copy()
         del to_save['_Sprite__g'], to_save['image'], to_save['mask']
         return 'super base', to_save
+
+    def give_resources(self, obj):
+        """Функция для пополнения запасов ресурсов на авианосце"""
+        obj.num_of_aircraft += self.num_of_aircraft
+        obj.num_of_missiles += self.num_of_missiles
+        oil_lack = min(100 - obj.oil_volume, self.oil_volume)
+        self.oil_volume -= oil_lack
+        obj.oil_volume += oil_lack
+        hp_lack = min((100 - obj.current_health) // 10,
+                      self.num_of_repair_parts)
+        self.num_of_repair_parts -= hp_lack
+        obj.current_health += hp_lack * 10
+        self.num_of_aircraft = 0
+        self.num_of_missiles = 0

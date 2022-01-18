@@ -22,10 +22,6 @@ from string import ascii_letters, digits
 from base import Base, SuperBase
 
 
-def check(x, y, n, m):
-    return 0 <= x < n and 0 <= y < m
-
-
 def give_sprites_to_check():
     """Функция, возвращающая список групп спрайтов для проверки в методе
     fog_of_war и camera_update"""
@@ -33,18 +29,15 @@ def give_sprites_to_check():
             Settings.PLAYER_SPRITE, Settings.MOVE_POINT_SPRITE,
             Settings.AI_SPRITE, Settings.PLAYER_MISSILES,
             Settings.PLAYER_AIRCRAFT, Settings.AI_MISSILES,
-            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP,
-            Settings.PARTICLES_GROUP]
+            Settings.AI_AIRCRAFT, Settings.EXPLOSION_GROUP]
 
 
 def set_standard_values():
     """Функция для установки значений по умолчанию"""
-    Settings.BASE_NUM_OF_REPAIR_PARTS = Settings.BASE_NUM_OF_MISSILES = \
-        Settings.BASE_NUM_OF_AIRCRAFT = Settings.BASE_OIL_VOLUME = 0
-    Settings.NUM_OF_REPAIR_PARTS = 0
-    Settings.OIL_VOLUME = 100
-    Settings.NUM_OF_AIRCRAFT = 3
-    Settings.NUM_OF_MISSILES = 5
+    for carrier in Settings.CARRIER_GROUP:
+        carrier.num_of_aircraft = 3
+        carrier.num_of_missiles = 5
+        carrier.oil_volume = 100
     Settings.LAUNCHED_MISSILES = 0
     Settings.LAUNCHED_AIRCRAFT = 0
     Settings.PLAYER_MISSILES_HIT = 0
@@ -84,6 +77,8 @@ def update_objects():
                              base.y * Settings.CELL_SIZE + Settings.TOP]
     camera.new_position()
     calculate_speed(Settings.CELL_SIZE)
+    player = list(Settings.PLAYER_SPRITE)[0]
+    player.check_stuck()
     game_objects.cell_size = Settings.CELL_SIZE
 
 
@@ -115,13 +110,6 @@ def load_save(title):
         Settings.AI_MISSILES_HIT = data['ai_hit']
         Settings.BASES_CAPT_PLAYER = data['player_captured']
         Settings.BASES_CAPT_AI = data['ai_captured']
-        Settings.OIL_VOLUME = data['player_oil']
-        Settings.NUM_OF_AIRCRAFT = data['player_aircraft']
-        Settings.NUM_OF_MISSILES = data['player_missiles']
-        Settings.BASE_OIL_VOLUME = data['base_oil']
-        Settings.BASE_NUM_OF_AIRCRAFT = data['base_aircraft']
-        Settings.BASE_NUM_OF_MISSILES = data['base_missiles']
-        Settings.BASE_NUM_OF_REPAIR_PARTS = data['base_repair_parts']
         Settings.CELL_SIZE = data['cell_size']
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
@@ -166,6 +154,7 @@ def load_save(title):
                                      base[1]['visibility'])
             for i, j in base[1].items():
                 new_base.__dict__[i] = j
+        Settings.NUM_OF_BASES = len(Settings.BASES_SPRITES)
         # Загрузим ракеты
         for missile in data['missiles']:
             new_mis = Missile(
@@ -177,6 +166,8 @@ def load_save(title):
     game_objects.menu = False
     Settings.IS_PAUSE = True
     calculate_speed(Settings.CELL_SIZE)
+    give_tooltip(3)
+    Settings.PARTICLES_GROUP.empty()
 
 
 def create_save(title):
@@ -197,13 +188,6 @@ def create_save(title):
         data['ai_hit'] = Settings.AI_MISSILES_HIT
         data['player_captured'] = Settings.BASES_CAPT_PLAYER
         data['ai_captured'] = Settings.BASES_CAPT_AI
-        data['player_oil'] = Settings.OIL_VOLUME
-        data['player_aircraft'] = Settings.NUM_OF_AIRCRAFT
-        data['player_missiles'] = Settings.NUM_OF_MISSILES
-        data['base_oil'] = Settings.BASE_OIL_VOLUME
-        data['base_aircraft'] = Settings.BASE_NUM_OF_AIRCRAFT
-        data['base_missiles'] = Settings.BASE_NUM_OF_MISSILES
-        data['base_repair_parts'] = Settings.BASE_NUM_OF_REPAIR_PARTS
         data['cell_size'] = Settings.CELL_SIZE
         data['game'] = game_objects.data_to_save()
         data['bases'] = [base.data_to_save() for base in
@@ -234,6 +218,12 @@ def give_tooltip(num):
             manager=user_data_manager,
             hover_distance=(1, 1),
             html_text="Вы не можете сохраниться, не начав игру")
+    elif num == 3:
+        pygame_gui.elements.UIScreenSpaceHealthBar(
+            relative_rect=pygame.Rect(10, 13, 200, 30),
+            manager=campaign_manager,
+            sprite_to_monitor=list(Settings.PLAYER_SPRITE)[0]
+        )
 
 
 def rebase_elements():
@@ -286,6 +276,7 @@ def clear_sprite_groups():
     Settings.EXPLOSION_GROUP.empty()
     Settings.ALL_SPRITES_FOR_SURE.empty()
     Settings.PLAYER_SPRITE.empty()
+    Settings.PARTICLES_GROUP.empty()
     Settings.CARRIER_GROUP.empty()
     Settings.AI_SPRITE.empty()
     Settings.BASES_SPRITES.empty()
@@ -416,6 +407,9 @@ def show_setting_screen(flag=True):
                         rebase_elements()
                         help_surface = pygame.transform.scale(
                             help_surface, (Settings.WIDTH, Settings.HEIGHT))
+                        background2 = help_surface if not flag else \
+                            pygame.transform.scale(MENU_BACKGROUND, (
+                                Settings.WIDTH, Settings.HEIGHT))
                         background = pygame.transform.scale(
                             SETTINGS_BACKGROUND, (Settings.WIDTH,
                                                   Settings.HEIGHT))
@@ -736,6 +730,15 @@ def show_resources_menu():
     background = pygame.transform.scale(RESOURCE_BACKGROUND, (
         Settings.WIDTH, Settings.HEIGHT))
     background2 = help_surface
+    base = [i for i in Settings.BASES_SPRITES if i.state == 'player']
+    try:
+        air = sum([b.num_of_aircraft for b in base])
+        mis = sum([m.num_of_missiles for m in base])
+        oil = sum([o.oil_volume for o in base])
+        rep = sum([r.num_of_repair_parts for r in base])
+        resources = air, mis, oil, rep
+    except AttributeError:
+        resources = 0, 0, 0, 0
     while True:
         delta = clock.tick(60) / 1000.0
         for event in pygame.event.get():
@@ -756,9 +759,7 @@ def show_resources_menu():
             background2.fill((0, 0, 0, alpha_down))
         screen.blit(background2, (0, 0))
         [i.update_text(j) for i, j in zip(
-            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], [
-                Settings.BASE_NUM_OF_AIRCRAFT, Settings.BASE_NUM_OF_MISSILES,
-                Settings.BASE_OIL_VOLUME, Settings.BASE_NUM_OF_REPAIR_PARTS])]
+            [AIR_NUM, MIS_NUM, OIL_NUM, REP_NUM], resources)]
         Settings.RESOURCES_BASE.update()
         Settings.RESOURCES_BASE.draw(screen)
         # Обновление менеджера
@@ -771,8 +772,6 @@ class Run:
     """Класс, в котором обрабатываются все основные игровые события"""
 
     def __init__(self):
-        # self.cells_x = Settings.WIDTH * 2 // Settings.CELL_SIZE
-        # self.cells_y = Settings.HEIGHT * 2 // Settings.CELL_SIZE
         self.cells_x, self.cells_y = 40, 22
 
         self.board = Board(self.cells_x, self.cells_y, self)
@@ -789,12 +788,13 @@ class Run:
         self.battle = False
         self.play_main_base_detection = True
 
-        self.g = defaultdict(list)
+        Settings.GRAPH = defaultdict(list)
         n, m = self.board.height, self.board.width
         for i in range(n):
             for j in range(m):
-                self.g[(i, j)] = [(i + v[0], j + v[1]) for v in Settings.N if
-                                  check(i + v[0], j + v[1], n, m)]
+                Settings.GRAPH[(i, j)] = [
+                    (i + v[0], j + v[1]) for v in N if check(
+                        i + v[0], j + v[1], n, m)]
 
         Map(True, self.board, chosen_map)
         LandCheck(self.board)
@@ -805,27 +805,6 @@ class Run:
     def data_to_save(self):
         """Функция, возвращающая занчения дял сохранения"""
         return self.__dict__.copy()
-
-    def bfs(self, start, g, end):
-        path = []
-        visited, queue = [start], deque([start])
-        p = {}
-        while queue:
-            vertex = queue.popleft()
-            if vertex == end:
-                break
-            for nr in g[vertex]:
-                if nr not in visited and Settings.BOARD[nr[0]][nr[1]] != 'X':
-                    visited.append(nr)
-                    queue.append(nr)
-                    p[nr] = vertex
-        if end in visited:
-            to = end
-            while to != start:
-                path.append(to)
-                to = p[to]
-            path.reverse()
-        return path
 
     def missile_launch(self, destination):
         """Функция для запуска противокорабельной ракеты"""
@@ -847,28 +826,33 @@ class Run:
     def destination_ai(self):
         """Расчет точки движания для ИИ"""
         for ai in Settings.AI_SPRITE:
-            distance = []
-            ai_pos_x = ai.rect.centerx // Settings.CELL_SIZE
-            ai_pos_y = ai.rect.centery // Settings.CELL_SIZE
-            for base in Settings.BASES_SPRITES:
-                dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
-                if base.start_of_capture != 2 and base.state != 'ai':
-                    distance.append(
-                        (dist, [base.rect.centerx, base.rect.centery]))
-            try:
-                destination_ai = min(distance, key=lambda x: x[0])
-                idx = distance.index(destination_ai)
-                path = self.bfs(((ai.rect.centery - self.board.top) // Settings.CELL_SIZE,
-                                (ai.rect.centerx - self.board.left) // Settings.CELL_SIZE),
-                                self.g, ((distance[idx][-1][1] - self.board.top) // Settings.CELL_SIZE,
-                                         (distance[idx][-1][0] - self.board.left) // Settings.CELL_SIZE))
-                path = (path[0][1], path[0][0])
-                ai.new_destination((path[0] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.left,
-                                    path[1] * Settings.CELL_SIZE + Settings.CELL_SIZE / 2 + self.board.top))
-            except ValueError:
-                ai.new_destination(ai.pos)
-            except IndexError:
-                ai.new_destination(ai.pos)
+            ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
+                ai.rect.center, Settings.CELL_SIZE, self.board.top,
+                self.board.left))
+            if not ai.path and ai.stop:
+                distance = []
+                for base in Settings.BASES_SPRITES:
+                    dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
+                    if base.start_of_capture != 2 and base.state != 'ai':
+                        distance.append(
+                            (dist, [base.x, base.y]))
+                try:
+                    min_dist = min(distance, key=lambda a: a[0])[1]
+                    ai.path = deque(bfs(
+                        (ai_pos_y, ai_pos_x), (min_dist[1], min_dist[0])))
+                    path = ai.path.popleft()
+                    ai.new_destination(get_pos_in_coords(
+                        [path[1] + 0.5, path[0] + 0.5], self.board.top,
+                        self.board.left))
+                except ValueError:
+                    ai.new_destination(ai.pos)
+                except IndexError:
+                    ai.new_destination(ai.pos)
+            elif ai.stop:
+                path = ai.path.popleft()
+                ai.new_destination(get_pos_in_coords(
+                    [path[1] + 0.5, path[0] + 0.5], self.board.top,
+                    self.board.left))
 
     def fog_of_war(self):
         """Отрисовка тумана войны"""
@@ -1023,6 +1007,8 @@ class Run:
                     CONTACT_LOST.play()
                     self.play_contact_lost = False
 
+            ai.visibility = True
+
         # радиусы обнаружения и пуска ракет
         pygame.draw.circle(screen, BLUE, (player_x, player_y),
                            Settings.CELL_SIZE * 4, 1)
@@ -1080,10 +1066,11 @@ class Run:
                 screen.blit(ico, rect)
             # Отрисовка полоски захвата
             if base.show_bar and base.ticks_to_capture:
+                tks = Settings.BASE_TICKS if base.state not in [
+                    'player', 'ai'] else Settings.BASE_TICKS * 2
                 image = pygame.Surface((int(
                     Settings.CELL_SIZE - Settings.CELL_SIZE /
-                    Settings.BASE_TICKS
-                    * base.ticks_to_capture), 5))
+                    tks * base.ticks_to_capture), 5))
                 image.fill(BLUE if base.start_of_capture == 1 else RED)
                 rect = image.get_rect(topleft=(base.rect.x, base.rect.y - 10))
                 screen.blit(image, rect)
@@ -1092,12 +1079,10 @@ class Run:
         """Функция с основным игровым циклом"""
         alpha = 0
         arrow_pressed = False
-        pygame_gui.elements.UIScreenSpaceHealthBar(
-            relative_rect=pygame.Rect(10, 13, 200, 30),
-            manager=campaign_manager,
-            sprite_to_monitor=list(PLAYER_SPRITE)[0]
-        )
+        mouse_border = False
+        give_tooltip(3)
         pygame.time.set_timer(FUEL_CONSUMPTION, 0)
+        pygame.time.set_timer(AI_FUEL_CONSUMPTION, 0)
         pygame.time.set_timer(UPDATE_ALL_SPRITES, 20)
         camera.rebase()
         camera.new_position()
@@ -1115,24 +1100,25 @@ class Run:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         player.new_destination(event.pos)
-                    if event.button == 2 and Settings.NUM_OF_AIRCRAFT and \
-                            Settings.OIL_VOLUME:
+                    if event.button == 2 and player.num_of_aircraft and \
+                            player.oil_volume:
                         self.aircraft_launch(event.pos)
-                        Settings.NUM_OF_AIRCRAFT -= 1
-                        Settings.OIL_VOLUME -= 1
-                    if event.button == 3 and Settings.NUM_OF_MISSILES:
+                        player.num_of_aircraft -= 1
+                        player.oil_volume -= 1
+                    if event.button == 3 and player.num_of_missiles:
                         self.missile_launch(event.pos)
-                        Settings.NUM_OF_MISSILES -= 1
-                    if event.button == 4 and Settings.CELL_SIZE < 200:
-                        Settings.CELL_SIZE = min(
-                            Settings.CELL_SIZE + 2 * Settings.CELL_SIZE / 30,
-                            200)
-                        update_objects()
-                    if event.button == 5 and Settings.CELL_SIZE > 30:
-                        Settings.CELL_SIZE = max(
-                            Settings.CELL_SIZE - 2 * Settings.CELL_SIZE / 30,
-                            30)
-                        update_objects()
+                        player.num_of_missiles -= 1
+                    if not arrow_pressed and not mouse_border:
+                        if event.button == 4 and Settings.CELL_SIZE < 200:
+                            Settings.CELL_SIZE = min(
+                                Settings.CELL_SIZE + 2 *
+                                Settings.CELL_SIZE / 30, 200)
+                            update_objects()
+                        if event.button == 5 and Settings.CELL_SIZE > 30:
+                            Settings.CELL_SIZE = max(
+                                Settings.CELL_SIZE - 2 *
+                                Settings.CELL_SIZE / 30, 30)
+                            update_objects()
                 if event.type == pygame.KEYDOWN:
                     diff = Settings.CELL_SIZE // 4
                     dx, dy = camera.dx, camera.dy
@@ -1144,15 +1130,17 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
-                    if event.key in [pygame.K_UP, pygame.K_DOWN]:
+                    if event.key in [pygame.K_UP, pygame.K_DOWN] and not \
+                            mouse_border:
                         camera.dy = dy + diff if event.key == pygame.K_UP \
                             else dy - diff
                         arrow_pressed = True
-                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT]:
+                    if event.key in [pygame.K_LEFT, pygame.K_RIGHT] and not \
+                            mouse_border:
                         camera.dx = dx + diff if event.key == pygame.K_LEFT \
                             else dx - diff
                         arrow_pressed = True
-                if event.type == pygame.KEYUP:
+                if event.type == pygame.KEYUP and not mouse_border:
                     if event.key in [pygame.K_UP, pygame.K_DOWN]:
                         camera.dy = 0
                         arrow_pressed = False
@@ -1164,8 +1152,11 @@ class Run:
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
                 campaign_manager.process_events(event)
+                if event.type == AI_FUEL_CONSUMPTION and not Settings.IS_PAUSE:
+                    for ai in Settings.AI_SPRITE:
+                        ai.oil_volume = max(ai.oil_volume - 1, 0)
                 if event.type == FUEL_CONSUMPTION and not Settings.IS_PAUSE:
-                    Settings.OIL_VOLUME = max(Settings.OIL_VOLUME - 1, 0)
+                    player.oil_volume = max(player.oil_volume - 1, 0)
                 if event.type == UPDATE_ALL_SPRITES and not (
                     Settings.IS_PAUSE or self.menu or self.resource_menu or
                         self.defeat):
@@ -1180,6 +1171,7 @@ class Run:
             self.camera_update()
 
             if not arrow_pressed:
+                mouse_border = True
                 if Settings.WIDTH - 1 > pygame.mouse.get_pos()[0] >= \
                         Settings.WIDTH - 50:
                     camera.dx = -Settings.CELL_SIZE // 4
@@ -1191,6 +1183,7 @@ class Run:
                 elif 0 < pygame.mouse.get_pos()[1] <= 50:
                     camera.dy = Settings.CELL_SIZE // 4
                 else:
+                    mouse_border = False
                     camera.dx = 0
                     camera.dy = 0
 
@@ -1242,6 +1235,7 @@ class Run:
                 screen.blit(help_surface, (0, 0))
                 [capt.update_text() for capt in CAPTIONS]
                 help_surface.blit(screen, (0, 0))
+                Settings.PARTICLES_GROUP.draw(screen)
                 Settings.ICONS_GROUP.draw(screen)
                 self.draw_icons_and_bars()
 
@@ -1290,8 +1284,9 @@ if __name__ == '__main__':
     help_surface = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
                                   pygame.SRCALPHA)
     game_surf = pygame.Surface((Settings.WIDTH, Settings.HEIGHT),
-                                  pygame.SRCALPHA)
+                               pygame.SRCALPHA)
     pygame.display.set_caption("CarrierOps")
+    pygame.display.set_icon(GAME_ICON)
     clock = pygame.time.Clock()
     FPS = 60
     chosen_map = 'solomon'

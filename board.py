@@ -16,7 +16,6 @@ class Board:
         Settings.TOP, Settings.LEFT = self.top, self.left
         self.cells = {(i, j) for i in range(self.width) for j in
                       range(self.height)}
-        self.used = set()
         self.run = run
 
     def set_view(self, left, top, cell_size):
@@ -29,6 +28,9 @@ class Board:
     def add_bases(self):
         """Функция для добавления баз"""
         self.cell_size = Settings.CELL_SIZE
+        self.cells = {(j[0], i[0]) for i in enumerate(Settings.BOARD)
+                      for j in enumerate(i[1]) if
+                      Settings.BOARD[i[0]][j[0]] == '.'}
         player_base, *bases, ai_base = sorted(sample(
             self.cells, Settings.NUM_OF_BASES + 2))
         [self.add_base(*base) for base in bases]
@@ -41,14 +43,7 @@ class Board:
             base = Base(x, y, 'neutral', True)
         else:
             base = SuperBase(x, y, mega[0], True)
-        land = list(Settings.BACKGROUND_MAP)[0]
-        while pygame.sprite.collide_mask(land, base) is not None:
-            self.used.add((x, y))
-            x, y = choice(list(self.cells - self.used))
-            base.x, base.y = x, y
-            base.new_position(self.cell_size, self.top, self.left)
         base.new_position(self.cell_size, self.top, self.left)
-        self.used.add((x, y))
         if mega and mega[0] == 'player':
             Settings.PLAYER_START = (x, y)
         elif mega and mega[0] == 'ai':

@@ -1,5 +1,5 @@
 import pygame
-from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET
+from Settings import PLAYER_SPRITE, PLAYER_CARRIER_SHEET, get_bigger_rect
 import Settings
 from carrier import Carrier
 from math import sin, cos, atan2
@@ -21,19 +21,14 @@ class Player(Carrier):
     def update(self):
         """Обновление позиции объекта"""
         self.left = self.prev_pos[0] > self.pos[0]
-        if Settings.OIL_VOLUME:
+        if self.oil_volume:
             land = list(Settings.BACKGROUND_MAP)[0]
-            if pygame.sprite.collide_mask(self, land):
+            rect = get_bigger_rect(pygame.Rect(land.rect.x, land.rect.y,
+                                               land.rect.w,  land.rect.h), 5)
+            if pygame.sprite.collide_mask(self, land) or not all(
+                    rect.collidepoint(point) for point in
+                    self.get_points()):
                 self.pos = [self.prev_pos[0], self.prev_pos[1]]
-            elif not all(land.rect.collidepoint(point) for point in
-                         self.get_points()):
-                for i in [(0, -3), (0, 3), (3, 0), (-3, 0)]:
-                    self.rect.center = self.rect.center[0] + i[0], \
-                                       self.rect.center[1] + i[1]
-                    self.pos = list(self.rect.center)
-                    if all(land.rect.collidepoint(point) for point in
-                           self.get_points()):
-                        break
 
             if self.pos != self.destination and not self.stop:
                 self.prev_pos = [self.pos[0], self.pos[1]]
@@ -44,8 +39,8 @@ class Player(Carrier):
                     self.alpha)
                 self.rect.center = self.pos
 
-            if abs(self.destination[0] - self.rect.centerx) <= 10 and \
-                    abs(self.destination[1] - self.rect.centery) <= 10:
+            if abs(self.destination[0] - self.rect.centerx) <= 5 and \
+                    abs(self.destination[1] - self.rect.centery) <= 5:
                 self.stop = True
 
             if self.stop:

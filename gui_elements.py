@@ -230,9 +230,10 @@ class IconText(pygame_gui.elements.UILabel):
 
     def update_text(self):
         """Функция для обновления текста подписи"""
-        text = Settings.NUM_OF_AIRCRAFT if self.ico == AIRCRAFT else \
-            Settings.NUM_OF_MISSILES if self.ico == MISSILES else \
-            f'{Settings.OIL_VOLUME}/100'
+        player = list(Settings.PLAYER_SPRITE)[0]
+        text = player.num_of_aircraft if self.ico == AIRCRAFT else \
+            player.num_of_missiles if self.ico == MISSILES else \
+            f'{player.oil_volume}/100'
         self.set_text(str(text))
 
 
@@ -337,11 +338,9 @@ RESOURCES_LABEL = Label(36, 'RESOURCES ON THE MAIN BASE', 0.5, 0.1,
 AIRCRAFT = Icon(PLANE_ICON, (0.20, 0.04), ICONS_GROUP)
 MISSILES = Icon(MISSILE_ICON, (0.27, 0.04), ICONS_GROUP)
 OIL = Icon(OIL_ICON, (0.34, 0.04), ICONS_GROUP)
-AIRCRAFT_CAPTION = IconText(AIRCRAFT, Settings.NUM_OF_AIRCRAFT,
-                            campaign_manager)
-MISSILES_CAPTION = IconText(MISSILES, Settings.NUM_OF_MISSILES,
-                            campaign_manager)
-OIL_CAPTION = IconText(OIL, Settings.OIL_VOLUME, campaign_manager)
+AIRCRAFT_CAPTION = IconText(AIRCRAFT, 3, campaign_manager)
+MISSILES_CAPTION = IconText(MISSILES, 5, campaign_manager)
+OIL_CAPTION = IconText(OIL, 100, campaign_manager)
 AIRCRAFT_BASE = Icon(PLANE_ICON, (0.12, 0.2), RESOURCES_BASE)
 MISSILES_BASE = Icon(MISSILE_ICON, (0.12, 0.4), RESOURCES_BASE)
 GEARS_BASE = Icon(GEAR_ICON, (0.12, 0.8), RESOURCES_BASE)
@@ -354,13 +353,13 @@ GEARS_BASE_CAPT = Label(24, 'REPAIR PARTS', 0.3, 0.8,
                         resource_manager, 'option', 'center')
 OIL_BASE_CAPT = Label(24, 'OIL VOLUME', 0.3, 0.6,
                       resource_manager, 'option', 'center')
-AIR_NUM = Label(24, f'  {Settings.BASE_NUM_OF_AIRCRAFT}', 0.5, 0.2,
+AIR_NUM = Label(24, f'  {0}', 0.5, 0.2,
                 resource_manager, 'option', 'center')
-MIS_NUM = Label(24, f'  {Settings.BASE_NUM_OF_MISSILES}', 0.5, 0.4,
+MIS_NUM = Label(24, f'  {0}', 0.5, 0.4,
                 resource_manager, 'option', 'center')
-OIL_NUM = Label(24, f'  {Settings.BASE_OIL_VOLUME}', 0.5, 0.6,
+OIL_NUM = Label(24, f'  {0}', 0.5, 0.6,
                 resource_manager, 'option', 'center')
-REP_NUM = Label(24, f'  {Settings.BASE_NUM_OF_REPAIR_PARTS}', 0.5, 0.8,
+REP_NUM = Label(24, f'  {0}', 0.5, 0.8,
                 resource_manager, 'option', 'center')
 CAPTIONS = [AIRCRAFT_CAPTION, MISSILES_CAPTION, OIL_CAPTION]
 SOLOMON_MAP = Button('SOLOMON ISLANDS', 0.5, 0.3, 20, map_manager)
