@@ -125,6 +125,8 @@ def load_save(title):
         Settings.CELL_SIZE = data['cell_size']
         Settings.TOP = data['game']['board'].top
         Settings.LEFT = data['game']['board'].left
+        Settings.PLAYER_START = data['start'][0]
+        Settings.AI_START = data['start'][1]
 
         # Загрузим класс для игры
         chosen_map = data['map']['chosen_map']
@@ -147,11 +149,9 @@ def load_save(title):
                 new_carrier.__dict__[i] = j
         # Загрузим самолеты
         for aircraft in data['aircraft']:
-            if aircraft[0] == 'friendly':
-                new_air = Aircraft(aircraft[1]['destination'],
-                                   aircraft[1]['visibility'])
-            else:
-                pass  # TODO: HOSTILE AIRCRAFT
+            new_air = Aircraft(aircraft[1]['rect'].center,
+                               aircraft[1]['destination'],
+                               aircraft[1]['visibility'], aircraft[1]['obj'])
             for i, j in aircraft[1].items():
                 new_air.__dict__[i] = j
         # Загрузим базы
@@ -217,6 +217,7 @@ def create_save(title):
             Settings.PLAYER_MISSILES) | set(Settings.AI_MISSILES)]
         data['map'] = list(Settings.BACKGROUND_MAP)[0].data_to_save()
         data['board'] = Settings.BOARD
+        data['start'] = Settings.PLAYER_START, Settings.AI_START
 
     rebase_load_manager()
 
@@ -838,8 +839,8 @@ class Run:
 
     def aircraft_launch(self, destination):
         """Функция для запуска самолета"""
-        Settings.PLAYER_AIRCRAFT.add(Aircraft(
-            destination, True, list(Settings.PLAYER_SPRITE)[0]))
+        Settings.PLAYER_AIRCRAFT.add(Aircraft(list(
+            Settings.PLAYER_SPRITE)[0].rect.center, destination, True, 'P0'))
         TAKEOFF.play()
         Settings.LAUNCHED_AIRCRAFT += 1
 
@@ -927,6 +928,7 @@ class Run:
                         missile.pause_checked = True
                         Settings.MISSILE_DETECTION.play()
                 else:
+                    missile.visibility = False
                     missile.pause_checked = False
 
             # проверка на обнаружение самолетом
@@ -951,11 +953,10 @@ class Run:
                 pygame.draw.circle(screen, BLUE,
                                    (air_x, air_y),
                                    Settings.CELL_SIZE * 3.5, 1)
-
             air_tracking_AI = False
             for aircraft in Settings.AI_AIRCRAFT:
                 air_x, air_y = aircraft.rect.center
-                if pygame.sprite.collide_circle_ratio(0.55)(aircraft, list(Settings.PLAYER_SPRITE)[0]):
+                if pygame.sprite.collide_circle_ratio(0.55)(aircraft, player):
                     aircraft.visibility = True
                     air_tracking_AI = True
                     pygame.draw.circle(screen, RED,
@@ -970,6 +971,7 @@ class Run:
                         aircraft.pause_checked = True
                         Settings.MISSILE_DETECTION.play()
                 else:
+                    aircraft.visibility = False
                     aircraft.pause_checked = False
                 # если цель в радиусе обнаружения самолета, то
                 # поднимается соответствующий флаг
@@ -984,7 +986,8 @@ class Run:
             if pygame.sprite.collide_circle_ratio(0.5)(player, ai) or \
                     missile_tracking or air_tracking:
                 ai.visibility = True
-                if self.AI_missiles_timer >= 15 and not (missile_tracking or air_tracking):
+                if self.AI_missiles_timer >= 15 and not (missile_tracking or
+                                                         air_tracking):
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
                 self.AI_missiles_timer += 0.02
@@ -1004,7 +1007,8 @@ class Run:
                 player = list(Settings.PLAYER_SPRITE)[0]
                 if self.AI_missiles_timer >= 15 and \
                         hypot(ai.rect.centerx - player.rect.centerx,
-                              ai.rect.centery - player.rect.centery) <= Settings.CELL_SIZE * 15:
+                              ai.rect.centery - player.rect.centery) <= \
+                        Settings.CELL_SIZE * 15:
                     ai.missile_launch(player.rect.center)
                     self.AI_missiles_timer = 0
                 self.AI_missiles_timer += 0.02

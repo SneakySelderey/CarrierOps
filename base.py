@@ -4,7 +4,6 @@ from Settings import BASE_FRIENDLY, BASE_HOSTILE, BASE_NEUTRAL, \
     GEAR_ICON, PLANE_ICON, MISSILE_ICON, \
     PLAYER_BASE, AI_BASE, BASES_SPRITES, ALL_SPRITES_FOR_SURE, ALWAYS_UPDATE
 import Settings
-from math import hypot
 
 
 class Base(pygame.sprite.Sprite):
