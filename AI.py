@@ -23,61 +23,63 @@ class AI(Carrier):
         self.idx = f'A{list(Settings.AI_SPRITE).index(self)}'
         self.destination = list(self.rect.center)
         self.prev_pos = list(self.rect.center)
+        self.sinking = False
 
     def update(self):
         """Обновление позиции объекта"""
-        if self.oil_volume:
-            self.left = self.prev_pos[0] > self.pos[0]
-            land = list(Settings.BACKGROUND_MAP)[0]
-            if pygame.sprite.collide_mask(self, land) or not \
-                    self.rect.colliderect(land.rect):
-                self.pos = [self.prev_pos[0], self.prev_pos[1]]
-                self.check_stuck()
-                self.path = []
+        if not self.sinking:
+            if self.oil_volume:
+                self.left = self.prev_pos[0] > self.pos[0]
+                land = list(Settings.BACKGROUND_MAP)[0]
+                if pygame.sprite.collide_mask(self, land) or not \
+                        self.rect.colliderect(land.rect):
+                    self.pos = [self.prev_pos[0], self.prev_pos[1]]
+                    self.check_stuck()
+                    self.path = []
 
-            if self.pos != self.destination and not self.stop:
-                self.prev_pos = [self.pos[0], self.pos[1]]
-                # Обновление кооординат (из полярной системы в декартову)
-                self.pos[0] = self.pos[0] + Settings.AI_SPEED * cos(
-                    self.alpha)
-                self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
-                    self.alpha)
-                self.rect.center = self.pos
-            if abs(self.destination[0] - self.rect.centerx) <= 5 and abs(
-                    self.destination[1] - self.rect.centery) <= 5:
-                self.stop = True
-            if self.stop:
-                pygame.time.set_timer(Settings.AI_FUEL_CONSUMPTION, 0)
-            if not self.stop and self.visibility:
-                [Particle(self) for _ in range(2)]
+                if self.pos != self.destination and not self.stop:
+                    self.prev_pos = [self.pos[0], self.pos[1]]
+                    # Обновление кооординат (из полярной системы в декартову)
+                    self.pos[0] = self.pos[0] + Settings.AI_SPEED * cos(
+                        self.alpha)
+                    self.pos[1] = self.pos[1] + Settings.AI_SPEED * sin(
+                        self.alpha)
+                    self.rect.center = self.pos
+                if abs(self.destination[0] - self.rect.centerx) <= 5 and abs(
+                        self.destination[1] - self.rect.centery) <= 5:
+                    self.stop = True
+                if self.stop:
+                    pygame.time.set_timer(Settings.AI_FUEL_CONSUMPTION, 0)
+                if not self.stop and self.visibility:
+                    [Particle(self) for _ in range(2)]
 
-            if not self.num_of_missiles or not self.num_of_aircraft or \
-                    self.current_health < 30 or self.oil_volume < 35:
-                bases = [base for base in Settings.BASES_SPRITES if
-                         base.state == 'ai']
-                if bases:
-                    to_return = None
-                    if len(bases) == 1:
-                        if self.check_base_for_resources(bases[0]):
-                            to_return = bases[0]
-                    else:
-                        bases.sort(key=lambda x: hypot(
-                            self.rect.centery - x.rect.centery,
-                            self.rect.centerx - x.rect.centerx))
-                        if self.check_base_for_resources(bases[0]):
-                            to_return = bases[0]
-                        elif self.check_base_for_resources(bases[1]):
-                            to_return = bases[1]
-                    if to_return is not None:
-                        ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
-                            self.rect.center, Settings.CELL_SIZE, Settings.TOP,
-                            Settings.LEFT))
-                        self.path = deque(bfs(
-                            (ai_pos_y, ai_pos_x), (to_return.y, to_return.x)))
-                        path = self.path.popleft()
-                        self.new_destination(get_pos_in_coords(
-                            [path[1] + 0.5, path[0] + 0.5], Settings.TOP,
-                            Settings.LEFT))
+                if not self.num_of_missiles or not self.num_of_aircraft or \
+                        self.current_health < 30 or self.oil_volume < 35:
+                    bases = [base for base in Settings.BASES_SPRITES if
+                             base.state == 'ai']
+                    if bases:
+                        to_return = None
+                        if len(bases) == 1:
+                            if self.check_base_for_resources(bases[0]):
+                                to_return = bases[0]
+                        else:
+                            bases.sort(key=lambda x: hypot(
+                                self.rect.centery - x.rect.centery,
+                                self.rect.centerx - x.rect.centerx))
+                            if self.check_base_for_resources(bases[0]):
+                                to_return = bases[0]
+                            elif self.check_base_for_resources(bases[1]):
+                                to_return = bases[1]
+                        if to_return is not None:
+                            ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
+                                self.rect.center, Settings.CELL_SIZE, Settings.TOP,
+                                Settings.LEFT))
+                            self.path = deque(bfs(
+                                (ai_pos_y, ai_pos_x), (to_return.y, to_return.x)))
+                            path = self.path.popleft()
+                            self.new_destination(get_pos_in_coords(
+                                [path[1] + 0.5, path[0] + 0.5], Settings.TOP,
+                                Settings.LEFT))
 
     def check_base_for_resources(self, base):
         """Функция проверки базы на наличие ресурсов"""

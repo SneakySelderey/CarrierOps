@@ -1168,6 +1168,12 @@ class Run:
                      Settings.ANIMATED_SPRTIES]
                 if event.type == UPDATE_PARTICLES:
                     Settings.PARTICLES_GROUP.update()
+                if event.type == AI_RESPAWN:
+                    for ai in Settings.AI_SPRITE:
+                        if ai.current_health <= 0:
+                            ai.respawn()
+                            ai.sinking = False
+                    pygame.time.set_timer(Settings.AI_RESPAWN, 0)
 
             self.camera_update()
 
