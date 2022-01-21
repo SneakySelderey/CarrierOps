@@ -1129,8 +1129,6 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
-                    if event.key == pygame.K_SPACE:
-                        self.win = True
                     if event.key in [pygame.K_UP, pygame.K_DOWN] and not \
                             mouse_border:
                         camera.dy = dy + diff if event.key == pygame.K_UP \
