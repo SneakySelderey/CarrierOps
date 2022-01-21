@@ -1129,6 +1129,8 @@ class Run:
                         self.resource_menu = not self.resource_menu
                     if event.key == pygame.K_c:
                         camera.new_position()
+                    if event.key == pygame.K_SPACE:
+                        self.win = True
                     if event.key in [pygame.K_UP, pygame.K_DOWN] and not \
                             mouse_border:
                         camera.dy = dy + diff if event.key == pygame.K_UP \
@@ -1353,6 +1355,7 @@ if __name__ == '__main__':
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
+            victory_run = result == 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1
