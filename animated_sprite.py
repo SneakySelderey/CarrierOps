@@ -50,7 +50,8 @@ class Explosion(AnimatedSprite):
             self.image = new_image_size(self.frames[self.cur_frame])
         except IndexError:
             if self.parent.obj == 'ai' and self.parent.current_health <= 0:
-                self.parent.respawn()
+                pygame.time.set_timer(Settings.AI_RESPAWN, 15000)
+                self.parent.sinking = True
             self.kill()
 
     def new_position(self, cell, top, left):

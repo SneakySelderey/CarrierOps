@@ -104,7 +104,6 @@ def load_save(title):
     title = int(title) if title.isdigit() else title
     with shelve.open(get_user_data()[title][1]) as data:
         # Загрузим ресурсы
-        Settings.BOARD = data['board']
         Settings.LAUNCHED_MISSILES = data['launched_missiles']
         Settings.LAUNCHED_AIRCRAFT = data['launched_aircraft']
         Settings.PLAYER_MISSILES_HIT = data['player_hit']
@@ -128,9 +127,10 @@ def load_save(title):
         for i, j in data['camera'].items():
             camera.__dict__[i] = j
         # Загузим карту
+        Settings.BOARD = data['board']
         Map(data['map']['visibility'], game_objects.board,
             data['map']['chosen_map'])
-        LandCheck(game_objects.board)
+        #LandCheck(game_objects.board)
         # Загрузим игрока и ИИ
         for carrier in data['carriers']:
             new_carrier = Player() if carrier['obj'] == 'player' else AI()
@@ -830,7 +830,7 @@ class Run:
             ai_pos_x, ai_pos_y = map(int, get_pos_in_field(
                 ai.rect.center, Settings.CELL_SIZE, self.board.top,
                 self.board.left))
-            if not ai.path and ai.stop:
+            if ai.stop and not ai.path:
                 distance = []
                 for base in Settings.BASES_SPRITES:
                     dist = hypot(ai_pos_y - base.y, ai_pos_x - base.x)
@@ -846,8 +846,10 @@ class Run:
                         [path[1] + 0.5, path[0] + 0.5], self.board.top,
                         self.board.left))
                 except ValueError:
+                    print('YYY')
                     ai.new_destination(ai.pos)
                 except IndexError:
+                    print('NNNN')
                     ai.new_destination(ai.pos)
             elif ai.stop:
                 path = ai.path.popleft()
@@ -1166,6 +1168,12 @@ class Run:
                      Settings.ANIMATED_SPRTIES]
                 if event.type == UPDATE_PARTICLES:
                     Settings.PARTICLES_GROUP.update()
+                if event.type == AI_RESPAWN:
+                    for ai in Settings.AI_SPRITE:
+                        if ai.current_health <= 0:
+                            ai.respawn()
+                            ai.sinking = False
+                    pygame.time.set_timer(Settings.AI_RESPAWN, 0)
 
             self.camera_update()
 
@@ -1353,6 +1361,7 @@ if __name__ == '__main__':
             game_run = False
             gameover_run = result == 1
             menu_run = result == 2
+            victory_run = result == 3
         elif settings_run:  # Меню настроек
             result = show_setting_screen()
             menu_run = result == 1

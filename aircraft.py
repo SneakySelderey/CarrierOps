@@ -86,7 +86,7 @@ class Aircraft(AnimatedSprite):
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""
-        if self.play_sound:
+        if self.play_sound and self.obj == 'P0':
             LANDING.play()
             self.play_sound = False
         carrier = list(Settings.PLAYER_SPRITE)[0] if self.obj == 'P0' else [
@@ -96,9 +96,8 @@ class Aircraft(AnimatedSprite):
         self.destination = [carrier.rect.centerx, carrier.rect.centery]
         self.stop = False
         self.to_return = True
-        player = list(Settings.PLAYER_SPRITE)[0]
-        if pygame.sprite.collide_rect(self, player):
-            player.num_of_aircraft += 1
+        if pygame.sprite.collide_rect(self, carrier):
+            carrier.num_of_aircraft += 1
             self.delete = True
 
     def aircraft_tracking(self):
