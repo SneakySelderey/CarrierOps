@@ -126,13 +126,13 @@ HOSTILE_BASES = []
 # Числовые и булевые значения значения
 AIR_SPEED = 2.5
 MISSILE_SPEED = 2
-FUEL_CONSUMPTION_SPEED = 2000
+FUEL_CONSUMPTION_SPEED = 3000
 BASES_RATIO_R_A_M_O = 0.2, 0.2, 0.25, 0.35
 BASE_TICKS = 240
 GIVE_RESOURCE_TIME = 1000
 PLAYER_SPEED = 1.5
 AI_SPEED = 1
-SPEEDS = {'PLAYER': 1.5, 'AI': 1.5, 'MISSILE': 2, 'AIRCRAFT': 2.5}
+SPEEDS = {'PLAYER': 1.5, 'AI': 1.5, 'MISSILE': 2, 'AIRCRAFT': 2.75}
 N = [(0, -1), (0, 1), (1, 0), (-1, 0)]
 # N = [(0, -1), (0, 1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
 NUM_OF_BASES = randint(10, 13)
