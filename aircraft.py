@@ -86,7 +86,7 @@ class Aircraft(AnimatedSprite):
 
     def aircraft_return(self):
         """Обновление координат при возвращении на авианосец"""
-        if self.play_sound:
+        if self.play_sound and self.obj == 'P0':
             LANDING.play()
             self.play_sound = False
         carrier = list(Settings.PLAYER_SPRITE)[0] if self.obj == 'P0' else [
