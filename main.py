@@ -318,7 +318,10 @@ def show_menu_screen():
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
-            menu_manager.process_events(event)
+            try:
+                menu_manager.process_events(event)
+            except AttributeError:
+                pass
         # Красивая картинка
         help_surface.fill((10, 10, 10, alpha))
         screen.blit(background, (0, 0))
@@ -348,7 +351,10 @@ def show_map_screen():
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=5000)
-            map_manager.process_events(event)
+            try:
+                map_manager.process_events(event)
+            except AttributeError:
+                pass
         # Красивая картинка
         help_surface.fill((10, 10, 10, alpha))
         screen.blit(background, (0, 0))
@@ -375,8 +381,8 @@ def show_setting_screen(flag=True):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.user_type == pygame.USEREVENT:
+                if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == SETTINGS_ELEMENTS['OK']:
                         return 1
                     if event.ui_element == SETTINGS_ELEMENTS['FULLSCREEN']:
@@ -441,8 +447,11 @@ def show_setting_screen(flag=True):
                 pygame.mixer.music.load(os.getcwd() + '/data/music/menu/' +
                                         choice(MENU_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
-            settings_manager.process_events(event)
-            bars_manager.process_events(event)
+            try:
+                settings_manager.process_events(event)
+                bars_manager.process_events(event)
+            except AttributeError:
+                pass
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -513,7 +522,10 @@ def show_gameover_win_screen(gameover=True):
                     pygame.mixer.music.load(os.getcwd() + '/data/music/win/'
                                             + choice(VICTORY_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
-            gameover_manager.process_events(event)
+            try:
+                gameover_manager.process_events(event)
+            except AttributeError:
+                pass
         # Создание красивой картинки и эффекта затемнения
         help_surface.fill((0, 0, 0, alpha))
         screen.blit(background, (0, 0))
@@ -555,7 +567,10 @@ def show_in_game_menu(from_game=True):
                 pygame.mixer.music.load(os.getcwd() + '/data/music/game/' +
                                         choice(GAME_MUSIC))
                 pygame.mixer.music.play(fade_ms=3000)
-            game_manager.process_events(event)
+            try:
+                game_manager.process_events(event)
+            except AttributeError:
+                pass
         # Создание красивой картинки
         screen.blit(help_surface_2, (0, 0))
         help_surface_3.fill((0, 0, 0, alpha))
@@ -692,9 +707,12 @@ def show_load_menu(from_main=True):
                     else:
                         to_type = False
                         rebase_load_manager()
-            load_manager.process_events(event)
-            user_data_manager.process_events(event)
-            text_type_manager.process_events(event)
+            try:
+                load_manager.process_events(event)
+                user_data_manager.process_events(event)
+                text_type_manager.process_events(event)
+            except AttributeError:
+                pass
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -748,7 +766,10 @@ def show_resources_menu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r or event.key == pygame.K_ESCAPE:
                     return 1
-            resource_manager.process_events(event)
+            try:
+                resource_manager.process_events(event)
+            except AttributeError:
+                pass
         # Создание красивой картинки и эффекта затемнения
         help_surface.blit(screen, (0, 0))
         if alpha_up < 255:
@@ -1152,7 +1173,10 @@ class Run:
                     pygame.mixer.music.load(os.getcwd() + '/data/music/game/'
                                             + choice(GAME_MUSIC))
                     pygame.mixer.music.play(fade_ms=3000)
-                campaign_manager.process_events(event)
+                try:
+                    campaign_manager.process_events(event)
+                except AttributeError:
+                    pass
                 if event.type == AI_FUEL_CONSUMPTION and not Settings.IS_PAUSE:
                     for ai in Settings.AI_SPRITE:
                         ai.oil_volume = max(ai.oil_volume - 1, 0)
