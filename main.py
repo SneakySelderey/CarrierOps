@@ -867,10 +867,8 @@ class Run:
                         [path[1] + 0.5, path[0] + 0.5], self.board.top,
                         self.board.left))
                 except ValueError:
-                    print('YYY')
                     ai.new_destination(ai.pos)
                 except IndexError:
-                    print('NNNN')
                     ai.new_destination(ai.pos)
             elif ai.stop:
                 path = ai.path.popleft()
