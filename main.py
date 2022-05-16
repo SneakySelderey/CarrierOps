@@ -381,8 +381,8 @@ def show_setting_screen(flag=True):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            if event.user_type == pygame.USEREVENT:
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == SETTINGS_ELEMENTS['OK']:
                         return 1
                     if event.ui_element == SETTINGS_ELEMENTS['FULLSCREEN']:
